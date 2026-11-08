@@ -1,0 +1,227 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
+import { Button } from '@astryxdesign/core/Button';
+import { TextInput } from '@astryxdesign/core/TextInput';
+import { Selector } from '@astryxdesign/core/Selector';
+import { useStore } from '../lib/store';
+import type { Tx, TxType } from '../lib/types';
+import { todayISO } from '../lib/format';
+import { iconFor } from '../lib/icons';
+import AmountPad from '../components/AmountPad';
+
+interface Props {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  tx?: Tx | null;
+  initialType?: TxType;
+}
+
+const TYPE_LABEL: Record<TxType, string> = {
+  expense: 'Pengeluaran',
+  income: 'Pendapatan',
+  transfer: 'Transfer',
+};
+
+export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType }: Props) {
+  const store = useStore();
+  const { state, addTx, updateTx, removeTx, notify } = store;
+
+  const [type, setType] = useState<TxType>(initialType ?? 'expense');
+  const [amount, setAmount] = useState(0);
+  const [accountId, setAccountId] = useState(state.accounts[0]?.id ?? '');
+  const [categoryId, setCategoryId] = useState('');
+  const [toAccountId, setToAccountId] = useState(state.accounts[1]?.id ?? '');
+  const [fee, setFee] = useState(0);
+  const [date, setDate] = useState(todayISO());
+  const [note, setNote] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (tx) {
+      setType(tx.type);
+      setAmount(tx.amount);
+      setAccountId(tx.accountId);
+      setCategoryId(tx.categoryId ?? '');
+      setToAccountId(tx.toAccountId ?? state.accounts[1]?.id ?? '');
+      setFee(tx.fee ?? 0);
+      setDate(tx.date);
+      setNote(tx.note);
+    } else {
+      const t = initialType ?? 'expense';
+      setType(t);
+      setAmount(0);
+      setAccountId(state.accounts.find((a) => a.active)?.id ?? state.accounts[0]?.id ?? '');
+      setCategoryId('');
+      setToAccountId(state.accounts.find((a) => a.active && a.id !== state.accounts[0]?.id)?.id ?? '');
+      setFee(0);
+      setDate(todayISO());
+      setNote('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, tx]);
+
+  const categories = useMemo(
+    () => state.categories.filter((c) => c.active && c.type === (type === 'income' ? 'income' : 'expense')),
+    [state.categories, type],
+  );
+
+  useEffect(() => {
+    if (type === 'transfer') return;
+    if (categoryId && categories.some((c) => c.id === categoryId)) return;
+    setCategoryId(categories[0]?.id ?? '');
+  }, [categories, categoryId, type]);
+
+  const accountOptions = state.accounts
+    .filter((a) => a.active)
+    .map((a) => ({ value: a.id, label: a.name }));
+
+  const canSave =
+    amount > 0 &&
+    Boolean(accountId) &&
+    (type === 'transfer' ? Boolean(toAccountId) && toAccountId !== accountId : Boolean(categoryId));
+
+  function submit() {
+    if (!canSave) {
+      notify('Lengkapi jumlah dan pilih rekening/kategori.', 'error');
+      return;
+    }
+    const payload = {
+      type,
+      amount,
+      accountId,
+      categoryId: type === 'transfer' ? undefined : categoryId,
+      toAccountId: type === 'transfer' ? toAccountId : undefined,
+      fee: type === 'transfer' ? fee : 0,
+      date,
+      note: note.trim(),
+    };
+    if (tx) {
+      updateTx(tx.id, payload);
+      notify('Transaksi diperbarui');
+    } else {
+      addTx(payload);
+      notify(type === 'expense' ? 'Pengeluaran dicatat' : type === 'income' ? 'Pendapatan dicatat' : 'Transfer dicatat');
+    }
+    onOpenChange(false);
+  }
+
+  function destroy() {
+    if (!tx) return;
+    removeTx(tx.id);
+    notify('Transaksi dihapus', 'info');
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460} maxHeight="92dvh">
+      <DialogHeader
+        title={tx ? 'Ubah transaksi' : 'Tambah transaksi'}
+        subtitle={TYPE_LABEL[type]}
+        onOpenChange={onOpenChange}
+      />
+      <div className="sk-dialog-body">
+      <div className="sk-sheet">
+        <div className="sk-type-row" role="radiogroup" aria-label="Jenis transaksi">
+          {(['expense', 'income', 'transfer'] as TxType[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="radio"
+              aria-checked={type === t}
+              className="sk-type-btn"
+              data-tone={t}
+              data-active={type === t}
+              onClick={() => setType(t)}
+            >
+              {TYPE_LABEL[t]}
+            </button>
+          ))}
+        </div>
+
+        <AmountPad value={amount} onChange={setAmount} currency={state.settings.currency} tone={type} />
+
+        <div className="sk-field">
+          <Selector
+            label={type === 'transfer' ? 'Dari rekening' : 'Rekening'}
+            options={accountOptions}
+            value={accountId}
+            onChange={setAccountId}
+            width="100%"
+          />
+        </div>
+
+        {type === 'transfer' ? (
+          <>
+            <div className="sk-field">
+              <Selector
+                label="Ke rekening"
+                options={accountOptions.filter((o) => o.value !== accountId)}
+                value={toAccountId}
+                onChange={setToAccountId}
+                width="100%"
+              />
+            </div>
+            <div className="sk-field">
+              <TextInput
+                label="Biaya admin"
+                value={fee ? String(fee) : ''}
+                placeholder="0"
+                onChange={(v) => setFee(Number(v.replace(/\D/g, '')) || 0)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="sk-field">
+            <p className="sk-eyebrow" style={{ marginBottom: '0.45rem' }}>
+              Kategori
+            </p>
+            <div className="sk-cat-grid" role="radiogroup" aria-label="Kategori">
+              {categories.map((c) => {
+                const Icon = iconFor(c.icon);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={categoryId === c.id}
+                    className="sk-cat-pill"
+                    data-active={categoryId === c.id}
+                    onClick={() => setCategoryId(c.id)}
+                  >
+                    <Icon />
+                    <span>{c.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="sk-two">
+          <label className="sk-field">
+            <span className="sk-eyebrow">Tanggal</span>
+            <input className="sk-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </label>
+          <div className="sk-field" style={{ gridColumn: 'span 1' }}>
+            <TextInput
+              label="Catatan"
+              value={note}
+              placeholder="Opsional"
+              onChange={setNote}
+            />
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div className="sk-sheet-actions">
+        {tx ? (
+          <Button label="Hapus" variant="destructive" onClick={destroy} />
+        ) : (
+          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+        )}
+        <Button label={tx ? 'Simpan perubahan' : 'Simpan'} variant="primary" onClick={submit} isDisabled={!canSave} />
+      </div>
+    </Dialog>
+  );
+}

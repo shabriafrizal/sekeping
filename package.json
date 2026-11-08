@@ -1,0 +1,41 @@
+{
+  "name": "sekeping",
+  "version": "1.0.0",
+  "description": "A calm, local-first personal finance web app: accounts, transactions, reports, debts and receivables in the browser.",
+  "scripts": {
+    "test": "node scripts/test.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "shots": "node scripts/shots.mjs",
+    "docs": "node scripts/docs-shots.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "private": "true",
+  "type": "module",
+  "dependencies": {
+    "@astryxdesign/cli": "^0.7.11",
+    "@astryxdesign/core": "^0.7.11",
+    "@astryxdesign/theme-chocolate": "^0.7.11",
+    "@astryxdesign/theme-neutral": "^0.7.11",
+    "@heroicons/react": "^2.2.0",
+    "@stylexjs/stylex": "^0.19.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "recharts": "^3.10.1",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
