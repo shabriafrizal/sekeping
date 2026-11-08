@@ -192,7 +192,7 @@ export default function Settings({
               <RepeatIcon />
             </span>
             <span className="sk-row-main">
-              <span className="sk-row-title">{t("Rutin &amp; langganan")}</span>
+              <span className="sk-row-title">{t("Rutin & langganan")}</span>
               <span className="sk-row-meta">
                 {t('{n} jadwal aktif · transaksi otomatis', { n: state.recurring.filter((r) => r.active).length })}
               </span>

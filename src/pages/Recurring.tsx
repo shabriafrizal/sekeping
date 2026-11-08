@@ -109,7 +109,7 @@ export default function RecurringPage({
       <div className="sk-page-head">
         <div>
           <p className="sk-eyebrow">{t("Otomatis")}</p>
-          <h1 className="sk-title">{t("Rutin &amp; langganan")}</h1>
+          <h1 className="sk-title">{t("Rutin & langganan")}</h1>
           <p className="sk-sub">
             {t('{n} jadwal aktif · {m} menunggu dicatat', { n: active.length, m: due.length })}
           </p>

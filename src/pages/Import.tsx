@@ -340,7 +340,7 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
               <label className="sk-check">
                 <input type="checkbox" checked={createMissing} onChange={(e) => setCreateMissing(e.target.checked)} />
                 <span>
-                  <b>Buat rekening &amp; kategori baru</b>
+                  <b>Buat rekening & kategori baru</b>
                   <small>{t("Nama yang belum ada ditambahkan otomatis, bukan dibuang.")}</small>
                 </span>
               </label>
@@ -351,7 +351,7 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
             <section className="sk-card" aria-labelledby="import-preview">
               <div className="sk-card-head">
                 <h2 className="sk-card-title" id="import-preview">
-                  3. Periksa &amp; impor
+                  3. Periksa & impor
                 </h2>
                 <span className="sk-badge" data-tone={preview.errors ? 'error' : 'success'}>
                   {preview.valid} siap

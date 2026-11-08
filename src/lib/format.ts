@@ -33,6 +33,41 @@ export function currencySymbol(currency = CURRENCY): string {
   return currencySymbols[currency] ?? '';
 }
 
+/** Rupiah is entered in whole units; the other supported currencies have cents. */
+export function currencyHasCents(currency = CURRENCY): boolean {
+  return currency !== 'IDR';
+}
+
+export function decimalSeparator(): string {
+  return LOCALE.startsWith('en') ? '.' : ',';
+}
+
+/**
+ * Read an amount typed into a text field. Non-IDR currencies keep up to two
+ * decimal places; IDR stays whole. Both comma and dot decimals are accepted.
+ */
+export function parseAmountInput(raw: string, currency = CURRENCY): number {
+  let value = raw.trim().replace(/[^\d.,-]/g, '').replace(/-/g, '');
+  if (!value) return 0;
+
+  if (!currencyHasCents(currency)) {
+    const whole = Number(value.replace(/\D/g, ''));
+    return Number.isFinite(whole) ? whole : 0;
+  }
+
+  const lastComma = value.lastIndexOf(',');
+  const lastDot = value.lastIndexOf('.');
+  if (lastComma >= 0 && lastDot >= 0) {
+    if (lastComma > lastDot) value = value.replace(/\./g, '').replace(',', '.');
+    else value = value.replace(/,/g, '');
+  } else if (lastComma >= 0) {
+    value = value.replace(',', '.');
+  }
+
+  const n = Number.parseFloat(value);
+  return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
+}
+
 export function money(value: number, currency = CURRENCY): string {
   const n = Number.isFinite(value) ? value : 0;
   const sign = n < 0 ? '−' : '';

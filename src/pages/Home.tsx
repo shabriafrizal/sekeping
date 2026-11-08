@@ -197,7 +197,7 @@ export default function Home({
                   {reminders.length}
                 </span>
               </h2>
-              <p className="sk-sub" style={{ marginTop: '0.15rem' }}>{t("Tagihan &amp; langganan jatuh tempo dalam 7 hari. Tandai selesai untuk mencatatnya hari ini.")}</p>
+              <p className="sk-sub" style={{ marginTop: '0.15rem' }}>{t("Tagihan & langganan jatuh tempo dalam 7 hari. Tandai selesai untuk mencatatnya hari ini.")}</p>
             </div>
             <button className="sk-link" type="button" onClick={() => onNavigate('recurring')}>{t("Kelola")}</button>
           </div>
