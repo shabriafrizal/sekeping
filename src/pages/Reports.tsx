@@ -11,10 +11,20 @@ import {
   YAxis,
 } from 'recharts';
 import { useStore } from '../lib/store';
-import { money, compactMoney, monthRange, toISO, monthLabel } from '../lib/format';
+import { money, compactMoney, monthRange, toISO, shortDate, daysBetween } from '../lib/format';
 import { iconFor } from '../lib/icons';
 
-type Period = 'month' | '3m' | 'year' | 'all';
+type Period =
+  | 'today'
+  | 'yesterday'
+  | '7d'
+  | 'month'
+  | 'lastmonth'
+  | '3m'
+  | 'year'
+  | '12m'
+  | 'all'
+  | 'custom';
 type Mode = 'expense' | 'income';
 
 const CHART_COLORS = [
@@ -29,29 +39,109 @@ const CHART_COLORS = [
 ];
 
 const PERIOD_LABEL: Record<Period, string> = {
+  today: 'Hari ini',
+  yesterday: 'Kemarin',
+  '7d': '7 hari',
   month: 'Bulan ini',
+  lastmonth: 'Bulan lalu',
   '3m': '3 bulan',
   year: 'Tahun ini',
+  '12m': '1 tahun',
   all: 'Semua',
+  custom: 'Rentang',
 };
 
-function periodRange(period: Period): { from?: string; to?: string } {
+const PERIODS: Period[] = [
+  'today',
+  'yesterday',
+  '7d',
+  'month',
+  'lastmonth',
+  '3m',
+  'year',
+  '12m',
+  'all',
+  'custom',
+];
+
+function periodRange(
+  period: Period,
+  customFrom: string,
+  customTo: string,
+): { from?: string; to?: string } {
   const now = new Date();
-  if (period === 'month') return monthRange(toISO(now));
-  if (period === '3m') {
-    const d = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-    return { from: toISO(d), to: toISO(now) };
+  const today = toISO(now);
+  const daysAgo = (n: number) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - n);
+    return toISO(d);
+  };
+  switch (period) {
+    case 'today':
+      return { from: today, to: today };
+    case 'yesterday':
+      return { from: daysAgo(1), to: daysAgo(1) };
+    case '7d':
+      return { from: daysAgo(6), to: today };
+    case 'month':
+      return monthRange(today);
+    case 'lastmonth': {
+      const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      return monthRange(toISO(d));
+    }
+    case '3m': {
+      const d = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      return { from: toISO(d), to: today };
+    }
+    case 'year':
+      return { from: `${now.getFullYear()}-01-01`, to: today };
+    case '12m': {
+      const d = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+      return { from: toISO(d), to: today };
+    }
+    case 'custom':
+      return { from: customFrom || undefined, to: customTo || undefined };
+    default:
+      return {};
   }
-  if (period === 'year') return { from: `${now.getFullYear()}-01-01`, to: toISO(now) };
-  return {};
 }
 
 export default function Reports() {
   const { state, categoryById } = useStore();
   const [mode, setMode] = useState<Mode>('expense');
   const [period, setPeriod] = useState<Period>('month');
+  const nowISO = toISO(new Date());
+  const [customFrom, setCustomFrom] = useState(`${nowISO.slice(0, 7)}-01`);
+  const [customTo, setCustomTo] = useState(nowISO);
 
-  const { from, to } = periodRange(period);
+  const { from, to } = periodRange(period, customFrom, customTo);
+
+  /* Keep the two ends in order: moving one past the other drags it along. */
+  function changeFrom(value: string) {
+    setCustomFrom(value);
+    if (value && customTo && value > customTo) setCustomTo(value);
+    setPeriod('custom');
+  }
+
+  function changeTo(value: string) {
+    setCustomTo(value);
+    if (value && customFrom && value < customFrom) setCustomFrom(value);
+    setPeriod('custom');
+  }
+
+  function resetRange() {
+    setCustomFrom(`${nowISO.slice(0, 7)}-01`);
+    setCustomTo(nowISO);
+    setPeriod('custom');
+  }
+
+  /* Presets also fill the date fields, so switching to Rentang continues from them. */
+  function choosePeriod(next: Period) {
+    setPeriod(next);
+    if (next === 'custom' || next === 'all') return;
+    const range = periodRange(next, customFrom, customTo);
+    if (range.from) setCustomFrom(range.from);
+    if (range.to) setCustomTo(range.to);
+  }
 
   const filtered = useMemo(
     () =>
@@ -103,6 +193,13 @@ export default function Reports() {
   const average = trend.filter((t) => t.total > 0);
   const avgValue = average.length ? average.reduce((s, t) => s + t.total, 0) / average.length : 0;
   const top = byCategory[0];
+  const rangeDays = from && to ? Math.max(1, daysBetween(from, to) + 1) : null;
+  const perDay = rangeDays ? total / rangeDays : 0;
+  const usePerDay = rangeDays !== null && Boolean(from) && Boolean(to);
+  const rangeSubtitle =
+    period === 'all' || !from || !to
+      ? 'Semua waktu'
+      : `${shortDate(from)} – ${shortDate(to)}${rangeDays ? ` · ${rangeDays} hari` : ''}`;
 
   return (
     <div className="sk-page">
@@ -110,7 +207,7 @@ export default function Reports() {
         <div>
           <p className="sk-eyebrow">Analisis</p>
           <h1 className="sk-title">Laporan</h1>
-          <p className="sk-sub">{period === 'month' ? monthLabel(toISO(new Date())) : PERIOD_LABEL[period]} · transfer antar rekening tidak dihitung</p>
+          <p className="sk-sub">{rangeSubtitle} · transfer antar rekening tidak dihitung</p>
         </div>
       </div>
 
@@ -140,13 +237,51 @@ export default function Reports() {
           </button>
         </div>
         <div className="sk-chips">
-          {(['month', '3m', 'year', 'all'] as Period[]).map((p) => (
-            <button key={p} type="button" className="sk-chip" data-active={period === p} onClick={() => setPeriod(p)}>
+          {PERIODS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="sk-chip"
+              data-active={period === p}
+              aria-pressed={period === p}
+              onClick={() => choosePeriod(p)}
+            >
               {PERIOD_LABEL[p]}
             </button>
           ))}
         </div>
       </div>
+
+      {period === 'custom' ? (
+        <div className="sk-range" role="group" aria-label="Rentang tanggal laporan">
+          <label className="sk-field">
+            <span className="sk-eyebrow">Dari tanggal</span>
+            <input
+              className="sk-input"
+              type="date"
+              value={customFrom}
+              max={customTo || undefined}
+              onChange={(e) => changeFrom(e.target.value)}
+            />
+          </label>
+          <span className="sk-range-dash" aria-hidden="true">
+            –
+          </span>
+          <label className="sk-field">
+            <span className="sk-eyebrow">Sampai tanggal</span>
+            <input
+              className="sk-input"
+              type="date"
+              value={customTo}
+              min={customFrom || undefined}
+              onChange={(e) => changeTo(e.target.value)}
+            />
+          </label>
+          <button type="button" className="sk-link sk-range-reset" onClick={resetRange}>
+            Bulan ini
+          </button>
+        </div>
+      ) : null}
 
       <section className="sk-kpis">
         <div className="sk-kpi">
@@ -160,8 +295,8 @@ export default function Reports() {
           <strong>{filtered.length}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Rata-rata / bulan</span>
-          <strong>{compactMoney(avgValue)}</strong>
+          <span>{usePerDay ? 'Rata-rata / hari' : 'Rata-rata / bulan'}</span>
+          <strong>{compactMoney(usePerDay ? perDay : avgValue)}</strong>
         </div>
         <div className="sk-kpi">
           <span>Terbesar</span>
@@ -180,7 +315,14 @@ export default function Reports() {
             </p>
           ) : (
             <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(0,1fr)' }}>
-              <div style={{ height: 220, position: 'relative' }}>
+              <div
+                style={{ height: 220, position: 'relative' }}
+                role="img"
+                aria-label={`Komposisi ${mode === 'expense' ? 'pengeluaran' : 'pendapatan'}: ${byCategory
+                  .slice(0, 6)
+                  .map((c) => `${c.name} ${money(c.value)}`)
+                  .join(', ')}`}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -264,7 +406,13 @@ export default function Reports() {
             <h2 className="sk-card-title">Tren 6 bulan</h2>
             <span className="sk-day-total">{mode === 'expense' ? 'Pengeluaran' : 'Pendapatan'}</span>
           </div>
-          <div style={{ height: 220 }}>
+          <div
+            style={{ height: 220 }}
+            role="img"
+            aria-label={`Tren enam bulan, ${mode === 'expense' ? 'pengeluaran' : 'pendapatan'}: ${trend
+              .map((t) => `${t.label} ${money(t.total)}`)
+              .join(', ')}`}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trend} margin={{ top: 8, right: 4, bottom: 0, left: -18 }}>
                 <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#8c8175' }} />

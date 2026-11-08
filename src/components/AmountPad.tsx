@@ -6,15 +6,28 @@ interface AmountPadProps {
   onChange: (next: number) => void;
   currency: string;
   tone?: 'expense' | 'income' | 'transfer';
+  /** Only capture global digit keys while the pad is actually on screen. */
+  isActive?: boolean;
 }
 
-const QUICK = [10_000, 25_000, 50_000, 100_000];
+const QUICK = [
+  { amount: 500, label: '500' },
+  { amount: 1_000, label: '1 rb' },
+  { amount: 2_000, label: '2 rb' },
+  { amount: 5_000, label: '5 rb' },
+  { amount: 10_000, label: '10 rb' },
+  { amount: 25_000, label: '25 rb' },
+  { amount: 50_000, label: '50 rb' },
+  { amount: 100_000, label: '100 rb' },
+];
 
-export default function AmountPad({ value, onChange, currency, tone = 'expense' }: AmountPadProps) {
+export default function AmountPad({ value, onChange, currency, tone = 'expense', isActive = true }: AmountPadProps) {
   useEffect(() => {
+    if (!isActive) return;
     function onKey(e: KeyboardEvent) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
-      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (target && (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable)) return;
       if (/^[0-9]$/.test(e.key)) {
         e.preventDefault();
         onChange(Math.min(value * 10 + Number(e.key), 999_999_999_999));
@@ -27,7 +40,7 @@ export default function AmountPad({ value, onChange, currency, tone = 'expense' 
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [value, onChange]);
+  }, [value, onChange, isActive]);
 
   const digit = (n: number) => onChange(Math.min(value * 10 + n, 999_999_999_999));
   const appendZeros = (zeros: number) => onChange(Math.min(value * 10 ** zeros, 999_999_999_999));
@@ -44,8 +57,8 @@ export default function AmountPad({ value, onChange, currency, tone = 'expense' 
 
       <div className="sk-quick" role="group" aria-label="Jumlah cepat">
         {QUICK.map((q) => (
-          <button key={q} type="button" onClick={() => onChange(value + q)}>
-            +{q / 1000} rb
+          <button key={q.amount} type="button" onClick={() => onChange(value + q.amount)}>
+            +{q.label}
           </button>
         ))}
       </div>

@@ -15,6 +15,8 @@ interface Props {
   tx?: Tx | null;
   initialType?: TxType;
   initialAccountId?: string;
+  /** Native surfaces show the confirmation outside the WebView. */
+  onSaved?: (message: string) => void;
 }
 
 const TYPE_LABEL: Record<TxType, string> = {
@@ -23,7 +25,7 @@ const TYPE_LABEL: Record<TxType, string> = {
   transfer: 'Transfer',
 };
 
-export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType, initialAccountId }: Props) {
+export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType, initialAccountId, onSaved }: Props) {
   const store = useStore();
   const { state, addTx, updateTx, removeTx, notify } = store;
 
@@ -102,9 +104,13 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
     if (tx) {
       updateTx(tx.id, payload);
       notify('Transaksi diperbarui');
+      onSaved?.('Transaksi diperbarui');
     } else {
       addTx(payload);
-      notify(type === 'expense' ? 'Pengeluaran dicatat' : type === 'income' ? 'Pendapatan dicatat' : 'Transfer dicatat');
+      const message =
+        type === 'expense' ? 'Pengeluaran dicatat' : type === 'income' ? 'Pendapatan dicatat' : 'Transfer dicatat';
+      notify(message);
+      onSaved?.(message);
     }
     onOpenChange(false);
   }
@@ -142,7 +148,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
           ))}
         </div>
 
-        <AmountPad value={amount} onChange={setAmount} currency={state.settings.currency} tone={type} />
+        <AmountPad value={amount} onChange={setAmount} currency={state.settings.currency} tone={type} isActive={isOpen} />
 
         <div className="sk-field">
           <Selector

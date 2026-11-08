@@ -1,6 +1,8 @@
-import type { AppState, Category, Account, Tx, Debt } from './types';
+import type { AppState, Category, Account, Tx, Debt, Recurring, Budget } from './types';
 import { uid } from './types';
-import { toISO, todayISO } from './format';
+import { monthKey, toISO, todayISO } from './format';
+import { initialNextDate } from './recurring';
+import { shiftMonth } from './budgets';
 
 function daysAgo(n: number): string {
   const d = new Date();
@@ -158,6 +160,111 @@ export function createDemoState(): AppState {
     });
   });
 
+  const today = todayISO();
+  const thisMonth = monthKey(today);
+
+  const recurring: Recurring[] = [
+    {
+      id: 'rec_netflix',
+      name: 'Netflix',
+      type: 'expense',
+      amount: 54_000,
+      accountId: 'acc_bank',
+      categoryId: 'cat_fun',
+      note: 'Langganan Netflix',
+      interval: 'monthly',
+      startDate: daysAgo(92),
+      nextDate: daysAgo(2),
+      active: true,
+      isSubscription: true,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'rec_spotify',
+      name: 'Spotify',
+      type: 'expense',
+      amount: 49_000,
+      accountId: 'acc_bank',
+      categoryId: 'cat_fun',
+      note: 'Langganan Spotify',
+      interval: 'monthly',
+      startDate: daysAgo(70),
+      nextDate: initialNextDate(daysAgo(70), 'monthly', today),
+      active: true,
+      isSubscription: true,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'rec_internet',
+      name: 'Internet rumah',
+      type: 'expense',
+      amount: 320_000,
+      accountId: 'acc_bank',
+      categoryId: 'cat_bills',
+      note: 'Tagihan internet',
+      interval: 'monthly',
+      startDate: daysAgo(60),
+      nextDate: initialNextDate(daysAgo(60), 'monthly', today),
+      active: true,
+      isSubscription: false,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'rec_salary',
+      name: 'Gaji bulanan',
+      type: 'income',
+      amount: 14_500_000,
+      accountId: 'acc_bank',
+      categoryId: 'cat_salary',
+      note: 'Gaji bulanan',
+      interval: 'monthly',
+      startDate: daysAgo(120),
+      nextDate: initialNextDate(daysAgo(120), 'monthly', today),
+      active: true,
+      isSubscription: false,
+      createdAt: Date.now(),
+    },
+  ];
+
+  const budgets: Budget[] = [
+    {
+      id: 'bud_food',
+      categoryId: 'cat_food',
+      amount: 2_800_000,
+      rollover: true,
+      startMonth: shiftMonth(thisMonth, -2),
+      active: true,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'bud_transport',
+      categoryId: 'cat_transport',
+      amount: 900_000,
+      rollover: false,
+      startMonth: thisMonth,
+      active: true,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'bud_fun',
+      categoryId: 'cat_fun',
+      amount: 400_000,
+      rollover: true,
+      startMonth: shiftMonth(thisMonth, -1),
+      active: true,
+      createdAt: Date.now(),
+    },
+    {
+      id: 'bud_bills',
+      categoryId: 'cat_bills',
+      amount: 1_200_000,
+      rollover: false,
+      startMonth: thisMonth,
+      active: true,
+      createdAt: Date.now(),
+    },
+  ];
+
   const debts: Debt[] = [
     {
       id: 'debt_1',
@@ -190,17 +297,20 @@ export function createDemoState(): AppState {
   ];
 
   return {
-    version: 1,
+    version: 2,
     accounts: DEFAULT_ACCOUNTS,
     categories: DEFAULT_CATEGORIES,
     txs,
     debts,
     payments,
+    recurring,
+    budgets,
     settings: {
       userName: 'Kamu',
       currency: 'IDR',
       pin: null,
       onboarded: false,
+      tourSeen: false,
       createdAt: Date.now(),
     },
   };
@@ -208,17 +318,20 @@ export function createDemoState(): AppState {
 
 export function createEmptyState(): AppState {
   return {
-    version: 1,
+    version: 2,
     accounts: DEFAULT_ACCOUNTS.map((a) => ({ ...a, initial: 0 })),
     categories: DEFAULT_CATEGORIES,
     txs: [],
     debts: [],
     payments: [],
+    recurring: [],
+    budgets: [],
     settings: {
       userName: 'Kamu',
       currency: 'IDR',
       pin: null,
       onboarded: false,
+      tourSeen: false,
       createdAt: Date.now(),
     },
   };

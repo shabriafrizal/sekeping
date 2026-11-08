@@ -2,7 +2,8 @@ package dev.shabri.sekeping
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
+import android.content.res.Configuration
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
 
@@ -34,7 +37,7 @@ class MainActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
             )
-            setBackgroundColor(Color.parseColor("#F6F1E7"))
+            setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.paper))
 
             settings.apply {
                 javaScriptEnabled = true
@@ -69,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(webView)
+        applySystemTheme(resources.configuration)
 
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState)
@@ -84,6 +88,29 @@ class MainActivity : AppCompatActivity() {
                 }
             },
         )
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applySystemTheme(newConfig)
+    }
+
+    /**
+     * uiMode is handled in the manifest, so the activity is not recreated when the system
+     * switches light and dark. Bars and the WebView backdrop are re-applied here; the page
+     * itself follows the same setting through prefers-color-scheme.
+     */
+    private fun applySystemTheme(config: Configuration) {
+        val night = (config.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val paper = ContextCompat.getColor(this, R.color.paper)
+        window.setBackgroundDrawable(ColorDrawable(paper))
+        window.statusBarColor = paper
+        window.navigationBarColor = paper
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !night
+            isAppearanceLightNavigationBars = !night
+        }
+        webView.setBackgroundColor(paper)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -127,11 +154,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Called by the web app to keep the widget's account picker up to date. */
+    /** Called by the web app to keep the widget's account picker and numbers up to date. */
     inner class WidgetBridge {
         @JavascriptInterface
         fun setAccounts(json: String) {
             WidgetPrefs.setAccounts(this@MainActivity, json)
+            WidgetProvider.refreshAll(this@MainActivity)
+        }
+
+        @JavascriptInterface
+        fun setSummary(json: String) {
+            WidgetPrefs.setSummary(this@MainActivity, json)
             WidgetProvider.refreshAll(this@MainActivity)
         }
 

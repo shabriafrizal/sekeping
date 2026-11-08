@@ -1,35 +1,133 @@
-import { useEffect, useState } from 'react';
-import { useStore } from './lib/store';
-import type { Account, Category, CategoryType, Debt, DebtKind, Tx, TxType } from './lib/types';
+import { useEffect, useRef, useState } from 'react';
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
+import { AppShell } from '@astryxdesign/core/AppShell';
+import { SideNav, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav';
+import { TopNav } from '@astryxdesign/core/TopNav';
+import { Section } from '@astryxdesign/core/Section';
+import { Center } from '@astryxdesign/core/Center';
+import { HStack } from '@astryxdesign/core/HStack';
+import { VStack } from '@astryxdesign/core/VStack';
+import { Text } from '@astryxdesign/core/Text';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Button } from '@astryxdesign/core/Button';
+import { currentMonth, useStore } from './lib/store';
+import type { Account, Budget, Category, CategoryType, Debt, DebtKind, Recurring, Tx, TxType } from './lib/types';
 import { money } from './lib/format';
 import Home from './pages/Home';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
 import Debts from './pages/Debts';
 import Settings from './pages/Settings';
+import RecurringPage from './pages/Recurring';
+import Budgets from './pages/Budgets';
+import ImportPage from './pages/Import';
 import TransactionSheet from './sheets/TransactionSheet';
 import TxDetail from './sheets/TxDetail';
 import { AccountSheet, CategorySheet, DebtSheet, PaymentSheet } from './sheets/EntitySheets';
+import { RecurringSheet } from './sheets/RecurringSheet';
+import { BudgetSheet } from './sheets/BudgetSheet';
+import WidgetConfigSheet from './sheets/WidgetConfigSheet';
 import { iconFor } from './lib/icons';
-import { signalReady, syncWidgetAccounts } from './lib/native';
+import { closeSheet, nativeMode, openApp, signalReady, syncWidgetAccounts, syncWidgetSummary, toast } from './lib/native';
+import { daysUntilNext } from './lib/recurring';
+import Tour, { type TourStep } from './components/Tour';
 
-type Page = 'home' | 'transactions' | 'reports' | 'debts' | 'settings';
+type Page = 'home' | 'transactions' | 'recurring' | 'budgets' | 'reports' | 'debts' | 'import' | 'settings';
 
-const NAV: Array<{ id: Page; label: string; icon: string }> = [
-  { id: 'home', label: 'Ringkasan', icon: 'house' },
-  { id: 'transactions', label: 'Transaksi', icon: 'receipt' },
-  { id: 'reports', label: 'Laporan', icon: 'pie' },
-  { id: 'debts', label: 'Utang & Piutang', icon: 'arrows' },
+/* The APK opens this build in a modal surface when a widget button or the
+   "Atur widget" dialog asks for it. */
+const NATIVE_MODE = nativeMode();
+const SHEET_START = (() => {
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('sheet');
+  if (type === 'expense' || type === 'income' || type === 'transfer') {
+    return { type: type as TxType, accountId: params.get('account') || undefined };
+  }
+  return null;
+})();
+
+const NAV: Array<{ id: Page; label: string; icon: string; short?: string }> = [
+  { id: 'home', label: 'Ringkasan', icon: 'house', short: 'h' },
+  { id: 'transactions', label: 'Transaksi', icon: 'receipt', short: 't' },
+  { id: 'recurring', label: 'Rutin', icon: 'repeat', short: 'r' },
+  { id: 'budgets', label: 'Anggaran', icon: 'budget', short: 'b' },
+  { id: 'reports', label: 'Laporan', icon: 'pie', short: 'l' },
+  { id: 'debts', label: 'Utang & Piutang', icon: 'arrows', short: 'd' },
+];
+
+const MAIN_IDS: Page[] = ['home', 'transactions', 'reports', 'debts'];
+const PLAN_IDS: Page[] = ['recurring', 'budgets'];
+
+const MORE_NAV: Array<{ id: Page; label: string; hint: string; icon: string }> = [
+  { id: 'recurring', label: 'Rutin & langganan', hint: 'Jadwal transaksi otomatis', icon: 'repeat' },
+  { id: 'budgets', label: 'Anggaran', hint: 'Batas bulanan per kategori', icon: 'budget' },
+  { id: 'debts', label: 'Utang & piutang', hint: 'Cicilan dan pinjaman', icon: 'arrows' },
+  { id: 'import', label: 'Impor CSV', hint: 'Pemetaan kolom dari bank', icon: 'receipt' },
+  { id: 'settings', label: 'Pengaturan', hint: 'Profil, data, dan keamanan', icon: 'house' },
+];
+
+const SHORTCUTS: Array<{ keys: string; label: string }> = [
+  { keys: 'Alt + 1…6', label: 'Langsung ke halaman (urutan menu)' },
+  { keys: 'g lalu h', label: 'Ringkasan' },
+  { keys: 'g lalu t', label: 'Transaksi' },
+  { keys: 'g lalu r', label: 'Rutin & langganan' },
+  { keys: 'g lalu b', label: 'Anggaran' },
+  { keys: 'g lalu l', label: 'Laporan' },
+  { keys: 'g lalu d', label: 'Utang & piutang' },
+  { keys: 'g lalu s', label: 'Pengaturan' },
+  { keys: 'n', label: 'Catat pengeluaran baru' },
+  { keys: '?', label: 'Buka atau tutup daftar pintasan ini' },
+  { keys: 'Esc', label: 'Tutup dialog' },
+  { keys: 'Tab / Shift + Tab', label: 'Pindah antar kontrol' },
+  { keys: '↑ ↓ ← →', label: 'Pindah antar item menu' },
+];
+
+/* Each target lists the desktop and the mobile home of the same control. */
+const TOUR_STEPS: TourStep[] = [
+  {
+    target: ['[data-tour="balance"]'],
+    title: 'Saldo semua rekening',
+    body: 'Angka ini berubah setiap kali kamu mencatat transaksi. Di bawahnya, uang masuk dan keluar bulan ini.',
+  },
+  {
+    target: ['[data-tour="accounts"]'],
+    title: 'Rekeningmu',
+    body: 'Dompet, bank, dan dompet digital. Tiap rekening menghitung saldonya sendiri.',
+  },
+  {
+    target: ['[data-tour="add"]'],
+    title: 'Catat transaksi',
+    body: 'Tekan di sini untuk pengeluaran, pemasukan, atau transfer antar rekening.',
+  },
+  {
+    target: ['[data-tour="month"]'],
+    title: 'Bulan ini',
+    body: 'Tingkat tabungan, pola belanja tujuh hari, dan kategori paling boros.',
+  },
+  {
+    target: ['.astryx-side-nav'],
+    title: 'Semua ada di sini',
+    body: 'Transaksi, laporan, utang dan piutang. Pengaturan berisi ekspor dan cadangan.',
+  },
 ];
 
 export default function App() {
   const store = useStore();
-  const { state, toasts, dismissToast, updateSettings, clearAll } = store;
+  const { state, toasts, dismissToast, updateSettings, clearAll, runRecurring, notify } = store;
 
   const [page, setPage] = useState<Page>('home');
+  const reminderCount = state.recurring.filter(
+    (r) => r.active && r.type === 'expense' && daysUntilNext(r) <= 7 && (!r.endDate || r.nextDate <= r.endDate),
+  ).length;
   const [locked, setLocked] = useState<boolean>(Boolean(state.settings.pin));
+  const [tourOpen, setTourOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
+  const mainRef = useRef<HTMLDivElement | null>(null);
+  const firstRender = useRef(true);
+  const gRef = useRef(0);
+  const postedRef = useRef(false);
 
   const [txSheet, setTxSheet] = useState<{
     open: boolean;
@@ -37,9 +135,10 @@ export default function App() {
     type: TxType;
     accountId?: string;
   }>({
-    open: false,
+    open: Boolean(SHEET_START),
     tx: null,
-    type: 'expense',
+    type: SHEET_START?.type ?? 'expense',
+    accountId: SHEET_START?.accountId,
   });
   const [queuedAdd, setQueuedAdd] = useState<{ type: TxType; accountId?: string } | null>(null);
   const [detail, setDetail] = useState<Tx | null>(null);
@@ -58,10 +157,112 @@ export default function App() {
     kind: 'debt',
   });
   const [paySheet, setPaySheet] = useState<{ open: boolean; debt: Debt | null }>({ open: false, debt: null });
+  const [recSheet, setRecSheet] = useState<{ open: boolean; item: Recurring | null }>({ open: false, item: null });
+  const [budgetSheet, setBudgetSheet] = useState<{ open: boolean; budget: Budget | null; categoryId?: string }>({
+    open: false,
+    budget: null,
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [page]);
+
+  /* Keyboard users land on the page heading, not back at the top of the menu. */
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    mainRef.current?.focus({ preventScroll: true });
+  }, [page]);
+
+  /* Catch up on recurring transactions once per session, after unlocking. */
+  useEffect(() => {
+    if (NATIVE_MODE === 'config') return;
+    if (!state.settings.onboarded || locked || postedRef.current) return;
+    postedRef.current = true;
+    const count = runRecurring();
+    if (count > 0) notify(`${count} transaksi berulang dicatat otomatis`, 'info');
+  }, [state.settings.onboarded, locked, runRecurring, notify]);
+
+  /* Global shortcuts: Alt+1…6 jumps, g-prefix jumps, n adds, ? shows help. */
+  useEffect(() => {
+    if (NATIVE_MODE) return;
+    function go(id: Page) {
+      setPage(id);
+      setHelpOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName ?? '';
+      const typing = Boolean(target) && (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) || Boolean(target?.isContentEditable));
+      const modal = document.querySelector('.astryx-dialog[open], .sk-tour');
+      if (modal) return;
+      if (e.defaultPrevented) return;
+
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !typing) {
+        const n = Number(e.key);
+        if (Number.isInteger(n) && n >= 1 && n <= NAV.length) {
+          e.preventDefault();
+          go(NAV[n - 1].id);
+          return;
+        }
+      }
+      if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (e.key === '?') {
+        e.preventDefault();
+        setHelpOpen((open) => !open);
+        return;
+      }
+      if (e.key === 'n') {
+        e.preventDefault();
+        setTxSheet({ open: true, tx: null, type: 'expense' });
+        return;
+      }
+      if (e.key === 'g') {
+        gRef.current = Date.now();
+        return;
+      }
+      if (Date.now() - gRef.current < 1200) {
+        const map: Record<string, Page> = {
+          h: 'home',
+          t: 'transactions',
+          r: 'recurring',
+          b: 'budgets',
+          l: 'reports',
+          d: 'debts',
+          i: 'import',
+          s: 'settings',
+        };
+        const destination = map[e.key.toLowerCase()];
+        gRef.current = 0;
+        if (destination) {
+          e.preventDefault();
+          go(destination);
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  /** Arrow keys move between menu items without leaving the menu. */
+  function onNavKeyDown(event: React.KeyboardEvent<HTMLElement>) {
+    if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    const items = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-nav]')];
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0) return;
+    event.preventDefault();
+    const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight';
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? items.length - 1
+          : (index + (forward ? 1 : -1) + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
 
   useEffect(() => {
     if (pin.length < 4) return;
@@ -99,10 +300,34 @@ export default function App() {
     };
   }, []);
 
-  /* Keep the Android widget's account picker in sync with the ledger. */
+  /* Keep the Android widget's account picker and summary in sync with the ledger. */
   useEffect(() => {
     syncWidgetAccounts(state.accounts);
   }, [state.accounts]);
+
+  useEffect(() => {
+    if (NATIVE_MODE === 'config') return;
+    const { from, to } = currentMonth();
+    let income = 0;
+    let expense = 0;
+    for (const tx of state.txs) {
+      if (tx.date < from || tx.date > to) continue;
+      if (tx.type === 'income') income += tx.amount;
+      if (tx.type === 'expense') expense += tx.amount;
+    }
+    syncWidgetSummary({
+      balance: money(store.netWorth, state.settings.currency),
+      monthIn: `+${money(income, state.settings.currency)}`,
+      monthOut: `−${money(expense, state.settings.currency)}`,
+      accounts: state.accounts.filter((a) => a.active).length,
+    });
+  }, [state.txs, state.accounts, state.settings.currency, store.netWorth]);
+
+  /* A sheet opened before onboarding has no ledger to write to: hand off to
+     the full app, which shows the welcome screen. */
+  useEffect(() => {
+    if (NATIVE_MODE === 'sheet' && !state.settings.onboarded) openApp();
+  }, [state.settings.onboarded]);
 
   /* A widget tap waits for onboarding and the PIN screen to finish. */
   useEffect(() => {
@@ -111,14 +336,79 @@ export default function App() {
     setQueuedAdd(null);
   }, [queuedAdd, state.settings.onboarded, locked]);
 
+  /* The tour introduces the interface once, right after onboarding. */
+  useEffect(() => {
+    if (NATIVE_MODE) return;
+    if (!state.settings.onboarded || state.settings.tourSeen || locked) return;
+    const timer = window.setTimeout(() => setTourOpen(true), 450);
+    return () => window.clearTimeout(timer);
+  }, [state.settings.onboarded, state.settings.tourSeen, locked]);
+
+  function startTour() {
+    setPage('home');
+    window.scrollTo({ top: 0 });
+    setTourOpen(true);
+  }
+
+  function endTour() {
+    setTourOpen(false);
+    updateSettings({ tourSeen: true });
+    window.scrollTo({ top: 0 });
+  }
+
   function editTx(tx: Tx) {
     setDetail(null);
     setTxSheet({ open: true, tx, type: tx.type });
   }
 
+  /* The widget setup dialog: a real Astryx dialog on a transparent window. */
+  if (NATIVE_MODE === 'config') {
+    return <WidgetConfigSheet locked={Boolean(state.settings.pin)} />;
+  }
+
+  /* The quick-add sheet: the same transaction dialog as the app, floating over
+     the home screen instead of opening the dashboard. */
+  if (NATIVE_MODE === 'sheet') {
+    if (!state.settings.onboarded) return null;
+    return (
+      <div className="sk-native-surface">
+        {locked ? (
+          <div className="sk-native-lock">
+            <button type="button" className="sk-native-dismiss" onClick={closeSheet} aria-label="Tutup">
+              Batal
+            </button>
+            <LockScreen
+              value={pin}
+              error={pinError}
+              onDigit={(d) => setPin((p) => (p.length < 4 ? p + d : p))}
+              onDelete={() => setPin((p) => p.slice(0, -1))}
+              onDigitError={() => setPinError(true)}
+            />
+          </div>
+        ) : (
+          <TransactionSheet
+            isOpen={txSheet.open}
+            onOpenChange={(open) => {
+              setTxSheet((s) => ({ ...s, open }));
+              /* Let the state commit and the widget summary reach the host
+                 before the activity is torn down. */
+              if (!open) window.setTimeout(closeSheet, 240);
+            }}
+            tx={null}
+            initialType={SHEET_START?.type}
+            initialAccountId={SHEET_START?.accountId}
+            onSaved={(message) => {
+              toast(message);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (!state.settings.onboarded) {
     return (
-      <Onboarding
+      <Start
         onDemo={() => updateSettings({ onboarded: true })}
         onEmpty={() => {
           clearAll();
@@ -141,164 +431,162 @@ export default function App() {
   }
 
   return (
-    <div className="sk-app">
-      <aside className="sk-sidebar">
-        <div className="sk-brand">
-          <span className="sk-brand-mark">
-            <LogoGlyph />
-          </span>
-          <div>
-            <div className="sk-brand-name">Sekeping</div>
-            <div className="sk-brand-tag">catatan keuangan</div>
-          </div>
-        </div>
-
-        <nav className="sk-nav" aria-label="Navigasi utama">
-          <p className="sk-nav-label">Menu</p>
-          {NAV.map((item) => {
-            const Icon = iconFor(item.icon);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className="sk-nav-item"
-                data-active={page === item.id}
-                data-nav={item.id}
-                onClick={() => setPage(item.id)}
-              >
-                <Icon />
-                <span>{item.label}</span>
-                {item.id === 'debts' ? (
-                  <span className="sk-nav-count">{state.debts.filter((d) => !d.kind || true).length}</span>
-                ) : null}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="sk-sidebar-foot">
-          <button type="button" className="sk-nav-item" data-active="false" data-add="expense" onClick={() => openAdd('expense')}>
-            <span
-              style={{
-                width: '1.2rem',
-                height: '1.2rem',
-                borderRadius: 6,
-                display: 'grid',
-                placeItems: 'center',
-                background: 'var(--color-accent)',
-                color: 'var(--color-on-accent)',
-                fontSize: '0.9rem',
-                lineHeight: 1,
-              }}
-            >
-              +
+    <AppShell
+      variant="surface"
+      height="auto"
+      contentPadding={0}
+      topNav={
+        <TopNav
+          label="Navigasi utama"
+          heading={
+            <HStack gap={2} vAlign="center">
+              <span className="sk-brand-mark sk-brand-mark--sm">
+                <LogoGlyph />
+              </span>
+              <VStack gap={0}>
+                <Text weight="semibold">Sekeping</Text>
+                <Text type="supporting" size="2xs">
+                  {money(store.netWorth)}
+                </Text>
+              </VStack>
+            </HStack>
+          }
+          endContent={
+            <span data-tour="add" data-add="expense">
+              <Button
+                label="Tambah"
+                size="sm"
+                variant="primary"
+                icon={<PlusGlyph />}
+                onClick={() => openAdd('expense')}
+              />
             </span>
-            <span>Tambah transaksi</span>
-          </button>
-
-          <div className="sk-mini-account">
-            <span className="sk-account-icon" style={{ width: '2rem', height: '2rem' }}>
-              <WalletGlyph />
+          }
+        />
+      }
+      sideNav={
+        <SideNav
+          topContent={
+            <span data-tour="add" data-add="expense" className="sk-add-wrap">
+              <Button
+                label="Tambah transaksi"
+                variant="primary"
+                width="100%"
+                icon={<PlusGlyph />}
+                onClick={() => openAdd('expense')}
+              />
             </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <strong>{money(store.netWorth)}</strong>
-              <span>{state.accounts.filter((a) => a.active).length} rekening aktif</span>
+          }
+          footer={
+            <SideNavSection title="Akun">
+              <SideNavItem
+                label="Pintasan"
+                icon={iconFor('key')}
+                endContent={<Badge label="?" />}
+                onClick={() => setHelpOpen(true)}
+              />
+              <SideNavItem
+                label="Pengaturan"
+                icon={iconFor('cog')}
+                isSelected={page === 'settings'}
+                onClick={() => setPage('settings')}
+              />
+            </SideNavSection>
+          }
+        >
+          <SideNavSection title="Menu">
+            {NAV.filter((item) => MAIN_IDS.includes(item.id)).map((item) => {
+              const Icon = iconFor(item.icon);
+              const count =
+                item.id === 'home' ? reminderCount : item.id === 'debts' ? state.debts.length : 0;
+              return (
+                <SideNavItem
+                  key={item.id}
+                  label={item.label}
+                  icon={Icon}
+                  isSelected={page === item.id}
+                  endContent={count > 0 ? <Badge label={String(count)} /> : undefined}
+                  onClick={() => setPage(item.id)}
+                />
+              );
+            })}
+          </SideNavSection>
+
+          <SideNavSection title="Perencanaan">
+            {NAV.filter((item) => PLAN_IDS.includes(item.id)).map((item) => {
+              const Icon = iconFor(item.icon);
+              const due =
+                item.id === 'recurring'
+                  ? state.recurring.filter(
+                      (r) => r.active && r.nextDate <= new Date().toISOString().slice(0, 10),
+                    ).length
+                  : 0;
+              return (
+                <SideNavItem
+                  key={item.id}
+                  label={item.label}
+                  icon={Icon}
+                  isSelected={page === item.id}
+                  endContent={due > 0 ? <Badge label={String(due)} variant="warning" /> : undefined}
+                  onClick={() => setPage(item.id)}
+                />
+              );
+            })}
+            <SideNavItem
+              label="Impor CSV"
+              icon={iconFor('receipt')}
+              isSelected={page === 'import'}
+              onClick={() => setPage('import')}
+            />
+          </SideNavSection>
+        </SideNav>
+      }
+    >
+      <Section padding={4} paddingBlock={5}>
+        <Center axis="horizontal">
+          <VStack gap={4} maxWidth={1120} width="100%">
+            <div id="sk-main" ref={mainRef} tabIndex={-1} className="sk-main-focus">
+              {page === 'home' ? (
+                <Home onAdd={openAdd} onOpenTx={setDetail} onNavigate={(p) => setPage(p as Page)} />
+              ) : null}
+              {page === 'transactions' ? <Transactions onAdd={openAdd} onOpenTx={setDetail} /> : null}
+              {page === 'recurring' ? (
+                <RecurringPage
+                  onAdd={() => setRecSheet({ open: true, item: null })}
+                  onEdit={(item) => setRecSheet({ open: true, item })}
+                />
+              ) : null}
+              {page === 'budgets' ? (
+                <Budgets
+                  onAdd={(categoryId) => setBudgetSheet({ open: true, budget: null, categoryId })}
+                  onEdit={(budget) => setBudgetSheet({ open: true, budget })}
+                />
+              ) : null}
+              {page === 'import' ? <ImportPage onNavigate={(p) => setPage(p as Page)} /> : null}
+              {page === 'reports' ? <Reports /> : null}
+              {page === 'debts' ? (
+                <Debts
+                  onAdd={(kind) => setDebtSheet({ open: true, debt: null, kind })}
+                  onEdit={(debt) => setDebtSheet({ open: true, debt, kind: debt.kind })}
+                  onPay={(debt) => setPaySheet({ open: true, debt })}
+                />
+              ) : null}
+              {page === 'settings' ? (
+                <Settings
+                  onEditAccount={(account) => setAccountSheet({ open: true, account })}
+                  onAddAccount={() => setAccountSheet({ open: true, account: null })}
+                  onEditCategory={(category) => setCategorySheet({ open: true, category, type: category.type })}
+                  onAddCategory={(type) => setCategorySheet({ open: true, category: null, type })}
+                  onLock={() => setLocked(true)}
+                  onTour={startTour}
+                  onNavigate={(p) => setPage(p as Page)}
+                  onShortcuts={() => setHelpOpen(true)}
+                />
+              ) : null}
             </div>
-          </div>
-
-          <button type="button" className="sk-nav-item" data-nav="settings" data-active={page === 'settings'} onClick={() => setPage('settings')}>
-            <GearGlyph />
-            <span>Pengaturan</span>
-          </button>
-        </div>
-      </aside>
-
-      <main className="sk-main">
-        <div className="sk-mobile-top">
-          <div className="sk-brand">
-            <span className="sk-brand-mark" style={{ width: '2rem', height: '2rem', borderRadius: 11 }}>
-              <LogoGlyph />
-            </span>
-            <div>
-              <div className="sk-brand-name" style={{ fontSize: '1.1rem' }}>
-                Sekeping
-              </div>
-              <div className="sk-brand-tag">{money(store.netWorth)}</div>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="sk-tab"
-            aria-label="Pengaturan"
-            onClick={() => setPage('settings')}
-            style={{ color: page === 'settings' ? 'var(--color-accent)' : undefined }}
-          >
-            <GearGlyph />
-          </button>
-        </div>
-
-        {page === 'home' ? (
-          <Home onAdd={openAdd} onOpenTx={setDetail} onNavigate={(p) => setPage(p as Page)} />
-        ) : null}
-        {page === 'transactions' ? <Transactions onAdd={openAdd} onOpenTx={setDetail} /> : null}
-        {page === 'reports' ? <Reports /> : null}
-        {page === 'debts' ? (
-          <Debts
-            onAdd={(kind) => setDebtSheet({ open: true, debt: null, kind })}
-            onEdit={(debt) => setDebtSheet({ open: true, debt, kind: debt.kind })}
-            onPay={(debt) => setPaySheet({ open: true, debt })}
-          />
-        ) : null}
-        {page === 'settings' ? (
-          <Settings
-            onEditAccount={(account) => setAccountSheet({ open: true, account })}
-            onAddAccount={() => setAccountSheet({ open: true, account: null })}
-            onEditCategory={(category) => setCategorySheet({ open: true, category, type: category.type })}
-            onAddCategory={(type) => setCategorySheet({ open: true, category: null, type })}
-            onLock={() => setLocked(true)}
-          />
-        ) : null}
-      </main>
-
-      <nav className="sk-tabbar" aria-label="Navigasi bawah">
-        <button type="button" className="sk-tab" data-active={page === 'home'} data-nav="home" onClick={() => setPage('home')}>
-          <NavIcon name="house" />
-          <span>Ringkasan</span>
-        </button>
-        <button
-          type="button"
-          className="sk-tab"
-          data-active={page === 'transactions'}
-          data-nav="transactions"
-          onClick={() => setPage('transactions')}
-        >
-          <NavIcon name="receipt" />
-          <span>Transaksi</span>
-        </button>
-        <button type="button" className="sk-tab-add" aria-label="Tambah transaksi" data-add="expense" onClick={() => openAdd('expense')}>
-          <PlusGlyph />
-        </button>
-        <button
-          type="button"
-          className="sk-tab"
-          data-active={page === 'reports'}
-          data-nav="reports"
-          onClick={() => setPage('reports')}
-        >
-          <NavIcon name="pie" />
-          <span>Laporan</span>
-        </button>
-        <button
-          type="button"
-          className="sk-tab"
-          data-active={page === 'debts'}
-          data-nav="debts"
-          onClick={() => setPage('debts')}
-        >
-          <NavIcon name="arrows" />
-          <span>Utang</span>
-        </button>
-      </nav>
+          </VStack>
+        </Center>
+      </Section>
 
       <TransactionSheet
         isOpen={txSheet.open}
@@ -336,6 +624,36 @@ export default function App() {
         debt={paySheet.debt}
       />
 
+      <RecurringSheet
+        isOpen={recSheet.open}
+        onOpenChange={(open) => setRecSheet((s) => ({ ...s, open }))}
+        item={recSheet.item}
+      />
+
+      <BudgetSheet
+        isOpen={budgetSheet.open}
+        onOpenChange={(open) => setBudgetSheet((s) => ({ ...s, open }))}
+        budget={budgetSheet.budget}
+        initialCategoryId={budgetSheet.categoryId}
+      />
+
+      <Dialog isOpen={helpOpen} onOpenChange={setHelpOpen} purpose="info" width={460}>
+        <DialogHeader title="Pintasan keyboard" subtitle="Bekerja tanpa mouse" onOpenChange={setHelpOpen} />
+        <div className="sk-shortcuts">
+          {SHORTCUTS.map((item) => (
+            <div className="sk-shortcut" key={item.keys}>
+              <span className="sk-kbd">{item.keys}</span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="sk-sub" style={{ fontSize: '0.74rem' }}>
+          Pintasan nonaktif saat kamu mengetik di kolom isian. Dialog selalu bisa ditutup dengan Esc.
+        </p>
+      </Dialog>
+
+      {tourOpen ? <Tour steps={TOUR_STEPS} onDone={endTour} /> : null}
+
       <div className="sk-toasts" aria-live="polite">
         {toasts.map((t) => (
           <button key={t.id} type="button" className="sk-toast" data-tone={t.tone} onClick={() => dismissToast(t.id)}>
@@ -344,73 +662,31 @@ export default function App() {
           </button>
         ))}
       </div>
-
-    </div>
+    </AppShell>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Onboarding                                                          */
+/* Start                                                               */
 /* ------------------------------------------------------------------ */
 
-function Onboarding({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void }) {
+function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void }) {
   return (
-    <div className="sk-onboard">
-      <div className="sk-onboard-art">
-        <div className="sk-brand" style={{ padding: 0 }}>
-          <span className="sk-brand-mark" style={{ background: 'rgba(246,242,233,0.15)' }}>
-            <LogoGlyph />
-          </span>
-          <div>
-            <div className="sk-brand-name" style={{ color: '#f6f2e9' }}>
-              Sekeping
-            </div>
-            <div className="sk-brand-tag" style={{ color: 'rgba(246,242,233,0.7)' }}>
-              catatan keuangan
-            </div>
-          </div>
-        </div>
-        <div>
-          <h2>Uangmu, dalam satu pandangan yang tenang.</h2>
-          <p style={{ opacity: 0.78, maxWidth: 340, lineHeight: 1.6 }}>
-            Catat pengeluaran tanpa ribet, lihat ke mana uang pergi, dan pantau utang-piutang — semuanya
-            tersimpan di perangkat ini.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '2rem', fontSize: '0.72rem', opacity: 0.7 }}>
-          <span>Tanpa akun</span>
-          <span>Tanpa unggahan</span>
-          <span>Bisa diekspor</span>
-        </div>
-      </div>
-      <div className="sk-onboard-copy">
-        <p className="sk-eyebrow">Selamat datang</p>
-        <h1>Mulai mencatat dalam satu menit.</h1>
-        <ul>
-          <li>
-            <CheckGlyph /> Rekening, kategori, dan transaksi
-          </li>
-          <li>
-            <CheckGlyph /> Laporan kategori &amp; tren bulanan
-          </li>
-          <li>
-            <CheckGlyph /> Utang, piutang, dan cicilan
-          </li>
-          <li>
-            <CheckGlyph /> Ekspor CSV dan cadangan JSON
-          </li>
-        </ul>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-          <button type="button" className="sk-chip" data-active="true" style={{ padding: '0.75rem 1rem', fontSize: '0.9rem' }} onClick={onDemo}>
-            Lihat dengan data contoh
-          </button>
-          <button type="button" className="sk-chip" style={{ padding: '0.75rem 1rem', fontSize: '0.9rem' }} onClick={onEmpty}>
-            Mulai dari kosong
-          </button>
-        </div>
-        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>
-          Data contoh bisa dihapus kapan saja dari Pengaturan.
-        </p>
+    <div className="sk-start">
+      <div className="sk-start-card">
+        <span className="sk-brand-mark sk-start-mark">
+          <LogoGlyph />
+        </span>
+        <h1 className="sk-start-name">Sekeping</h1>
+        <p className="sk-start-line">Catatan keuangan yang tenang.</p>
+        <span className="sk-start-rule" aria-hidden="true" />
+        <button type="button" className="sk-start-primary" data-start="demo" onClick={onDemo}>
+          Mulai
+        </button>
+        <button type="button" className="sk-start-secondary" data-start="empty" onClick={onEmpty}>
+          Mulai dari kosong
+        </button>
+        <p className="sk-start-note">Dimulai dengan data contoh yang bisa dihapus kapan saja.</p>
       </div>
     </div>
   );

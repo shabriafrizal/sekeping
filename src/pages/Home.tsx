@@ -1,10 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { currentMonth, useStore } from '../lib/store';
-import { money, compactMoney, monthLabel, shortDate, dayLabel, toISO } from '../lib/format';
+import { money, compactMoney, monthLabel, dayLabel, toISO } from '../lib/format';
 import { TxRow } from '../components/TxRow';
 import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
 import type { Tx } from '../lib/types';
+import { daysUntilNext } from '../lib/recurring';
+
+const BellIcon = iconFor('bell');
+const CheckIcon = iconFor('check');
 
 const CHART_COLORS = [
   'var(--sk-chart-1)',
@@ -23,6 +27,17 @@ function greeting() {
   return 'Selamat malam';
 }
 
+function longDate(d: Date) {
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function reminderLabel(days: number) {
+  if (days < 0) return `Terlambat ${Math.abs(days)} hari`;
+  if (days === 0) return 'Jatuh tempo hari ini';
+  if (days === 1) return 'Jatuh tempo besok';
+  return `Jatuh tempo dalam ${days} hari`;
+}
+
 export default function Home({
   onAdd,
   onOpenTx,
@@ -32,12 +47,21 @@ export default function Home({
   onOpenTx: (tx: Tx) => void;
   onNavigate: (page: string) => void;
 }) {
-  const { state, netWorth, balanceOf, monthTotals, categoryById } = useStore();
+  const { state, netWorth, balanceOf, monthTotals, categoryById, completeRecurring, notify } = useStore();
+  const [justDone, setJustDone] = useState<string[]>([]);
   const { from, to, iso } = currentMonth();
+  const now = new Date();
 
   const totals = monthTotals(from, to);
+  const flow = totals.income - totals.expense;
+  const savingRate = totals.income > 0 ? Math.round((flow / totals.income) * 100) : null;
   const monthTx = state.txs.filter((t) => t.date >= from && t.date <= to);
   const recent = [...state.txs].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt)).slice(0, 6);
+  const dailyAverage = totals.expense / Math.max(now.getDate(), 1);
+
+  const positiveTotal = state.accounts
+    .filter((a) => a.active)
+    .reduce((sum, a) => sum + Math.max(balanceOf(a.id), 0), 0);
 
   const topCategories = useMemo(() => {
     const map = new Map<string, number>();
@@ -48,7 +72,7 @@ export default function Home({
     return [...map.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4)
-      .map(([id, value]) => ({ id, value, name: categoryById(id)?.name ?? 'Lainnya', icon: categoryById(id)?.icon }));
+      .map(([id, value]) => ({ id, value, name: categoryById(id)?.name ?? 'Lainnya' }));
   }, [monthTx, categoryById]);
 
   const last7 = useMemo(() => {
@@ -65,20 +89,39 @@ export default function Home({
     return days;
   }, [state.txs]);
 
-  const max7 = Math.max(...last7.map((d) => d.total), 1);
-  const savingRate = totals.income > 0 ? Math.round(((totals.income - totals.expense) / totals.income) * 100) : 0;
+  const week = last7.reduce((s, d) => s + d.total, 0);
+  const maxDay = Math.max(...last7.map((d) => d.total), 1);
+  const maxCategory = Math.max(...topCategories.map((c) => c.value), 1);
+
+  /* Bills and subscriptions due in the next seven days (overdue included). */
+  const reminders = useMemo(
+    () =>
+      state.recurring
+        .filter(
+          (r) =>
+            r.active &&
+            r.type === 'expense' &&
+            !justDone.includes(r.id) &&
+            daysUntilNext(r) <= 7 &&
+            (!r.endDate || r.nextDate <= r.endDate),
+        )
+        .sort((a, b) => (a.nextDate < b.nextDate ? -1 : a.nextDate > b.nextDate ? 1 : 0)),
+    [state.recurring, justDone],
+  );
 
   return (
-    <div className="sk-page">
-      <div className="sk-page-head">
+    <div className="sk-page sk-home">
+      <header className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">
-            {greeting()}, {state.settings.userName || 'Kamu'}
-          </p>
           <h1 className="sk-title">Ringkasan</h1>
-          <p className="sk-sub">{monthLabel(iso)} · semua rekening</p>
+          <p className="sk-sub">
+            {greeting()}, {state.settings.userName || 'Kamu'}. {longDate(now)}
+          </p>
         </div>
         <div className="sk-chips">
+          <button className="sk-chip" type="button" onClick={() => onAdd('transfer')}>
+            Transfer
+          </button>
           <button className="sk-chip" type="button" onClick={() => onAdd('income')}>
             + Pendapatan
           </button>
@@ -86,86 +129,140 @@ export default function Home({
             + Pengeluaran
           </button>
         </div>
+      </header>
+
+      <div className="sk-home-top">
+        <section className="sk-ledger" aria-labelledby="home-total" data-tour="balance">
+          <p className="sk-ledger-label" id="home-total">
+            Total saldo
+          </p>
+          <p className="sk-ledger-total">{money(netWorth)}</p>
+          <dl className="sk-ledger-lines">
+            <div>
+              <dt>Masuk bulan ini</dt>
+              <dd data-tone="income">+{money(totals.income)}</dd>
+            </div>
+            <div>
+              <dt>Keluar bulan ini</dt>
+              <dd>−{money(totals.expense)}</dd>
+            </div>
+            <div data-total="true">
+              <dt>Sisa bulan ini</dt>
+              <dd data-tone={flow < 0 ? 'expense' : 'income'}>
+                {flow < 0 ? '−' : ''}
+                {money(Math.abs(flow))}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="sk-home-block" data-tour="accounts">
+          <div className="sk-home-head">
+            <h2 className="sk-home-title">Rekening</h2>
+            <button className="sk-link" type="button" onClick={() => onNavigate('settings')}>
+              Kelola
+            </button>
+          </div>
+          <ul className="sk-accounts">
+            {state.accounts.map((acc) => {
+              const Icon = iconFor(acc.icon);
+              const balance = balanceOf(acc.id);
+              const share = acc.active && positiveTotal > 0 ? Math.max(balance, 0) / positiveTotal : 0;
+              return (
+                <li key={acc.id}>
+                  <button
+                    type="button"
+                    className="sk-account-row"
+                    onClick={() => onNavigate('settings')}
+                    aria-label={`${acc.name}, saldo ${money(balance)}`}
+                  >
+                    <span className="sk-account-icon">
+                      <Icon />
+                    </span>
+                    <span className="sk-account-main">
+                      <span className="sk-account-name">
+                        {acc.name}
+                        {acc.active ? null : <span className="sk-account-note"> · nonaktif</span>}
+                      </span>
+                      <span className="sk-share" aria-hidden="true">
+                        <i style={{ width: `${share * 100}%` }} />
+                      </span>
+                    </span>
+                    <span className="sk-account-bal">{money(balance)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </div>
 
-      <section className="sk-hero">
-        <p className="sk-hero-label">Total saldo</p>
-        <p className="sk-hero-balance">{money(netWorth)}</p>
-        <div className="sk-hero-grid">
-          <div className="sk-hero-stat">
-            <span>Masuk bulan ini</span>
-            <strong>+{money(totals.income)}</strong>
-          </div>
-          <div className="sk-hero-stat">
-            <span>Keluar bulan ini</span>
-            <strong>−{money(totals.expense)}</strong>
-          </div>
-        </div>
-        <div className="sk-hero-actions">
-          <button className="sk-hero-chip" type="button" onClick={() => onAdd('expense')}>
-            <PlusIcon /> Transaksi
-          </button>
-          <button className="sk-hero-chip" type="button" onClick={() => onAdd('transfer')}>
-            <TransferIcon /> Transfer
-          </button>
-          <button className="sk-hero-chip" type="button" onClick={() => onNavigate('reports')}>
-            <ChartIcon /> Laporan
-          </button>
-        </div>
-      </section>
-
-      <section>
-        <div className="sk-card-head">
-          <h2 className="sk-card-title">Rekening</h2>
-          <button className="sk-link" type="button" onClick={() => onNavigate('settings')}>
-            Kelola
-          </button>
-        </div>
-        <div className="sk-strip">
-          {state.accounts.map((acc) => {
-            const Icon = iconFor(acc.icon);
-            return (
-              <button
-                key={acc.id}
-                type="button"
-                className="sk-account"
-                onClick={() => onNavigate('settings')}
-                aria-label={`${acc.name}, saldo ${money(balanceOf(acc.id))}`}
-              >
-                <span className="sk-account-top">
-                  <span className="sk-account-icon">
-                    <Icon />
-                  </span>
-                  <span className="sk-account-name">{acc.name}</span>
+      {reminders.length > 0 ? (
+        <section className="sk-reminders" aria-labelledby="home-reminders">
+          <div className="sk-reminder-head">
+            <div>
+              <h2 className="sk-home-title" id="home-reminders">
+                <BellIcon aria-hidden="true" /> Pengingat
+                <span className="sk-badge" data-tone="neutral">
+                  {reminders.length}
                 </span>
-                <span className="sk-account-bal">{money(balanceOf(acc.id))}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+              </h2>
+              <p className="sk-sub" style={{ marginTop: '0.15rem' }}>
+                Tagihan &amp; langganan jatuh tempo dalam 7 hari. Tandai selesai untuk mencatatnya hari ini.
+              </p>
+            </div>
+            <button className="sk-link" type="button" onClick={() => onNavigate('recurring')}>
+              Kelola
+            </button>
+          </div>
+          <ul className="sk-reminder-list">
+            {reminders.map((item) => {
+              const days = daysUntilNext(item);
+              const category = categoryById(item.categoryId);
+              const Icon = iconFor(item.isSubscription ? 'repeat' : category?.icon);
+              return (
+                <li
+                  key={item.id}
+                  className="sk-reminder-row"
+                  data-tone={days < 0 ? 'error' : days <= 1 ? 'warning' : undefined}
+                >
+                  <span className="sk-row-icon" data-tone="expense">
+                    <Icon aria-hidden="true" />
+                  </span>
+                  <span className="sk-reminder-main">
+                    <span className="sk-reminder-title">
+                      {item.name}
+                      {item.isSubscription ? <span className="sk-badge">Langganan</span> : null}
+                    </span>
+                    <span className="sk-reminder-meta">
+                      {[category?.name, reminderLabel(days)].filter(Boolean).join(' · ')}
+                    </span>
+                  </span>
+                  <span className="sk-reminder-amount">−{money(item.amount)}</span>
+                  <button
+                    type="button"
+                    className="sk-reminder-done"
+                    onClick={() => {
+                      completeRecurring(item.id);
+                      setJustDone((prev) => [...prev, item.id]);
+                      notify(`${item.name} selesai dicatat`);
+                    }}
+                    aria-label={`Tandai ${item.name} selesai dan catat pengeluaran hari ini`}
+                  >
+                    <CheckIcon aria-hidden="true" />
+                    Selesai
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
-      <section className="sk-kpis">
-        <div className="sk-kpi">
-          <span>Rasio tabungan</span>
-          <strong style={{ color: savingRate >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}>
-            {savingRate}%
-          </strong>
-        </div>
-        <div className="sk-kpi">
-          <span>Transaksi bulan ini</span>
-          <strong>{monthTx.length}</strong>
-        </div>
-        <div className="sk-kpi">
-          <span>Rata-rata / hari</span>
-          <strong>{compactMoney(totals.expense / Math.max(new Date().getDate(), 1))}</strong>
-        </div>
-      </section>
-
-      <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.45fr) minmax(0, 1fr)', gap: '1rem' }} className="sk-home-grid">
-        <div className="sk-card">
-          <div className="sk-card-head">
-            <h2 className="sk-card-title">Transaksi terakhir</h2>
+      <div className="sk-home-bottom">
+        <section className="sk-home-block">
+          <div className="sk-home-head">
+            <h2 className="sk-home-title">Transaksi terakhir</h2>
             <button className="sk-link" type="button" onClick={() => onNavigate('transactions')}>
               Lihat semua
             </button>
@@ -183,39 +280,63 @@ export default function Home({
               ))}
             </div>
           )}
-        </div>
+          <p className="sk-sub">{monthTx.length} transaksi bulan ini.</p>
+        </section>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="sk-card">
-            <div className="sk-card-head">
-              <h2 className="sk-card-title">7 hari terakhir</h2>
-              <span className="sk-day-total">{compactMoney(last7.reduce((s, d) => s + d.total, 0))}</span>
+        <section className="sk-home-block sk-home-month" data-tour="month">
+          <div className="sk-home-head">
+            <h2 className="sk-home-title">Bulan ini</h2>
+            <span className="sk-day-total">{monthLabel(iso)}</span>
+          </div>
+
+          <div className="sk-save">
+            <span className="sk-save-label">Tingkat tabungan</span>
+            <strong className="sk-save-figure" data-tone={savingRate !== null && savingRate < 0 ? 'error' : undefined}>
+              {savingRate === null ? '–' : `${savingRate}%`}
+            </strong>
+            <div className="sk-progress" data-tone={savingRate !== null && savingRate < 0 ? 'error' : undefined}>
+              <i style={{ width: `${Math.min(Math.max(savingRate ?? 0, 0), 100)}%` }} />
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.45rem', height: 92 }}>
+            <p className="sk-sub">
+              {totals.income === 0
+                ? 'Belum ada pemasukan bulan ini.'
+                : flow >= 0
+                  ? `Dari ${money(totals.income)} pemasukan, ${money(flow)} tersisa.`
+                  : `Pengeluaran melebihi pemasukan sebesar ${money(-flow)}.`}
+            </p>
+          </div>
+
+          <div className="sk-week">
+            <div className="sk-subhead">
+              <span>7 hari terakhir</span>
+              <span className="sk-day-total">{compactMoney(week)}</span>
+            </div>
+            <div
+              className="sk-week-bars"
+              role="img"
+              aria-label={`Pengeluaran tujuh hari terakhir: ${last7
+                .map((d) => `${d.label} ${money(d.total)}`)
+                .join(', ')}`}
+            >
               {last7.map((d) => (
-                <div key={d.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                    {d.total > 0 ? compactMoney(d.total).replace('Rp ', '') : ''}
-                  </span>
+                <div key={d.date} className="sk-week-day">
+                  <span className="sk-week-value">{d.total > 0 ? compactMoney(d.total).replace('Rp ', '') : ''}</span>
                   <div
+                    className="sk-week-bar"
+                    data-empty={d.total === 0}
                     title={`${dayLabel(d.date)}: ${money(d.total)}`}
-                    style={{
-                      width: '100%',
-                      height: `${Math.max(4, (d.total / max7) * 56)}px`,
-                      borderRadius: 6,
-                      background: d.total === 0 ? 'var(--color-background-muted)' : 'var(--color-accent)',
-                      opacity: d.total === 0 ? 1 : 0.35 + (d.total / max7) * 0.65,
-                    }}
+                    style={{ height: `${d.total === 0 ? 3 : Math.max(8, (d.total / maxDay) * 72)}px` }}
                   />
-                  <span style={{ fontSize: '0.62rem', color: 'var(--color-text-secondary)' }}>{d.label}</span>
+                  <span className="sk-week-label">{d.label}</span>
                 </div>
               ))}
             </div>
+            <p className="sk-sub">Rata-rata {compactMoney(dailyAverage)} per hari bulan ini.</p>
           </div>
 
-          <div className="sk-card">
-            <div className="sk-card-head">
-              <h2 className="sk-card-title">Paling boros</h2>
+          <div className="sk-rank">
+            <div className="sk-subhead">
+              <span>Paling boros</span>
               <button className="sk-link" type="button" onClick={() => onNavigate('reports')}>
                 Laporan
               </button>
@@ -223,45 +344,21 @@ export default function Home({
             {topCategories.length === 0 ? (
               <p className="sk-sub">Belum ada pengeluaran bulan ini.</p>
             ) : (
-              <div className="sk-legend">
-                {topCategories.map((c, i) => (
-                  <div className="sk-legend-row" key={c.id}>
-                    <span className="sk-dot" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                    <span className="sk-legend-name">{c.name}</span>
-                    <b>{compactMoney(c.value)}</b>
+              topCategories.map((c, i) => (
+                <div className="sk-rank-row" key={c.id}>
+                  <div className="sk-rank-line">
+                    <span className="sk-rank-name">{c.name}</span>
+                    <b>{money(c.value)}</b>
                   </div>
-                ))}
-              </div>
+                  <div className="sk-progress">
+                    <i style={{ width: `${(c.value / maxCategory) * 100}%`, background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        </div>
-      </section>
-
-      <p className="sk-sub" style={{ textAlign: 'center', fontSize: '0.72rem' }}>
-        Terakhir diperbarui {shortDate(iso)}
-      </p>
+        </section>
+      </div>
     </div>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-    </svg>
-  );
-}
-function TransferIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-      <path d="M4 8h13l-3-3M20 16H7l3 3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function ChartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-      <path d="M5 19V9M12 19V5M19 19v-6" strokeLinecap="round" />
-    </svg>
   );
 }

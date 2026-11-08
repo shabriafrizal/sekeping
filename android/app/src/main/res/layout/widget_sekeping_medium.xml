@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:contentDescription="@string/widget_open"
+    android:orientation="horizontal"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_wallet" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/app_name"
+                android:textColor="@color/widget_cream"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_accounts"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:maxLines="1"
+                android:textColor="@color/widget_muted"
+                android:textSize="9sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:letterSpacing="0.14"
+            android:text="@string/widget_caption"
+            android:textAllCaps="true"
+            android:textColor="@color/widget_muted"
+            android:textSize="9sp" />
+
+        <TextView
+            android:id="@+id/widget_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            style="@style/WidgetBalance"
+            android:maxLines="1"
+            android:text="Rp 0"
+            android:textColor="@color/widget_cream"
+            android:textSize="26sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.08"
+                    android:text="@string/widget_month_in"
+                    android:textAllCaps="true"
+                    android:textColor="@color/widget_muted"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:id="@+id/widget_month_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="+Rp 0"
+                    android:textColor="@color/widget_icon_income"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.08"
+                    android:text="@string/widget_month_out"
+                    android:textAllCaps="true"
+                    android:textColor="@color/widget_muted"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:id="@+id/widget_month_out"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="−Rp 0"
+                    android:textColor="@color/widget_icon_expense"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="36dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_expense"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/widget_btn_expense"
+            android:clickable="true"
+            android:contentDescription="@string/widget_expense"
+            android:focusable="true"
+            android:padding="9dp"
+            android:src="@drawable/ic_widget_expense"
+            android:tint="@color/widget_icon_expense" />
+
+        <ImageView
+            android:id="@+id/widget_income"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/widget_btn_income"
+            android:clickable="true"
+            android:contentDescription="@string/widget_income"
+            android:focusable="true"
+            android:padding="9dp"
+            android:src="@drawable/ic_widget_income"
+            android:tint="@color/widget_icon_income" />
+
+        <ImageView
+            android:id="@+id/widget_transfer"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/widget_btn_transfer"
+            android:clickable="true"
+            android:contentDescription="@string/widget_transfer"
+            android:focusable="true"
+            android:padding="9dp"
+            android:src="@drawable/ic_widget_transfer"
+            android:tint="@color/widget_icon_transfer" />
+    </LinearLayout>
+</LinearLayout>

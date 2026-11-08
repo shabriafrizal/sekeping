@@ -2,8 +2,16 @@
 <resources>
     <color name="brand">#2F6B57</color>
     <color name="brand_dark">#24503F</color>
+    <color name="accent">#2F6B57</color>
     <color name="paper">#F6F1E7</color>
     <color name="ink">#231E18</color>
     <color name="muted">#6E6357</color>
     <color name="ic_launcher_background">#2F6B57</color>
+
+    <!-- Home-screen widget: a deep-green card that stays legible on any wallpaper. -->
+    <color name="widget_cream">#F6F2E9</color>
+    <color name="widget_muted">#B9D6CA</color>
+    <color name="widget_icon_expense">#FFE1BC</color>
+    <color name="widget_icon_income">#D8F6EA</color>
+    <color name="widget_icon_transfer">#DCEBF7</color>
 </resources>

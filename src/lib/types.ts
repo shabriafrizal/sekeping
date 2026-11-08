@@ -1,6 +1,7 @@
 export type TxType = 'expense' | 'income' | 'transfer';
 export type CategoryType = 'expense' | 'income';
 export type DebtKind = 'debt' | 'loan';
+export type Interval = 'weekly' | 'monthly' | 'yearly';
 
 export interface Account {
   id: string;
@@ -29,6 +30,40 @@ export interface Tx {
   date: string; // YYYY-MM-DD
   note: string;
   debtId?: string;
+  recurringId?: string;
+  createdAt: number;
+}
+
+/**
+ * A template that posts a transaction on a schedule. `nextDate` is the first
+ * occurrence that has not been posted yet; the app catches up on load.
+ */
+export interface Recurring {
+  id: string;
+  name: string;
+  type: CategoryType;
+  amount: number;
+  accountId: string;
+  categoryId?: string;
+  note: string;
+  interval: Interval;
+  startDate: string; // YYYY-MM-DD
+  nextDate: string; // YYYY-MM-DD
+  endDate?: string;
+  active: boolean;
+  isSubscription: boolean;
+  lastPostedAt?: number;
+  createdAt: number;
+}
+
+/** A monthly spending limit for one expense category. */
+export interface Budget {
+  id: string;
+  categoryId: string;
+  amount: number;
+  rollover: boolean;
+  startMonth: string; // YYYY-MM
+  active: boolean;
   createdAt: number;
 }
 
@@ -58,6 +93,7 @@ export interface Settings {
   currency: 'IDR' | 'USD' | 'EUR' | 'SGD' | 'MYR';
   pin: string | null;
   onboarded: boolean;
+  tourSeen: boolean;
   createdAt: number;
 }
 
@@ -68,6 +104,8 @@ export interface AppState {
   txs: Tx[];
   debts: Debt[];
   payments: DebtPayment[];
+  recurring: Recurring[];
+  budgets: Budget[];
   settings: Settings;
 }
 

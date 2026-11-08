@@ -18,12 +18,35 @@ page.on('pageerror', (e) => errors.push(e.message));
 await page.setViewport({ width: 1280, height: 900 });
 await page.goto(BASE, { waitUntil: 'networkidle0' });
 
-// onboarding
-await page.evaluate(() =>
-  [...document.querySelectorAll('button')].find((b) => b.textContent?.includes('Lihat dengan data contoh'))?.click(),
+// start screen + guided tour
+check('start screen offers one way in', (await page.$('[data-start="demo"]')) !== null);
+await page.click('[data-start="demo"]');
+await wait(900);
+check('start screen dismissed', (await page.$('.astryx-side-nav')) !== null);
+
+async function nav(label) {
+  const ok = await page.evaluate((name) => {
+    const el = [...document.querySelectorAll('.astryx-side-nav button')].find((b) => (b.textContent || '').trim().startsWith(name));
+    if (!el) return false;
+    el.click();
+    return true;
+  }, label);
+  await wait(650);
+  return ok;
+}
+check('tour opens after start', (await page.$('.sk-tour-card')) !== null);
+const firstStep = await page.evaluate(() => document.querySelector('.sk-tour-title')?.textContent ?? '');
+await page.click('.sk-tour-primary');
+await wait(250);
+const secondStep = await page.evaluate(() => document.querySelector('.sk-tour-title')?.textContent ?? '');
+check('tour moves to the next step', firstStep !== '' && secondStep !== '' && firstStep !== secondStep, `${firstStep} → ${secondStep}`);
+await page.click('.sk-tour-skip');
+await wait(250);
+check('tour can be skipped', (await page.$('.sk-tour-card')) === null);
+check(
+  'tour is remembered',
+  await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).settings.tourSeen === true),
 );
-await wait(700);
-check('onboarding dismissed', (await page.$('.sk-sidebar')) !== null);
 
 // total count baseline
 const baseline = await page.evaluate(() => {
@@ -32,7 +55,7 @@ const baseline = await page.evaluate(() => {
 });
 
 // add expense
-await page.click('.sk-sidebar [data-add]');
+await page.click('.sk-add-wrap button');
 await wait(500);
 await page.keyboard.type('25000');
 await wait(200);
@@ -47,7 +70,7 @@ const firstRow = await page.evaluate(() => document.querySelector('.sk-row .sk-r
 check('new expense appears at top', firstRow.replace(/\s/g, '').includes('25.000'), firstRow);
 
 // navigate to transactions and filter
-await page.click('.sk-sidebar [data-nav="transactions"]');
+await nav('Transaksi');
 await wait(500);
 const countText = await page.evaluate(() => document.querySelector('.sk-page-head .sk-sub')?.textContent ?? '');
 check('transactions list renders', countText.includes('catatan'), countText);
@@ -76,13 +99,17 @@ await wait(500);
 check('delete closes dialog', (await page.$('.astryx-dialog[open]')) === null);
 
 // PIN
-await page.click('.sk-sidebar [data-nav="settings"]');
+await nav('Pengaturan');
 await wait(500);
 await page.evaluate(() =>
   [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Pasang PIN')?.click(),
 );
 await wait(500);
-const pw = await page.$$('input[type="password"]');
+// Only the open dialog's fields are laid out; closed ones stay in the DOM.
+const pw = [];
+for (const field of await page.$$('input[type="password"]')) {
+  if (await field.boundingBox()) pw.push(field);
+}
 if (pw.length === 2) {
   await pw[0].type('1234');
   await pw[1].type('1234');
@@ -111,13 +138,13 @@ const persisted = await page.evaluate(() => localStorage.getItem('sekeping.state
 check('state persisted in localStorage', Boolean(persisted && persisted.length > 100));
 
 // reports render chart
-await page.click('.sk-sidebar [data-nav="reports"]');
+await nav('Laporan');
 await wait(900);
 const svgCount = await page.evaluate(() => document.querySelectorAll('.recharts-surface').length);
 check('reports charts render', svgCount >= 2, `${svgCount} charts`);
 
 // debts page + payment dialog
-await page.click('.sk-sidebar [data-nav="debts"]');
+await nav('Utang');
 await wait(500);
 await page.evaluate(() =>
   [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Bayar')?.click(),

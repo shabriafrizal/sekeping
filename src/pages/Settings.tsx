@@ -4,9 +4,13 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
 import { useStore } from '../lib/store';
-import type { Account, Category, CategoryType } from '../lib/types';
+import type { Account, AppState, Category, CategoryType } from '../lib/types';
 import { money } from '../lib/format';
 import { iconFor } from '../lib/icons';
+import { decryptJson, encryptJson, isEncryptedExport } from '../lib/crypto';
+
+const RepeatIcon = iconFor('repeat');
+const BudgetIcon = iconFor('budget');
 
 export default function Settings({
   onEditAccount,
@@ -14,12 +18,18 @@ export default function Settings({
   onEditCategory,
   onAddCategory,
   onLock,
+  onNavigate,
+  onShortcuts,
+  onTour,
 }: {
   onEditAccount: (a: Account) => void;
   onAddAccount: () => void;
   onEditCategory: (c: Category) => void;
   onAddCategory: (type: CategoryType) => void;
   onLock: () => void;
+  onNavigate: (page: string) => void;
+  onShortcuts: () => void;
+  onTour: () => void;
 }) {
   const { state, updateSettings, balanceOf, exportCSV, exportJSON, replaceState, resetDemo, clearAll, notify, addCategory } =
     useStore();
@@ -27,6 +37,13 @@ export default function Settings({
   const [pinOpen, setPinOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [pin2, setPin2] = useState('');
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportPassword, setExportPassword] = useState('');
+  const [exportPassword2, setExportPassword2] = useState('');
+  const [exportBusy, setExportBusy] = useState(false);
+  const [unlock, setUnlock] = useState<{ text: string; name: string } | null>(null);
+  const [unlockPassword, setUnlockPassword] = useState('');
+  const [unlockBusy, setUnlockBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const categories = state.categories.filter((c) => c.type === catTab);
@@ -65,17 +82,69 @@ export default function Settings({
     notify('PIN aktif');
   }
 
+  function applyRestore(parsed: AppState) {
+    if (!parsed || !Array.isArray(parsed.accounts) || !Array.isArray(parsed.txs)) {
+      throw new Error('format');
+    }
+    replaceState({
+      ...parsed,
+      recurring: Array.isArray(parsed.recurring) ? parsed.recurring : [],
+      budgets: Array.isArray(parsed.budgets) ? parsed.budgets : [],
+      settings: { ...state.settings, ...parsed.settings },
+    });
+    notify('Cadangan dipulihkan');
+  }
+
   async function onRestore(file: File) {
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      if (!parsed || !Array.isArray(parsed.accounts) || !Array.isArray(parsed.txs)) {
-        throw new Error('format');
+      if (isEncryptedExport(text)) {
+        setUnlock({ text, name: file.name });
+        setUnlockPassword('');
+        return;
       }
-      replaceState({ ...parsed, settings: { ...state.settings, ...parsed.settings } });
-      notify('Cadangan dipulihkan');
+      applyRestore(JSON.parse(text));
     } catch {
       notify('Berkas cadangan tidak valid.', 'error');
+    }
+  }
+
+  async function doEncryptedExport() {
+    if (exportPassword.length < 8) {
+      notify('Kata sandi minimal 8 karakter.', 'error');
+      return;
+    }
+    if (exportPassword !== exportPassword2) {
+      notify('Konfirmasi kata sandi tidak sama.', 'error');
+      return;
+    }
+    setExportBusy(true);
+    try {
+      const text = await encryptJson(state, exportPassword);
+      download(`sekeping-${new Date().toISOString().slice(0, 10)}.sekeping`, text, 'application/octet-stream');
+      setExportOpen(false);
+      setExportPassword('');
+      setExportPassword2('');
+    } catch {
+      notify('Ekspor terenkripsi gagal di perangkat ini.', 'error');
+    } finally {
+      setExportBusy(false);
+    }
+  }
+
+  async function doUnlock() {
+    if (!unlock) return;
+    setUnlockBusy(true);
+    try {
+      const parsed = (await decryptJson(unlock.text, unlockPassword)) as AppState;
+      applyRestore(parsed);
+      setUnlock(null);
+      setUnlockPassword('');
+    } catch {
+      setUnlockPassword('');
+      notify('Kata sandi salah atau berkas rusak.', 'error');
+    } finally {
+      setUnlockBusy(false);
     }
   }
 
@@ -107,6 +176,34 @@ export default function Settings({
             onChange={(v) => updateSettings({ currency: v as typeof state.settings.currency })}
             width="100%"
           />
+        </div>
+      </section>
+
+      <section className="sk-card">
+        <div className="sk-card-head">
+          <h2 className="sk-card-title">Perencanaan</h2>
+        </div>
+        <div className="sk-rows">
+          <button type="button" className="sk-row" onClick={() => onNavigate('recurring')}>
+            <span className="sk-row-icon">
+              <RepeatIcon />
+            </span>
+            <span className="sk-row-main">
+              <span className="sk-row-title">Rutin &amp; langganan</span>
+              <span className="sk-row-meta">
+                {state.recurring.filter((r) => r.active).length} jadwal aktif · transaksi otomatis
+              </span>
+            </span>
+          </button>
+          <button type="button" className="sk-row" onClick={() => onNavigate('budgets')}>
+            <span className="sk-row-icon">
+              <BudgetIcon />
+            </span>
+            <span className="sk-row-main">
+              <span className="sk-row-title">Anggaran</span>
+              <span className="sk-row-meta">{state.budgets.filter((b) => b.active).length} kategori dengan batas bulanan</span>
+            </span>
+          </button>
         </div>
       </section>
 
@@ -209,7 +306,8 @@ export default function Settings({
           <b>{state.settings.pin ? 'Aktif' : 'Nonaktif'}</b>
         </div>
         <p className="sk-sub" style={{ fontSize: '0.78rem' }}>
-          PIN hanya tersimpan di perangkat ini, bukan di server. Ini pengaman layar, bukan enkripsi data.
+          PIN hanya tersimpan di perangkat ini, bukan di server. Ini pengaman layar, bukan enkripsi data — untuk
+          cadangan yang terkunci, gunakan <b>Ekspor terenkripsi</b> di bagian Data.
         </p>
         <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
           {state.settings.pin ? (
@@ -239,6 +337,10 @@ export default function Settings({
           <span>Total transaksi</span>
           <b>{state.txs.length}</b>
         </div>
+        <div className="sk-kv">
+          <span>Jadwal berulang</span>
+          <b>{state.recurring.length}</b>
+        </div>
         <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.8rem' }}>
           <Button
             label="Ekspor CSV"
@@ -254,6 +356,8 @@ export default function Settings({
               download(`sekeping-backup-${new Date().toISOString().slice(0, 10)}.json`, exportJSON(), 'application/json')
             }
           />
+          <Button label="Ekspor terenkripsi" variant="secondary" size="sm" onClick={() => setExportOpen(true)} />
+          <Button label="Impor CSV" variant="secondary" size="sm" onClick={() => onNavigate('import')} />
           <Button label="Pulihkan" variant="ghost" size="sm" onClick={() => fileRef.current?.click()} />
           <Button
             label="Muat data contoh"
@@ -276,11 +380,15 @@ export default function Settings({
             }}
           />
         </div>
+        <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.55rem' }}>
+          Ekspor terenkripsi memakai AES-GCM dengan kunci dari kata sandimu (PBKDF2). Tanpa kata sandi, berkas
+          tidak bisa dibuka — simpan baik-baik.
+        </p>
         <input
           ref={fileRef}
           type="file"
-          accept="application/json"
-          style={{ display: 'none' }}
+          accept=".json,.sekeping,application/json,text/plain"
+          className="sk-visually-hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) void onRestore(file);
@@ -298,9 +406,79 @@ export default function Settings({
           browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.
         </p>
         <p className="sk-sub" style={{ fontSize: '0.72rem' }}>
-          Versi 1.0 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.
+          Versi 1.1 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.
         </p>
+        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <Button label="Tur antarmuka" variant="ghost" size="sm" onClick={onTour} />
+          <Button label="Pintasan keyboard (?)" variant="ghost" size="sm" onClick={onShortcuts} />
+        </div>
       </section>
+
+      <Dialog isOpen={exportOpen} onOpenChange={setExportOpen} purpose="form" width={420}>
+        <DialogHeader
+          title="Ekspor terenkripsi"
+          subtitle="Cadangan JSON yang dikunci kata sandi"
+          onOpenChange={setExportOpen}
+        />
+        <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
+          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>
+            Berkas <code>.sekeping</code> ini memuat semua rekening, transaksi, jadwal, dan anggaran. Tanpa kata
+            sandi, isinya tidak bisa dipulihkan.
+          </p>
+          <TextInput
+            label="Kata sandi (min. 8 karakter)"
+            value={exportPassword}
+            onChange={setExportPassword}
+            type="password"
+            placeholder="••••••••"
+          />
+          <TextInput
+            label="Ulangi kata sandi"
+            value={exportPassword2}
+            onChange={setExportPassword2}
+            type="password"
+            placeholder="••••••••"
+          />
+        </div>
+        <div className="sk-sheet-actions">
+          <Button label="Batal" variant="ghost" onClick={() => setExportOpen(false)} />
+          <Button
+            label={exportBusy ? 'Mengenkripsi…' : 'Unduh terenkripsi'}
+            variant="primary"
+            isDisabled={exportBusy}
+            onClick={doEncryptedExport}
+          />
+        </div>
+      </Dialog>
+
+      <Dialog isOpen={Boolean(unlock)} onOpenChange={(open) => !open && setUnlock(null)} purpose="form" width={420}>
+        <DialogHeader
+          title="Buka cadangan terenkripsi"
+          subtitle={unlock?.name}
+          onOpenChange={(open) => !open && setUnlock(null)}
+        />
+        <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
+          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>
+            Masukkan kata sandi yang dipakai saat mengekspor. Kata sandi tidak disimpan di mana pun.
+          </p>
+          <TextInput
+            label="Kata sandi"
+            value={unlockPassword}
+            onChange={setUnlockPassword}
+            type="password"
+            placeholder="••••••••"
+          />
+        </div>
+        <div className="sk-sheet-actions">
+          <Button label="Batal" variant="ghost" onClick={() => setUnlock(null)} />
+          <Button
+            label={unlockBusy ? 'Membuka…' : 'Pulihkan'}
+            variant="primary"
+            isDisabled={unlockBusy || unlockPassword.length === 0}
+            onClick={doUnlock}
+          />
+        </div>
+      </Dialog>
 
       <Dialog isOpen={pinOpen} onOpenChange={setPinOpen} purpose="form" width={360}>
         <DialogHeader title="Pasang PIN" subtitle="4 angka, hanya di perangkat ini" onOpenChange={setPinOpen} />

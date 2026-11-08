@@ -1,7 +1,7 @@
 package dev.shabri.sekeping
 
 import android.content.Context
-import org.json.JSONArray
+import org.json.JSONObject
 
 data class WidgetConfig(
     val accountId: String,
@@ -12,14 +12,28 @@ data class WidgetConfig(
     val hasAny: Boolean get() = showExpense || showIncome || showTransfer
 }
 
+/** The numbers the web app pushes so the widget can render without the app open. */
+data class WidgetSummary(
+    val balance: String,
+    val monthIn: String,
+    val monthOut: String,
+    val accounts: Int,
+) {
+    companion object {
+        val EMPTY = WidgetSummary("Rp 0", "+Rp 0", "−Rp 0", 0)
+    }
+}
+
 /**
  * Small shared-preferences store for the home screen widget: the account list pushed
- * from the web app, plus the per-widget choices made in the setup popup.
+ * from the web app, the summary numbers, plus the per-widget choices made in the setup
+ * dialog.
  */
 object WidgetPrefs {
 
     private const val FILE = "sekeping_widgets"
     private const val KEY_ACCOUNTS = "accounts_json"
+    private const val KEY_SUMMARY = "summary_json"
     private const val KEY_IDS = "widget_ids"
 
     private fun prefs(context: Context) = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
@@ -31,7 +45,7 @@ object WidgetPrefs {
     fun accounts(context: Context): List<Pair<String, String>> {
         val raw = prefs(context).getString(KEY_ACCOUNTS, null) ?: return emptyList()
         return try {
-            val array = JSONArray(raw)
+            val array = org.json.JSONArray(raw)
             buildList {
                 for (i in 0 until array.length()) {
                     val item = array.optJSONObject(i) ?: continue
@@ -42,6 +56,25 @@ object WidgetPrefs {
             }
         } catch (_: Exception) {
             emptyList()
+        }
+    }
+
+    fun setSummary(context: Context, json: String) {
+        prefs(context).edit().putString(KEY_SUMMARY, json).apply()
+    }
+
+    fun summary(context: Context): WidgetSummary {
+        val raw = prefs(context).getString(KEY_SUMMARY, null) ?: return WidgetSummary.EMPTY
+        return try {
+            val json = JSONObject(raw)
+            WidgetSummary(
+                balance = json.optString("balance", WidgetSummary.EMPTY.balance),
+                monthIn = json.optString("monthIn", WidgetSummary.EMPTY.monthIn),
+                monthOut = json.optString("monthOut", WidgetSummary.EMPTY.monthOut),
+                accounts = json.optInt("accounts", WidgetSummary.EMPTY.accounts),
+            )
+        } catch (_: Exception) {
+            WidgetSummary.EMPTY
         }
     }
 

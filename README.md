@@ -41,20 +41,26 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 - **Zero backend.** Clone it, build it, host it on any static host. No database, no auth service.
 - **Instant.** One small bundle, self-hosted fonts, no network calls after load.
 - **Yours.** Export everything to CSV or a JSON backup at any time; restore it on another device.
-- **Complete enough.** Accounts, categories, transfers with fees, reports, debts, loans, PIN lock.
+- **Complete enough.** Accounts, categories, transfers with fees, recurring bills and subscriptions,
+  rolling budgets, reports, CSV import, password-encrypted backups, debts, loans and a PIN lock.
 
 ## Features
 
 | Area | What you get |
 | --- | --- |
-| **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories |
+| **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories, and a seven-day reminder for bills and subscriptions with one-tap **Selesai** |
 | **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals, detail view with edit and delete |
 | **Entry** | Expense, income or transfer; amount keypad (keyboard input too), account and category pickers, date, note, transfer fee |
-| **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, period switch |
+| **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, quick ranges (**Hari ini, Kemarin, 7 hari, Bulan ini, Bulan lalu, 3 bulan, Tahun ini, 1 tahun, Semua**) and a custom **from/to date range** |
+| **Recurring** | Weekly, monthly or yearly schedules for bills, salary and subscriptions; catch-up posting on open; monthly subscription cost |
+| **Budgets** | Monthly limit per expense category, optional rollover of unused money, month-by-month progress and over-budget warnings |
+| **Import** | CSV from a bank or another app with column mapping, date/amount format detection, duplicate skipping and optional account/category creation |
 | **Debts & receivables** | Paid vs remaining progress, due dates, overdue state, payment entries that post to the ledger |
-| **Settings** | Profile and currency, account and category CRUD with icon picker, PIN lock, CSV export, JSON backup/restore, demo reset |
-| **Responsive** | Sidebar on desktop; bottom tab bar and floating add button on phones |
-| **Android app** | Offline APK plus a 4×1 home-screen widget with three quick actions (see [Android app](#android-app)) |
+| **Settings** | Profile and currency, account and category CRUD with icon picker, PIN lock, CSV export, CSV import, JSON backup, password-encrypted backup, demo reset |
+| **Keyboard** | Skip link, arrow-key menus, `Alt+1…6` page jumps, `g`-prefix jumps, `n` for a new expense, `?` for the shortcut sheet |
+| **Responsive** | Sidebar and top bar on desktop; drawer navigation and a top action bar on phones |
+| **Android app** | Offline APK plus a resizable 4×1 / 4×2 / 2×2 home-screen widget with saldo and three icon actions (see [Android app](#android-app)) |
+| **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
 
 ## Quick start
 
@@ -72,10 +78,10 @@ demo dataset or start from an empty ledger.
 
 **Requirements:** Node.js 20 or newer, npm 10 or newer, and any modern browser.
 
-### Use the hosted preview
+### Use the hosted build
 
-A temporary build runs at **<https://4175-agq3odpinhs2pqpojgekdx5pvq.instabox.tech>**
-while its host is up. For something permanent, deploy your own copy — see [Deploy](#deploy).
+**<https://shabriafrizal.github.io/sekeping/>** — served by GitHub Pages from the
+`gh-pages` branch. To publish your own copy, see [Deploy](#deploy).
 
 ## Android app
 
@@ -85,16 +91,28 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 1. Download `sekeping-1.0.0.apk` from [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
-3. Requires Android 8.0 (API 24) or newer. It works offline; no account needed.
+3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
 ### Use the widget
 
 1. Long-press an empty spot on the home screen → **Widgets**.
-2. Find **Sekeping**, drag the 4×1 widget onto the home screen.
-3. The setup popup asks for the **default account** and which of the three buttons to show.
+2. Find **Sekeping** and drag the widget onto the home screen.
+3. The **Atur widget** dialog opens with a live preview. Pick the **default account**,
+   which square buttons to show, and preview the **4×1**, **4×2** or **2×2** shape.
    Long-press the widget → **Reconfigure** to change it later.
-4. **Pengeluaran**, **Pendapatan** and **Transfer** open the app straight in that entry
-   form, with the chosen account already selected.
+4. The widget shows **Saldo** — the net worth of every active account — plus three square
+   icon buttons. Drag its handles to resize; one widget adapts to the space:
+   - **4×1** — saldo and a row of icon buttons.
+   - **4×2** — saldo, this month's money in/out, and an icon column.
+   - **2×2** — compact saldo and an icon row.
+5. **Pengeluaran**, **Pendapatan** and **Transfer** do not open the dashboard. They show
+   the same add-transaction sheet as the app, floating over the home screen, with the
+   chosen account already selected. Save or cancel returns straight to the home screen;
+   if a PIN is set, the sheet asks for it first.
+
+![The widget in 4×1, 4×2 and 2×2](docs/widget-sizes.png)
+
+![The Atur widget dialog: live preview, account picker and action switches](docs/widget.png)
 
 ### Build the APK
 
@@ -115,7 +133,7 @@ to move data between the two.
 
 ### Record a transaction
 
-1. Press **Tambah transaksi** in the sidebar (or the **+** tab on mobile).
+1. Press **Tambah transaksi** in the sidebar, or **Tambah** in the top bar on a phone.
 2. Choose **Pengeluaran**, **Pendapatan** or **Transfer**.
 3. Type the amount with the keypad, or just type the digits on your keyboard.
 4. Pick an account and a category, then **Simpan**.
@@ -128,8 +146,12 @@ one, the admin fee. Transfers never count as income or spending in reports.
 ### Read your month
 
 **Laporan** shows a category donut and a ranked list for the selected period, plus a
-six-month trend. Toggle between spending and income at the top. Periods: this month,
-three months, this year, or everything.
+six-month trend. Toggle between spending and income at the top. Pick a shortcut — **Hari
+ini**, **Kemarin**, **7 hari**, **Bulan ini**, **Bulan lalu**, **3 bulan**, **Tahun ini**,
+**1 tahun**, or **Semua** — or choose **Rentang** for an exact `Dari`/`Sampai` span. The
+date fields remember the last shortcut, so Rentang starts from it. Pick the same day on
+both sides to inspect a single day. The header shows the effective dates and the average
+KPI is per day for any finite range.
 
 ### Track debts and loans
 
@@ -137,19 +159,63 @@ three months, this year, or everything.
 Each card shows the remaining amount, a progress bar and the due date. Recording a
 payment creates a matching transaction, so the ledger and the debt record stay in sync.
 
+### Automate recurring bills
+
+**Rutin** holds schedules for rent, salary, bills and subscriptions. Pick the account,
+category and interval (weekly, monthly or yearly) and the first due date. When the app
+opens on or after a due date it writes the transaction automatically and catches up on
+missed occurrences. You can also press **Catat** to post one early, or **Lewati sekali**
+to skip an occurrence. Marking an item as a subscription adds it to the monthly cost
+summary.
+
+### Answer the reminders on Ringkasan
+
+Bills and subscriptions due within the next seven days appear in the **Pengingat** card on
+Ringkasan, together with the days left and the amount. Press **Selesai** to post the
+expense dated today and move the schedule to its next occurrence; the item disappears
+from the card and the count on the Ringkasan menu clears. Anything overdue is marked in
+red, and **Kelola** jumps to the full schedule list.
+
+### Set budgets that roll over
+
+**Anggaran** sets a monthly limit per expense category. A progress bar shows spending
+against the limit, and rows turn red when you pass it. With **rollover** on, money you
+did not spend is added to next month's allowance — overspending never shrinks the next
+month. Switch months with the arrows to look back.
+
+### Import a CSV
+
+1. Open **Pengaturan → Data → Impor CSV** (or press `g` then `i`).
+2. Choose a file, or paste the CSV text.
+3. Match each field to a column. Sekeping guesses the usual headers (`Tanggal`,
+   `Jumlah`, `Kategori`, …) and accepts `,`, `;`, tab or `|` separators.
+4. Pick the default type and the date order; turn on **Arah dari tanda angka** when
+   negative amounts mean spending.
+5. Check the preview, then import. Duplicates are skipped and unfamiliar accounts or
+   categories can be created on the spot.
+
 ### Lock it and back it up
 
 - **Pengaturan → Keamanan** sets a 4-digit PIN. It guards the screen on this device; it
   is not encryption.
 - **Pengaturan → Data** exports a CSV of all transactions or a complete JSON backup. Use
   **Pulihkan** to restore a backup file.
+- **Ekspor terenkripsi** writes a `.sekeping` file encrypted with AES-GCM and a key
+  derived from your password (PBKDF2-SHA256, 310,000 iterations). Restoring it asks for
+  the password; without it the file cannot be opened.
 
 ### Keyboard shortcuts
 
 | Key | Action |
 | --- | --- |
-| `0`–`9` | Append the digit to the amount |
-| `Backspace` | Remove the last digit |
+| `Tab` / `Shift+Tab` | Move through controls; the first stop is the skip link |
+| `↑ ↓ ← →` | Move between menu items |
+| `Alt+1…6` | Jump to a page in menu order |
+| `g` then `h/t/r/b/l/d/i/s` | Jump to Home, Transactions, Recurring, Budgets, Reports, Debts, Import, Settings |
+| `n` | New expense |
+| `?` | Open or close the shortcut sheet |
+| `0`–`9` | Append a digit to the amount (entry dialog only) |
+| `Backspace` | Remove the last digit (entry dialog only) |
 | `Esc` | Close the open dialog |
 
 ## Screenshots
@@ -158,9 +224,34 @@ payment creates a matching transaction, so the ledger and the debt record stay i
 | --- | --- |
 | ![Transaction list with daily totals](docs/transactions.png) | ![Category donut and six-month trend](docs/reports.png) |
 
+| Budgets | Recurring |
+| --- | --- |
+| ![Monthly limits with rollover and progress](docs/budgets.png) | ![Recurring bills and subscriptions](docs/recurring.png) |
+
 | New transaction | Mobile |
 | --- | --- |
-| ![Amount keypad, account and category pickers](docs/add-transaction.png) | ![Mobile dashboard with bottom tab bar](docs/mobile.png) |
+| ![Amount keypad, account and category pickers](docs/add-transaction.png) | ![Mobile dashboard with drawer navigation](docs/mobile.png) |
+
+## Design
+
+The interface is built on [Astryx](https://astryx.design) end to end.
+
+- **Frame** — `AppShell` with `SideNav` and `TopNav`. The same navigation becomes a drawer
+  under the mobile breakpoint, and the skip link and landmarks come from the shell rather
+  than custom chrome.
+- **Surfaces** — one panel treatment (background, border, radius, padding) shared by every
+  card, home block and reminder. `Card`, `Section`, `Grid` and `VStack`/`HStack` carry the
+  spacing on the 4-step scale instead of ad-hoc margins.
+- **Type** — Astryx `Heading` and `Text` semantic types. Fraunces for headings, Albert Sans
+  for body, both self-hosted woff2.
+- **Controls** — `Button`, `TextInput`, `Selector`, `SegmentedControl`, `Switch`, `Dialog`
+  and `Badge` everywhere; even the amount keypad is a grid of `Button`.
+- **Tokens** — colour, radius, shadow and focus rings come from the theme in
+  `src/theme.ts` (Chocolate base, moss green accent, warm paper). `src/app.css` keeps only
+  what Astryx does not ship: the ledger gradient, the seven-day bars and the keypad.
+
+Every screen follows one rhythm: a page header (eyebrow, title, description, actions), then
+panels with a title row and a trailing action, then the content.
 
 ## How it works
 
@@ -173,6 +264,8 @@ type AppState = {
   txs: Tx[];                // expense | income | transfer, amount, account, category, date, note
   debts: Debt[];            // debt | loan, total, due date
   payments: DebtPayment[];  // payments against a debt, each mirrored into txs
+  recurring: Recurring[];   // schedule template plus the next unposted date
+  budgets: Budget[];        // monthly limit per category, optional rollover
   settings: Settings;       // name, currency, PIN, onboarding flag
 };
 ```
@@ -186,6 +279,10 @@ Three rules keep the numbers honest:
 3. **A debt payment** writes both a `DebtPayment` and a linked `Tx`, so deleting the
    transaction removes the payment and vice versa.
 
+Recurring items write ordinary transactions with a `recurringId`; deleting the schedule
+leaves the transactions that were already posted. Budget progress is computed from those
+transactions, so importing or editing spending changes the bar immediately.
+
 There is no sync layer by design. Clearing site data clears the app — take a JSON
 backup first.
 
@@ -195,51 +292,69 @@ backup first.
 | --- | --- |
 | UI | React 19 + TypeScript |
 | Build | Vite 6 |
-| Design system | [Astryx](https://astryx.design) (Chocolate base, extended with a custom palette and type scale) |
+| Design system | [Astryx](https://astryx.design) 0.7 — `AppShell`, `SideNav`, `Card`, `Section`, `Dialog`, `SegmentedControl` — on a Chocolate-based custom theme |
 | Charts | Recharts |
 | Icons | Heroicons |
 | Fonts | Fraunces + Albert Sans, self-hosted woff2 (OFL) |
 | Storage | `localStorage` — no backend |
 | Android | Kotlin shell, `WebViewAssetLoader`, App Widget, AGP 8.5 |
+| Widget dialogs | The same Astryx build in translucent dialog activities |
 
 ## Project structure
 
 ```text
 src/
-  App.tsx              shell, navigation, dialogs, onboarding, PIN lock
+  App.tsx              AppShell frame, navigation, dialogs, onboarding, PIN lock
   theme.ts             Astryx theme: warm paper, moss green, Fraunces headings
   lib/
     types.ts           domain types
     store.tsx          state, actions, selectors, persistence
     seed.ts            demo dataset
     format.ts          currency, dates, helpers
-  components/          amount keypad, icon picker, transaction row, empty state
-  pages/               Home, Transactions, Reports, Debts, Settings
-  sheets/              transaction, account, category, debt and payment dialogs
+    recurring.ts       schedule math and catch-up posting
+    budgets.ts         monthly limits and rollover
+    csv.ts             CSV parser, column mapping and value detection
+    crypto.ts          password-encrypted backup envelope
+  components/          amount keypad, icon picker, transaction row, empty state, tour, widget preview
+  pages/               Home, Transactions, Recurring, Budgets, Import, Reports, Debts, Settings
+  sheets/              transaction, account, category, debt, payment, recurring, budget and widget-setup dialogs
 scripts/
-  test.mjs             14 browser smoke tests
+  test.mjs             browser smoke tests
+  test-features.mjs    recurring, budgets, CSV import, encryption and keyboard audit
+  test-widget.mjs      widget setup and quick-add surfaces (stubbed Android bridge)
   shots.mjs            screenshot set for the docs
+  widget-shots.mjs     widget setup and size screenshots for the docs
 ```
 
 ## Development
 
 ```bash
-npm run dev       # development server with hot reload
-npm run build     # production build into dist/
-npm run preview   # serve the production build on :4173
-npm run typecheck # tsc --noEmit
+npm run dev            # development server with hot reload
+npm run build          # production build into dist/
+npm run preview        # serve the production build on :4173
+npm run typecheck      # tsc --noEmit
+npm test               # browser smoke tests
+npm run test:features  # new-feature end-to-end tests
+npm run test:widget    # widget setup and quick-add surfaces
+npm run docs:widget    # regenerate the widget screenshots
 ```
 
 ### Tests
 
 The smoke tests drive a real Chromium against a preview build and cover onboarding,
 adding a transaction, search, deleting, PIN set → reload → unlock, persistence, charts
-and the payment dialog.
+and the payment dialog. A second suite covers recurring catch-up, the Ringkasan reminder and its
+**Selesai** action, budget rollover, CSV column mapping, encrypted export/restore and
+the keyboard shortcuts. A third suite stubs the Android bridge to cover the **Atur
+widget** dialog (sizes, account picker, switches, save payload) and the quick-add sheet
+(no dashboard, bottom anchoring, PIN gate, persistence before closing).
 
 ```bash
 npm run build
 npm run preview -- --port 4180 &
 npm test
+npm run test:features
+npm run test:widget
 ```
 
 `scripts/test.mjs` uses `puppeteer-core` and the system Chromium (`/usr/bin/chromium`).
@@ -272,21 +387,32 @@ npm run dev
 
 Good places to start:
 
-- Additional currencies and number formats
-- Recurring transactions
-- Budgets per category
-- Import from bank CSV exports
+- Additional currencies and per-transaction exchange rates
+- Receipt attachments stored beside the ledger
+- Splitting one transaction across categories
+- An installable PWA with an offline cache
 - Accessibility review of the dialogs and keypad
 
 Please keep the project backend-free — local-first is the point.
 
 ## Roadmap
 
-- [ ] Recurring transactions and subscriptions
-- [ ] Per-category budgets with monthly rollover
-- [ ] CSV import with column mapping
-- [ ] Optional encrypted export
-- [ ] Full keyboard navigation audit
+Shipped in 1.1:
+
+- [x] Recurring transactions and subscriptions
+- [x] Per-category budgets with monthly rollover
+- [x] CSV import with column mapping
+- [x] Password-encrypted export
+- [x] Full keyboard navigation audit
+
+Next:
+
+- [ ] Multi-currency accounts with per-transaction rates
+- [ ] Receipt attachments stored locally
+- [ ] Split transactions across categories
+- [ ] Installable PWA with an offline cache
+- [ ] Merge two ledgers from a shared export
+- [ ] iOS and desktop packaging from the same build
 
 ## Acknowledgments
 

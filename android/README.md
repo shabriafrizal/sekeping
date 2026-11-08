@@ -1,24 +1,54 @@
 # Sekeping for Android
 
-A thin native shell around the same web build, plus a home-screen widget.
+A thin native shell around the same web build, plus a resizable home-screen widget and
+two Astryx dialogs that float over the launcher.
 
 | Piece | File |
 | --- | --- |
 | WebView host, asset loader, deep links | `app/src/main/java/dev/shabri/sekeping/MainActivity.kt` |
-| 4×1 widget with three quick actions | `WidgetProvider.kt` |
-| Setup popup (account + visible buttons) | `WidgetConfigActivity.kt` |
-| Shared preferences shared by both | `WidgetPrefs.kt` |
+| Shared WebView setup for the dialogs | `WebAppHost.kt` |
+| Widget preferences, accounts and saldo summary | `WidgetPrefs.kt` |
+| Resizable 4×1 / 4×2 / 2×2 widget | `WidgetProvider.kt`, `res/layout/widget_sekeping_*.xml` |
+| “Atur widget” dialog (web modal) | `WidgetConfigActivity.kt`, `src/sheets/WidgetConfigSheet.tsx` |
+| Quick-add sheet over the home screen | `WidgetSheetActivity.kt` |
 
 ## How the pieces talk
 
-1. The web app calls `window.SekepingWidget.setAccounts(json)` whenever accounts change.
-   `MainActivity` stores that list for the setup popup.
-2. A widget button fires a `PendingIntent` with `type` and `account` extras.
-3. `MainActivity` opens the WebView with `?add=<type>&account=<id>`, or calls
-   `window.SekepingOpenAdd(...)` when the app is already running.
-4. The site is served through `WebViewAssetLoader` at
-   `https://appassets.androidplatform.net/assets/www/index.html`, so ES modules and
-   `localStorage` behave exactly like on the web, offline.
+1. The web app calls `window.SekepingWidget.setAccounts(json)` and `setSummary(json)`
+   whenever accounts, transactions or the currency change. `MainActivity` stores both in
+   `WidgetPrefs`, then refreshes every widget instance.
+2. A widget button fires a `PendingIntent` for `WidgetSheetActivity` with `type` and
+   `account` extras. The card itself opens `MainActivity`.
+3. `WidgetSheetActivity` loads
+   `…/index.html?sheet=<type>&account=<id>` in a transparent, dimmed dialog activity. The
+   React app renders **only** the transaction sheet, anchored to the bottom of the window,
+   and `closeSheet()` finishes the activity after saving or cancelling.
+4. “Reconfigure” loads `…/index.html?widget_config=<id>` in `WidgetConfigActivity`. The
+   same Astryx build renders the **Atur widget** dialog: account picker, action switches,
+   and a live 4×1 / 4×2 / 2×2 preview. `getWidgetConfig()` seeds it and
+   `saveWidgetConfig(json)` writes the choices, updates the widget and returns `RESULT_OK`.
+5. Both dialog activities use `android:taskAffinity=""` and a translucent theme, so the
+   launcher (not the dashboard) stays visible behind them.
+6. Every surface uses the same `WebViewAssetLoader` origin, so the ledger in
+   `localStorage` is shared. A `storage` listener plus a visibility check reload the state
+   when the full app and the quick-add sheet are open at the same time.
+
+## Widget sizes
+
+One resizable widget, three layouts chosen from the cells it occupies:
+
+| Shape | Layout | Content |
+| --- | --- | --- |
+| 4×1 | `widget_sekeping_small.xml` | Saldo + icon row |
+| 4×2 | `widget_sekeping_medium.xml` | Saldo, month in/out, icon column |
+| 2×2 | `widget_sekeping_square.xml` | Compact saldo + icon row |
+
+The layout switches in `WidgetProvider.onAppWidgetOptionsChanged`. Saldo and the month
+figures are formatted by the web app (`money()`), so the widget uses the same currency
+and separators as the ledger. Fraunces is bundled as a static semibold TTF for API 26+;
+API 24–25 fall back to the platform serif through `values/styles.xml`.
+
+## Data
 
 Data lives in the WebView's own storage. It is not shared with the hosted site and is
 removed when the app is uninstalled.

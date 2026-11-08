@@ -37,11 +37,24 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- A separate task with no affinity keeps the launcher visible behind it. -->
         <activity
             android:name=".WidgetConfigActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:excludeFromRecents="true"
             android:exported="true"
             android:label="@string/widget_configure"
-            android:theme="@style/Theme.Sekeping.Dialog" />
+            android:theme="@style/Theme.Sekeping.Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".WidgetSheetActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Sekeping.Modal"
+            android:windowSoftInputMode="adjustResize" />
 
         <receiver
             android:name=".WidgetProvider"

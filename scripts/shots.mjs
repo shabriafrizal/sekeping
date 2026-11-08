@@ -23,7 +23,7 @@ watch(page, 'desktop');
 await page.setViewport({ width: 1440, height: 1250 });
 await page.goto(BASE, { waitUntil: 'networkidle0' });
 await page.evaluate(() => {
-  [...document.querySelectorAll('button')].find((b) => b.textContent?.includes('Lihat dengan data contoh'))?.click();
+  document.querySelector('[data-start="demo"]')?.click();
 });
 await wait(900);
 
@@ -70,7 +70,7 @@ watch(m, 'mobile');
 await m.setViewport({ width: 414, height: 896, isMobile: true, hasTouch: true });
 await m.goto(BASE, { waitUntil: 'networkidle0' });
 await m.evaluate(() => {
-  [...document.querySelectorAll('button')].find((b) => b.textContent?.includes('Lihat dengan data contoh'))?.click();
+  document.querySelector('[data-start="demo"]')?.click();
 });
 await wait(900);
 await m.screenshot({ path: `${OUT}/07-mobile-home.png`, fullPage: true });

@@ -1,30 +1,54 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   Account,
   AppState,
+  Budget,
   Category,
   Debt,
   DebtPayment,
   Filters,
+  Recurring,
   Settings,
   Tx,
 } from './types';
 import { uid } from './types';
 import { createDemoState, createEmptyState } from './seed';
 import { monthRange, todayISO } from './format';
+import { advanceDate, collectDue, occurrenceTx } from './recurring';
+import { nativeMode } from './native';
 
 const STORAGE_KEY = 'sekeping.state.v1';
 
+/* Native sheet and config surfaces reuse this same origin and storage. */
+const NATIVE = nativeMode();
+const HAD_STORAGE = (() => {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== null;
+  } catch {
+    return false;
+  }
+})();
+
 function loadState(): AppState {
   try {
+    /* Never seed demo data from a widget surface: it would overwrite the
+       ledger the full app has not created yet. */
+    if (!HAD_STORAGE && NATIVE) return createEmptyState();
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createDemoState();
-    const parsed = JSON.parse(raw) as AppState;
+    const parsed = JSON.parse(raw) as Partial<AppState>;
     if (!parsed || !Array.isArray(parsed.accounts)) return createDemoState();
     return {
       ...parsed,
+      version: 2,
+      txs: Array.isArray(parsed.txs) ? parsed.txs : [],
+      debts: Array.isArray(parsed.debts) ? parsed.debts : [],
+      payments: Array.isArray(parsed.payments) ? parsed.payments : [],
+      // Added in v2; older backups simply have no schedules or budgets yet.
+      recurring: Array.isArray(parsed.recurring) ? parsed.recurring : [],
+      budgets: Array.isArray(parsed.budgets) ? parsed.budgets : [],
       settings: { ...createEmptyState().settings, ...parsed.settings },
-    };
+    } as AppState;
   } catch {
     return createDemoState();
   }
@@ -63,6 +87,19 @@ interface StoreValue {
   removeDebt: (id: string) => void;
   addPayment: (p: Omit<DebtPayment, 'id'>) => void;
   removePayment: (id: string) => void;
+  addRecurring: (r: Omit<Recurring, 'id' | 'createdAt'>) => void;
+  updateRecurring: (id: string, patch: Partial<Recurring>) => void;
+  removeRecurring: (id: string) => void;
+  postRecurring: (id: string) => void;
+  /** Mark a due reminder done: post it dated today, then advance the schedule. */
+  completeRecurring: (id: string) => void;
+  skipRecurring: (id: string) => void;
+  /** Post every occurrence that came due. Returns how many transactions were added. */
+  runRecurring: () => number;
+  addBudget: (b: Omit<Budget, 'id' | 'createdAt'>) => void;
+  updateBudget: (id: string, patch: Partial<Budget>) => void;
+  removeBudget: (id: string) => void;
+  importData: (payload: { accounts?: Account[]; categories?: Category[]; txs?: Tx[] }) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   replaceState: (next: AppState) => void;
   resetDemo: () => void;
@@ -77,19 +114,73 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(() => loadState());
   const [hydrated, setHydrated] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const lastPersisted = useRef('');
+
+  /* The config dialog is read-only. A sheet may write, but never creates the
+     first ledger from an empty install. */
+  const canPersist = NATIVE === null || (NATIVE === 'sheet' && HAD_STORAGE);
+
+  /** Write immediately so a native sheet can close without losing the entry. */
+  const persist = useCallback(
+    (next: AppState) => {
+      if (!canPersist) return;
+      try {
+        const raw = JSON.stringify(next);
+        lastPersisted.current = raw;
+        localStorage.setItem(STORAGE_KEY, raw);
+      } catch {
+        /* storage full or blocked */
+      }
+    },
+    [canPersist],
+  );
 
   useEffect(() => {
     setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !canPersist) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const raw = JSON.stringify(state);
+      if (raw === lastPersisted.current) return;
+      lastPersisted.current = raw;
+      localStorage.setItem(STORAGE_KEY, raw);
     } catch {
       /* storage full or blocked */
     }
-  }, [state, hydrated]);
+  }, [state, hydrated, canPersist]);
+
+  /* The full app and the quick-add sheet are separate WebViews on one origin.
+     Reload when the other one writes, so neither side keeps a stale ledger. */
+  useEffect(() => {
+    if (!canPersist) return;
+    function sync() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw || raw === lastPersisted.current) return;
+        lastPersisted.current = raw;
+        setState(loadState());
+      } catch {
+        /* ignore malformed storage */
+      }
+    }
+    function onStorage(event: StorageEvent) {
+      if (event.key && event.key !== STORAGE_KEY) return;
+      sync();
+    }
+    function onVisible() {
+      if (!document.hidden) sync();
+    }
+    window.addEventListener('storage', onStorage);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [canPersist]);
 
   const notify = useCallback((message: string, tone: Toast['tone'] = 'success') => {
     const id = uid('toast');
@@ -161,27 +252,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [state.payments],
   );
 
-  const addTx = useCallback((tx: Omit<Tx, 'id' | 'createdAt'>) => {
-    setState((prev) => ({
-      ...prev,
-      txs: [{ ...tx, id: uid('tx'), createdAt: Date.now() }, ...prev.txs],
-    }));
-  }, []);
+  const addTx = useCallback(
+    (tx: Omit<Tx, 'id' | 'createdAt'>) => {
+      const next: AppState = {
+        ...state,
+        txs: [{ ...tx, id: uid('tx'), createdAt: Date.now() }, ...state.txs],
+      };
+      setState(next);
+      persist(next);
+    },
+    [state, persist],
+  );
 
-  const updateTx = useCallback((id: string, patch: Partial<Tx>) => {
-    setState((prev) => ({
-      ...prev,
-      txs: prev.txs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
-    }));
-  }, []);
+  const updateTx = useCallback(
+    (id: string, patch: Partial<Tx>) => {
+      const next: AppState = {
+        ...state,
+        txs: state.txs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+      };
+      setState(next);
+      persist(next);
+    },
+    [state, persist],
+  );
 
-  const removeTx = useCallback((id: string) => {
-    setState((prev) => ({
-      ...prev,
-      txs: prev.txs.filter((t) => t.id !== id),
-      payments: prev.payments.filter((p) => p.id !== id),
-    }));
-  }, []);
+  const removeTx = useCallback(
+    (id: string) => {
+      const next: AppState = {
+        ...state,
+        txs: state.txs.filter((t) => t.id !== id),
+        payments: state.payments.filter((p) => p.id !== id),
+      };
+      setState(next);
+      persist(next);
+    },
+    [state, persist],
+  );
 
   const addAccount = useCallback((a: Omit<Account, 'id'>) => {
     setState((prev) => ({ ...prev, accounts: [...prev.accounts, { ...a, id: uid('acc') }] }));
@@ -200,6 +306,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       accounts: prev.accounts.filter((a) => a.id !== id),
       txs: prev.txs.filter((t) => t.accountId !== id && t.toAccountId !== id),
       debts: prev.debts.filter((d) => d.accountId !== id),
+      recurring: prev.recurring.filter((r) => r.accountId !== id),
     }));
   }, []);
 
@@ -219,6 +326,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       categories: prev.categories.filter((c) => c.id !== id),
       txs: prev.txs.map((t) => (t.categoryId === id ? { ...t, categoryId: undefined } : t)),
+      recurring: prev.recurring.map((r) => (r.categoryId === id ? { ...r, categoryId: undefined } : r)),
+      budgets: prev.budgets.filter((b) => b.categoryId !== id),
     }));
   }, []);
 
@@ -271,6 +380,116 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       txs: prev.txs.filter((t) => t.id !== id),
     }));
   }, []);
+
+  /* ---------------- recurring & subscriptions ---------------- */
+
+  const addRecurring = useCallback((r: Omit<Recurring, 'id' | 'createdAt'>) => {
+    setState((prev) => ({
+      ...prev,
+      recurring: [{ ...r, id: uid('rec'), createdAt: Date.now() }, ...prev.recurring],
+    }));
+  }, []);
+
+  const updateRecurring = useCallback((id: string, patch: Partial<Recurring>) => {
+    setState((prev) => ({
+      ...prev,
+      recurring: prev.recurring.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    }));
+  }, []);
+
+  const removeRecurring = useCallback((id: string) => {
+    // Posted transactions stay in the ledger; only the schedule goes away.
+    setState((prev) => ({ ...prev, recurring: prev.recurring.filter((r) => r.id !== id) }));
+  }, []);
+
+  const postRecurring = useCallback((id: string) => {
+    setState((prev) => {
+      const item = prev.recurring.find((r) => r.id === id);
+      if (!item) return prev;
+      return {
+        ...prev,
+        txs: [occurrenceTx(item), ...prev.txs],
+        recurring: prev.recurring.map((r) =>
+          r.id === id
+            ? { ...r, nextDate: advanceDate(r.nextDate, r.interval), lastPostedAt: Date.now() }
+            : r,
+        ),
+      };
+    });
+  }, []);
+
+  const completeRecurring = useCallback((id: string) => {
+    setState((prev) => {
+      const item = prev.recurring.find((r) => r.id === id);
+      if (!item) return prev;
+      return {
+        ...prev,
+        txs: [occurrenceTx(item, todayISO()), ...prev.txs],
+        recurring: prev.recurring.map((r) =>
+          r.id === id
+            ? { ...r, nextDate: advanceDate(r.nextDate, r.interval), lastPostedAt: Date.now() }
+            : r,
+        ),
+      };
+    });
+  }, []);
+
+  const skipRecurring = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      recurring: prev.recurring.map((r) =>
+        r.id === id ? { ...r, nextDate: advanceDate(r.nextDate, r.interval) } : r,
+      ),
+    }));
+  }, []);
+
+  const runRecurring = useCallback(() => {
+    const run = collectDue(state.recurring);
+    if (run.count === 0) return 0;
+    setState((prev) => ({
+      ...prev,
+      txs: [...run.txs, ...prev.txs],
+      recurring: prev.recurring.map((r) =>
+        run.nextDates[r.id] ? { ...r, nextDate: run.nextDates[r.id], lastPostedAt: Date.now() } : r,
+      ),
+    }));
+    return run.count;
+  }, [state.recurring]);
+
+  /* ---------------- budgets ---------------- */
+
+  const addBudget = useCallback((b: Omit<Budget, 'id' | 'createdAt'>) => {
+    setState((prev) => ({ ...prev, budgets: [...prev.budgets, { ...b, id: uid('bud'), createdAt: Date.now() }] }));
+  }, []);
+
+  const updateBudget = useCallback((id: string, patch: Partial<Budget>) => {
+    setState((prev) => ({
+      ...prev,
+      budgets: prev.budgets.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+    }));
+  }, []);
+
+  const removeBudget = useCallback((id: string) => {
+    setState((prev) => ({ ...prev, budgets: prev.budgets.filter((b) => b.id !== id) }));
+  }, []);
+
+  /* ---------------- bulk import ---------------- */
+
+  const importData = useCallback(
+    (payload: { accounts?: Account[]; categories?: Category[]; txs?: Tx[] }) => {
+      setState((prev) => {
+        const accountIds = new Set(prev.accounts.map((a) => a.id));
+        const categoryIds = new Set(prev.categories.map((c) => c.id));
+        return {
+          ...prev,
+          accounts: [...prev.accounts, ...(payload.accounts ?? []).filter((a) => !accountIds.has(a.id))],
+          categories: [...prev.categories, ...(payload.categories ?? []).filter((c) => !categoryIds.has(c.id))],
+          txs: [...(payload.txs ?? []), ...prev.txs],
+        };
+      });
+    },
+    [],
+  );
 
   const updateSettings = useCallback((patch: Partial<Settings>) => {
     setState((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } }));
@@ -339,6 +558,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     removeDebt,
     addPayment,
     removePayment,
+    addRecurring,
+    updateRecurring,
+    removeRecurring,
+    postRecurring,
+    completeRecurring,
+    skipRecurring,
+    runRecurring,
+    addBudget,
+    updateBudget,
+    removeBudget,
+    importData,
     updateSettings,
     replaceState,
     resetDemo,

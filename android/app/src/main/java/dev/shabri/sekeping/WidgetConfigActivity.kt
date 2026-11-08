@@ -2,22 +2,26 @@ package dev.shabri.sekeping
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.TextView
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import org.json.JSONObject
 
 /**
- * The setup popup shown when the widget is dropped on the home screen (and when the user
- * taps "reconfigure"). Picks the default account and which of the three buttons appear.
+ * The "Atur widget" dialog. It hosts the web build in config mode, so the
+ * account list, toggles and live 4x1 / 4x2 / 2x2 preview use the same Astryx
+ * components and theme as the app itself.
  */
 class WidgetConfigActivity : AppCompatActivity() {
 
     private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+    private lateinit var webView: WebView
+    private var openedApp = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,68 +37,119 @@ class WidgetConfigActivity : AppCompatActivity() {
             return
         }
 
-        setContentView(R.layout.activity_widget_config)
+        applyBars()
+        webView = WebAppHost.create(this, Bridge(), transparent = true)
+        setContentView(webView)
+        webView.loadUrl(WebAppHost.url("widget_config=$widgetId"))
 
-        val group = findViewById<RadioGroup>(R.id.account_group)
-        val emptyHint = findViewById<TextView>(R.id.empty_hint)
-        val openApp = findViewById<Button>(R.id.open_app)
-        val checkExpense = findViewById<CheckBox>(R.id.check_expense)
-        val checkIncome = findViewById<CheckBox>(R.id.check_income)
-        val checkTransfer = findViewById<CheckBox>(R.id.check_transfer)
-
-        val config = WidgetPrefs.config(this, widgetId)
-        val accounts = WidgetPrefs.accounts(this)
-
-        if (accounts.isEmpty()) {
-            emptyHint.visibility = View.VISIBLE
-            openApp.visibility = View.VISIBLE
-            openApp.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
-        } else {
-            emptyHint.visibility = View.GONE
-            accounts.forEach { (id, name) ->
-                val radio = RadioButton(this).apply {
-                    text = name
-                    tag = id
-                    isChecked = id == config.accountId
-                    setPadding(0, 8, 0, 8)
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    finish()
                 }
-                group.addView(radio)
-            }
-            if (group.checkedRadioButtonId == -1) {
-                group.check(group.getChildAt(0).id)
-            }
+            },
+        )
+    }
+
+    private fun applyBars() {
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+    }
+
+    /**
+     * The setup dialog can send the user into the app to onboard or add an
+     * account. Reload on return so the picker sees the ledger they just made.
+     */
+    override fun onResume() {
+        super.onResume()
+        if (openedApp) {
+            openedApp = false
+            webView.reload()
+        }
+    }
+
+    inner class Bridge {
+
+        /** Current choices, read synchronously by the web dialog on mount. */
+        @JavascriptInterface
+        fun getWidgetConfig(): String {
+            val config = WidgetPrefs.config(this@WidgetConfigActivity, widgetId)
+            return JSONObject().apply {
+                put("widgetId", widgetId)
+                put("accountId", config.accountId)
+                put("showExpense", config.showExpense)
+                put("showIncome", config.showIncome)
+                put("showTransfer", config.showTransfer)
+            }.toString()
         }
 
-        checkExpense.isChecked = config.showExpense
-        checkIncome.isChecked = config.showIncome
-        checkTransfer.isChecked = config.showTransfer
-
-        findViewById<Button>(R.id.cancel).setOnClickListener { finish() }
-
-        findViewById<Button>(R.id.save).setOnClickListener {
-            val checkedId = group.checkedRadioButtonId
-            val accountId = if (checkedId != -1) {
-                (group.findViewById<RadioButton>(checkedId)?.tag as? String).orEmpty()
-            } else {
-                ""
+        @JavascriptInterface
+        fun saveWidgetConfig(json: String) {
+            val payload = try {
+                JSONObject(json)
+            } catch (_: Exception) {
+                return
             }
 
             WidgetPrefs.save(
-                this,
+                this@WidgetConfigActivity,
                 widgetId,
                 WidgetConfig(
-                    accountId = accountId,
-                    showExpense = checkExpense.isChecked,
-                    showIncome = checkIncome.isChecked,
-                    showTransfer = checkTransfer.isChecked,
+                    accountId = payload.optString("accountId", ""),
+                    showExpense = payload.optBoolean("showExpense", true),
+                    showIncome = payload.optBoolean("showIncome", true),
+                    showTransfer = payload.optBoolean("showTransfer", true),
                 ),
             )
 
-            WidgetProvider.update(this, AppWidgetManager.getInstance(this), widgetId)
-
-            val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            setResult(RESULT_OK, result)
-            finish()
+            runOnUiThread {
+                WidgetProvider.update(
+                    this@WidgetConfigActivity,
+                    AppWidgetManager.getInstance(this@WidgetConfigActivity),
+                    widgetId,
+                )
+                Toast.makeText(this@WidgetConfigActivity, R.string.widget_saved, Toast.LENGTH_SHORT).show()
+                setResult(
+                    RESULT_OK,
+                    Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId),
+                )
+                finish()
+            }
         }
+
+        @JavascriptInterface
+        fun closeSheet() {
+            runOnUiThread { finish() }
+        }
+
+        @JavascriptInterface
+        fun openApp() {
+            runOnUiThread {
+                openedApp = true
+                startActivity(Intent(this@WidgetConfigActivity, MainActivity::class.java))
+            }
+        }
+
+        @JavascriptInterface
+        fun toast(message: String) {
+            runOnUiThread {
+                Toast.makeText(this@WidgetConfigActivity, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        /* The shared bundle still calls these; the config surface ignores them. */
+        @JavascriptInterface
+        fun setAccounts(json: String) = Unit
+
+        @JavascriptInterface
+        fun setSummary(json: String) = Unit
+
+        @JavascriptInterface
+        fun ready() = Unit
     }
 }
