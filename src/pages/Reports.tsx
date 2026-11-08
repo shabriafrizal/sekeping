@@ -11,7 +11,16 @@ import {
   YAxis,
 } from 'recharts';
 import { useStore } from '../lib/store';
-import { money, compactMoney, monthRange, toISO, shortDate, daysBetween } from '../lib/format';
+import {
+  money,
+  compactMoney,
+  compactNumber,
+  formatDate,
+  monthRange,
+  toISO,
+  shortDate,
+  daysBetween,
+} from '../lib/format';
 import { iconFor } from '../lib/icons';
 
 type Period =
@@ -183,7 +192,7 @@ export default function Reports() {
         .reduce((s, t) => s + t.amount, 0);
       months.push({
         key,
-        label: d.toLocaleDateString('id-ID', { month: 'short' }),
+        label: formatDate(d, { month: 'short' }),
         total: totalMonth,
       });
     }
@@ -420,7 +429,7 @@ export default function Reports() {
                   tickLine={false}
                   axisLine={false}
                   tick={{ fontSize: 10, fill: '#8c8175' }}
-                  tickFormatter={(v: number) => compactMoney(v).replace('Rp ', '')}
+                  tickFormatter={(v: number) => compactNumber(v)}
                 />
                 <Tooltip
                   cursor={{ fill: 'rgba(47,107,87,0.07)' }}

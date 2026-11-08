@@ -49,13 +49,6 @@ export default function Settings({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const categories = state.categories.filter((c) => c.type === catTab);
-  const currencyOptions = [
-    { value: 'IDR', label: 'IDR — Rupiah' },
-    { value: 'USD', label: 'USD — Dollar' },
-    { value: 'EUR', label: 'EUR — Euro' },
-    { value: 'SGD', label: 'SGD — Singapore dollar' },
-    { value: 'MYR', label: 'MYR — Ringgit' },
-  ];
 
   function download(name: string, content: string, mime: string) {
     const blob = new Blob([content], { type: mime });
@@ -173,17 +166,14 @@ export default function Settings({
           />
           <Selector
             label="Mata uang"
-            options={currencyOptions}
+            options={CURRENCY_OPTIONS}
             value={state.settings.currency}
             onChange={(v) => updateSettings({ currency: v as typeof state.settings.currency })}
             width="100%"
           />
           <Selector
             label="Bahasa"
-            options={[
-              { value: 'id', label: 'Bahasa Indonesia' },
-              { value: 'en', label: 'English' },
-            ]}
+            options={LANGUAGE_OPTIONS}
             value={state.settings.language}
             onChange={(v) => updateSettings({ language: v as 'id' | 'en' })}
             width="100%"

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { currentMonth, useStore } from '../lib/store';
-import { money, compactMoney, monthLabel, dayLabel, toISO, compareTxs } from '../lib/format';
+import { money, compactMoney, compactNumber, formatDate, monthLabel, dayLabel, toISO, compareTxs } from '../lib/format';
 import { TxRow } from '../components/TxRow';
 import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
@@ -28,7 +28,7 @@ function greeting() {
 }
 
 function longDate(d: Date) {
-  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return formatDate(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function reminderLabel(days: number) {
@@ -84,7 +84,7 @@ export default function Home({
       const total = state.txs
         .filter((t) => t.date === key && t.type === 'expense')
         .reduce((s, t) => s + t.amount, 0);
-      days.push({ date: key, label: d.toLocaleDateString('id-ID', { weekday: 'short' }), total });
+      days.push({ date: key, label: formatDate(d, { weekday: 'short' }), total });
     }
     return days;
   }, [state.txs]);
@@ -320,7 +320,7 @@ export default function Home({
             >
               {last7.map((d) => (
                 <div key={d.date} className="sk-week-day">
-                  <span className="sk-week-value">{d.total > 0 ? compactMoney(d.total).replace('Rp ', '') : ''}</span>
+                  <span className="sk-week-value">{d.total > 0 ? compactNumber(d.total) : ''}</span>
                   <div
                     className="sk-week-bar"
                     data-empty={d.total === 0}

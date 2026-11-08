@@ -496,8 +496,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const replaceState = useCallback((next: AppState) => setState(next), []);
-  const resetDemo = useCallback(() => setState(createDemoState()), []);
-  const clearAll = useCallback(() => setState(createEmptyState()), []);
+
+  /* Replacing the ledger must not silently change the person's profile,
+     language, currency, PIN or onboarding state. */
+  const resetDemo = useCallback(
+    () =>
+      setState((prev) => {
+        const demo = createDemoState();
+        return { ...demo, settings: { ...demo.settings, ...prev.settings } };
+      }),
+    [],
+  );
+
+  const clearAll = useCallback(
+    () =>
+      setState((prev) => {
+        const empty = createEmptyState();
+        return { ...empty, settings: { ...empty.settings, ...prev.settings } };
+      }),
+    [],
+  );
 
   const exportJSON = useCallback(() => JSON.stringify(state, null, 2), [state]);
 

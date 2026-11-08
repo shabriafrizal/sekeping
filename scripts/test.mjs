@@ -215,6 +215,87 @@ check(
   await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).txs.length === 0),
 );
 
+/* ---------- language and currency from the start screen ---------- */
+async function choose(labelText, optionText) {
+  const listId = await page.evaluate((name) => {
+    const label = [...document.querySelectorAll('label')].find((el) => el.textContent === name);
+    const combobox = label ? document.getElementById(label.getAttribute('for')) : null;
+    combobox?.click();
+    return combobox?.getAttribute('aria-controls') ?? '';
+  }, labelText);
+  await wait(120);
+  await page.evaluate(
+    ({ id, option }) => {
+      const list = document.getElementById(id);
+      [...(list?.querySelectorAll('[role="option"]') ?? [])]
+        .find((item) => item.textContent?.includes(option))
+        ?.click();
+    },
+    { id: listId, option: optionText },
+  );
+  await wait(120);
+}
+
+await page.evaluate(() => localStorage.clear());
+await page.reload({ waitUntil: 'networkidle0' });
+await wait(400);
+check(
+  'start screen offers language and currency',
+  await page.evaluate(() => document.querySelectorAll('.sk-start [role="combobox"]').length === 2),
+);
+await choose('Bahasa', 'English');
+await choose('Mata uang', 'USD');
+const startSample = await page.evaluate(() => document.querySelector('.sk-start-sample')?.textContent?.trim() ?? '');
+check(
+  'start preview follows the chosen language and currency',
+  startSample.includes('Sample') && startSample.includes('$ 1,234,567.00'),
+  startSample,
+);
+
+await page.click('[data-start="demo"]');
+await wait(900);
+await page.evaluate(() => document.querySelector('.sk-tour-skip')?.click());
+const startSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).settings);
+check(
+  'start choices survive onboarding',
+  startSettings.onboarded && startSettings.language === 'en' && startSettings.currency === 'USD',
+  JSON.stringify(startSettings),
+);
+const englishNav = await page.evaluate(() => document.querySelector('.astryx-top-nav')?.innerText ?? '');
+check('currency applies across the app', /\$\s[\d,]+\.\d{2}/.test(englishNav), englishNav.split('\n')[1]);
+
+await nav('Pengaturan');
+await wait(400);
+await choose('Mata uang', 'IDR');
+const idrNav = await page.evaluate(() => document.querySelector('.astryx-top-nav')?.innerText ?? '');
+check('currency changes without leaving Settings', /Rp\s/.test(idrNav), idrNav.split('\n')[1]);
+await choose('Bahasa', 'Bahasa Indonesia');
+const localizedNav = await page.evaluate(() => document.querySelector('.astryx-top-nav')?.innerText ?? '');
+check(
+  'language changes without leaving Settings',
+  /Rp\s[\d.]+/.test(localizedNav) && !localizedNav.includes(','),
+  localizedNav.split('\n')[1],
+);
+
+/* Loading the demo ledger must not throw the person back to onboarding or
+   reset the language/currency they just chose. */
+await page.evaluate(() =>
+  [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Muat data contoh')?.click(),
+);
+await wait(700);
+const reloaded = await page.evaluate(() => ({
+  settings: JSON.parse(localStorage.getItem('sekeping.state.v1')).settings,
+  hasSettingsPage: Boolean(document.querySelector('.sk-page-head')),
+}));
+check(
+  'loading demo keeps preferences and onboarding',
+  reloaded.hasSettingsPage &&
+    reloaded.settings.onboarded &&
+    reloaded.settings.language === 'id' &&
+    reloaded.settings.currency === 'IDR',
+  JSON.stringify(reloaded.settings),
+);
+
 console.log(results.join('\n'));
 console.log('\nPAGE ERRORS:', errors.length ? errors.join('\n') : 'none');
 const failed = results.filter((r) => r.startsWith('FAIL')).length;

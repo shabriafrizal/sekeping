@@ -80,6 +80,11 @@ export function plainNumber(value: number): string {
   return Math.abs(value).toLocaleString(LOCALE);
 }
 
+/** Locale-aware date text for labels that need a custom shape. */
+export function formatDate(value: Date, options: Intl.DateTimeFormatOptions): string {
+  return value.toLocaleDateString(LOCALE, options);
+}
+
 export function nowTime(): string {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -138,8 +143,8 @@ export function dayLabel(iso: string): string {
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
-  if (toISO(d) === toISO(today)) return 'Hari ini';
-  if (toISO(d) === toISO(yesterday)) return 'Kemarin';
+  if (toISO(d) === toISO(today)) return LOCALE.startsWith('en') ? 'Today' : 'Hari ini';
+  if (toISO(d) === toISO(yesterday)) return LOCALE.startsWith('en') ? 'Yesterday' : 'Kemarin';
   return d.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
 }
 

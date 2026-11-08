@@ -74,7 +74,8 @@ npm run dev
 ```
 
 Open the printed URL (usually <http://localhost:5173>). The ledger starts **empty**; the
-start screen offers a demo dataset if you want to explore first.
+start screen lets you pick a language and currency and offers a demo dataset if you want
+to explore first.
 
 **Requirements:** Node.js 20 or newer, npm 10 or newer, and any modern browser.
 
@@ -89,7 +90,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.3.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.3/sekeping-1.1.3.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.4.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.4/sekeping-1.1.4.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -208,6 +209,9 @@ month. Switch months with the arrows to look back.
   formatting and the widget labels, including the setup dialog.
 - **Mata uang** — IDR (default), USD, EUR, SGD or MYR. It changes the symbol and grouping
   everywhere, including the widget.
+
+Both can also be chosen on the welcome screen, with a live sample of the formatted
+amount, and they carry over into the new ledger.
 
 ### Lock it and back it up
 

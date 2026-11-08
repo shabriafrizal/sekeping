@@ -4,7 +4,7 @@ import { Button } from '@astryxdesign/core/Button';
 import { RadioList, RadioListItem } from '@astryxdesign/core/RadioList';
 import { Switch } from '@astryxdesign/core/Switch';
 import { useStore, currentMonth } from '../lib/store';
-import { money } from '../lib/format';
+import { currencySymbol, money } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import WidgetPreview, { type WidgetSize } from '../components/WidgetPreview';
 import { closeSheet, openApp, readWidgetConfig, saveWidgetConfig } from '../lib/native';
@@ -102,7 +102,9 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
     { income: 0, expense: 0 },
   );
 
-  const balance = locked ? 'Rp ••••••' : money(netWorth, state.settings.currency);
+  const balance = locked
+    ? `${currencySymbol(state.settings.currency)} ••••••`
+    : money(netWorth, state.settings.currency);
   const canSave = activeAccounts.length === 0 || Boolean(accountId);
 
   function save() {
