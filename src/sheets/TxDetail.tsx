@@ -68,7 +68,10 @@ export default function TxDetail({
         ) : null}
         <div className="sk-kv">
           <span>Tanggal</span>
-          <b>{shortDate(tx.date)}</b>
+          <b>
+            {shortDate(tx.date)}
+            {tx.time ? ` · ${tx.time}` : ''}
+          </b>
         </div>
         <div className="sk-kv">
           <span>Catatan</span>

@@ -989,6 +989,27 @@ body {
   margin: 0.6rem 0 1.1rem;
 }
 
+.sk-start-settings {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  text-align: left;
+}
+
+.sk-start-sample {
+  margin: 0.35rem 0 0.55rem;
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 400px) {
+  .sk-start-settings {
+    grid-template-columns: 1fr;
+  }
+}
+
 .sk-start-primary {
   width: 100%;
   padding: 0.8rem 1rem;

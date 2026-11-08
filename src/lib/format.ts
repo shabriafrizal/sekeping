@@ -1,9 +1,5 @@
 let LOCALE = 'id-ID';
-
-/** Follow the app language setting for grouping and month names. */
-export function setFormatLocale(language: string): void {
-  LOCALE = language === 'en' ? 'en-US' : 'id-ID';
-}
+let CURRENCY = 'IDR';
 
 const currencySymbols: Record<string, string> = {
   IDR: 'Rp',
@@ -13,7 +9,31 @@ const currencySymbols: Record<string, string> = {
   MYR: 'RM',
 };
 
-export function money(value: number, currency = 'IDR'): string {
+/** Follow the app language setting for grouping and month names. */
+export function setFormatLocale(language: string): void {
+  LOCALE = language === 'en' ? 'en-US' : 'id-ID';
+}
+
+/** Follow the app currency setting for every `money()` call without an override. */
+export function setFormatCurrency(currency: string): void {
+  CURRENCY = currencySymbols[currency] ? currency : 'IDR';
+}
+
+/**
+ * Apply both display settings together. The store calls this while rendering,
+ * before its children, so the same paint already uses the new locale/currency
+ * instead of waiting for an effect and flashing the old format.
+ */
+export function setFormatPreferences(language: string, currency: string): void {
+  setFormatLocale(language);
+  setFormatCurrency(currency);
+}
+
+export function currencySymbol(currency = CURRENCY): string {
+  return currencySymbols[currency] ?? '';
+}
+
+export function money(value: number, currency = CURRENCY): string {
   const n = Number.isFinite(value) ? value : 0;
   const sign = n < 0 ? '−' : '';
   const sym = currencySymbols[currency] ?? '';
@@ -25,18 +45,65 @@ export function money(value: number, currency = 'IDR'): string {
   return `${sign}${sym}${sym ? ' ' : ''}${body}`;
 }
 
-export function compactMoney(value: number, currency = 'IDR'): string {
+function compactBody(value: number): string {
   const n = Math.abs(value);
+  const english = LOCALE.startsWith('en');
+  let divisor = 1;
+  let unit = '';
+  if (n >= 1_000_000_000) {
+    divisor = 1_000_000_000;
+    unit = english ? 'B' : 'M';
+  } else if (n >= 1_000_000) {
+    divisor = 1_000_000;
+    unit = english ? 'M' : 'jt';
+  } else if (n >= 1_000) {
+    divisor = 1_000;
+    unit = english ? 'K' : 'rb';
+  }
+  const body = unit
+    ? (n / divisor).toLocaleString(LOCALE, { maximumFractionDigits: 1 })
+    : n.toLocaleString(LOCALE);
+  return `${body}${unit ? ` ${unit}` : ''}`;
+}
+
+export function compactMoney(value: number, currency = CURRENCY): string {
   const sym = currencySymbols[currency] ?? '';
-  const sign = value < 0 ? '−' : '';
-  if (n >= 1_000_000_000) return `${sign}${sym} ${(n / 1_000_000_000).toFixed(1).replace('.', ',')} M`;
-  if (n >= 1_000_000) return `${sign}${sym} ${(n / 1_000_000).toFixed(1).replace('.', ',')} jt`;
-  if (n >= 1_000) return `${sign}${sym} ${(n / 1_000).toFixed(0)} rb`;
-  return `${sign}${sym} ${n}`;
+  return `${value < 0 ? '−' : ''}${sym}${sym ? ' ' : ''}${compactBody(value)}`;
+}
+
+/** Compact number without a currency symbol, for chart axes. */
+export function compactNumber(value: number): string {
+  return `${value < 0 ? '−' : ''}${compactBody(value)}`;
 }
 
 export function plainNumber(value: number): string {
   return Math.abs(value).toLocaleString(LOCALE);
+}
+
+export function nowTime(): string {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** Chronological key: date plus the optional time (midnight when absent). */
+export function txSortValue(tx: { date: string; time?: string }): number {
+  const d = parseISO(tx.date);
+  const [h, m] = (tx.time ?? '00:00').split(':').map(Number);
+  d.setHours(Number.isFinite(h) ? h : 0, Number.isFinite(m) ? m : 0, 0, 0);
+  return d.getTime();
+}
+
+/** Newest first; same moment falls back to when it was captured. */
+export function compareTxs(
+  a: { date: string; time?: string; createdAt: number },
+  b: { date: string; time?: string; createdAt: number },
+): number {
+  const delta = txSortValue(b) - txSortValue(a);
+  return delta !== 0 ? delta : b.createdAt - a.createdAt;
+}
+
+export function txWhen(tx: { date: string; time?: string }): string {
+  return tx.time ? `${shortDate(tx.date)} · ${tx.time}` : shortDate(tx.date);
 }
 
 export function todayISO(): string {

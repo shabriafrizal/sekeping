@@ -4,7 +4,7 @@ import { Selector } from '@astryxdesign/core/Selector';
 import { Button } from '@astryxdesign/core/Button';
 import { useStore } from '../lib/store';
 import type { Tx, TxType } from '../lib/types';
-import { money, dayLabel, monthRange, toISO } from '../lib/format';
+import { money, dayLabel, monthRange, toISO, compareTxs } from '../lib/format';
 import { TxRow } from '../components/TxRow';
 import { EmptyState } from '../components/EmptyState';
 
@@ -64,7 +64,7 @@ export default function Transactions({
         }
         return true;
       })
-      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt));
+      .sort(compareTxs);
   }, [state.txs, state.categories, state.accounts, type, accountId, categoryId, from, to, search]);
 
   const totals = useMemo(() => {

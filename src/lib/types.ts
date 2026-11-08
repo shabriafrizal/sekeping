@@ -28,6 +28,7 @@ export interface Tx {
   toAccountId?: string;
   fee?: number;
   date: string; // YYYY-MM-DD
+  time?: string; // HH:mm, optional; absent means "no time"
   note: string;
   debtId?: string;
   recurringId?: string;

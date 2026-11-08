@@ -6,6 +6,7 @@ import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
 import { useStore } from '../lib/store';
 import type { Account, AppState, Category, CategoryType } from '../lib/types';
 import { money } from '../lib/format';
+import { CURRENCY_OPTIONS, LANGUAGE_OPTIONS } from '../lib/settings-options';
 import { iconFor } from '../lib/icons';
 import { decryptJson, encryptJson, isEncryptedExport } from '../lib/crypto';
 

@@ -5,7 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Tx, TxType } from '../lib/types';
-import { todayISO } from '../lib/format';
+import { nowTime, todayISO } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import AmountPad from '../components/AmountPad';
 
@@ -36,6 +36,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
   const [toAccountId, setToAccountId] = useState(state.accounts[1]?.id ?? '');
   const [fee, setFee] = useState(0);
   const [date, setDate] = useState(todayISO());
+  const [time, setTime] = useState(nowTime());
   const [note, setNote] = useState('');
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       setToAccountId(tx.toAccountId ?? state.accounts[1]?.id ?? '');
       setFee(tx.fee ?? 0);
       setDate(tx.date);
+      setTime(tx.time ?? '');
       setNote(tx.note);
     } else {
       const t = initialType ?? 'expense';
@@ -61,6 +63,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       setToAccountId(state.accounts.find((a) => a.active && a.id !== state.accounts[0]?.id)?.id ?? '');
       setFee(0);
       setDate(todayISO());
+      setTime(nowTime());
       setNote('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,6 +102,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       toAccountId: type === 'transfer' ? toAccountId : undefined,
       fee: type === 'transfer' ? fee : 0,
       date,
+      time: time || undefined,
       note: note.trim(),
     };
     if (tx) {
@@ -212,15 +216,13 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
             <span className="sk-eyebrow">Tanggal</span>
             <input className="sk-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
-          <div className="sk-field" style={{ gridColumn: 'span 1' }}>
-            <TextInput
-              label="Catatan"
-              value={note}
-              placeholder="Opsional"
-              onChange={setNote}
-            />
-          </div>
+          <label className="sk-field">
+            <span className="sk-eyebrow">Waktu · opsional</span>
+            <input className="sk-input" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          </label>
         </div>
+
+        <TextInput label="Catatan" value={note} placeholder="Opsional" onChange={setNote} />
       </div>
       </div>
 

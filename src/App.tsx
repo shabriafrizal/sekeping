@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
+import { Selector } from '@astryxdesign/core/Selector';
 import { AppShell } from '@astryxdesign/core/AppShell';
 import { SideNav, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav';
 import { TopNav } from '@astryxdesign/core/TopNav';
@@ -12,7 +13,8 @@ import { Badge } from '@astryxdesign/core/Badge';
 import { Button } from '@astryxdesign/core/Button';
 import { currentMonth, useStore } from './lib/store';
 import type { Account, Budget, Category, CategoryType, Debt, DebtKind, Recurring, Tx, TxType } from './lib/types';
-import { money, setFormatLocale } from './lib/format';
+import { money } from './lib/format';
+import { CURRENCY_OPTIONS, LANGUAGE_OPTIONS } from './lib/settings-options';
 import Home from './pages/Home';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
@@ -305,9 +307,9 @@ export default function App() {
     syncWidgetAccounts(state.accounts);
   }, [state.accounts]);
 
-  /* Language drives grouping, month names and the widget labels. */
+  /* The store applies number/date formatting before render; the document
+     language is only an accessibility hint and can update afterwards. */
   useEffect(() => {
-    setFormatLocale(state.settings.language);
     document.documentElement.lang = state.settings.language;
   }, [state.settings.language]);
 
@@ -432,12 +434,14 @@ export default function App() {
     return (
       <Start
         onDemo={() => {
+          const { language, currency } = state.settings;
           resetDemo();
-          updateSettings({ onboarded: true });
+          updateSettings({ onboarded: true, language, currency });
         }}
         onEmpty={() => {
+          const { language, currency } = state.settings;
           clearAll();
-          updateSettings({ onboarded: true });
+          updateSettings({ onboarded: true, language, currency });
         }}
       />
     );
@@ -696,6 +700,9 @@ export default function App() {
 /* ------------------------------------------------------------------ */
 
 function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void }) {
+  const { state, updateSettings } = useStore();
+  const { language, currency } = state.settings;
+
   return (
     <div className="sk-start">
       <div className="sk-start-card">
@@ -705,6 +712,27 @@ function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void })
         <h1 className="sk-start-name">Sekeping</h1>
         <p className="sk-start-line">Catatan keuangan yang tenang.</p>
         <span className="sk-start-rule" aria-hidden="true" />
+
+        <div className="sk-start-settings">
+          <Selector
+            label="Bahasa"
+            options={LANGUAGE_OPTIONS}
+            value={language}
+            onChange={(v) => updateSettings({ language: v as typeof language })}
+            width="100%"
+          />
+          <Selector
+            label="Mata uang"
+            options={CURRENCY_OPTIONS}
+            value={currency}
+            onChange={(v) => updateSettings({ currency: v as typeof currency })}
+            width="100%"
+          />
+        </div>
+        <p className="sk-start-sample" aria-live="polite">
+          {language === 'en' ? 'Sample' : 'Contoh'}: {money(1_234_567)}
+        </p>
+
         <button type="button" className="sk-start-primary" data-start="empty" onClick={onEmpty}>
           Mulai dari kosong
         </button>

@@ -49,8 +49,8 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | Area | What you get |
 | --- | --- |
 | **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories, and a seven-day reminder for bills and subscriptions with one-tap **Selesai** |
-| **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals, detail view with edit and delete |
-| **Entry** | Expense, income or transfer; amount keypad (keyboard input too), account and category pickers, date, note, transfer fee |
+| **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals and ordered by date + time, detail view with edit and delete |
+| **Entry** | Expense, income or transfer; amount keypad (keyboard input too), account and category pickers, date, optional time (defaults to now), note, transfer fee |
 | **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, quick ranges (**Hari ini, Kemarin, 7 hari, Bulan ini, Bulan lalu, 3 bulan, Tahun ini, 1 tahun, Semua**) and a custom **from/to date range** |
 | **Recurring** | Weekly, monthly or yearly schedules for bills, salary and subscriptions; catch-up posting on open; monthly subscription cost |
 | **Budgets** | Monthly limit per expense category, optional rollover of unused money, month-by-month progress and over-budget warnings |
@@ -89,7 +89,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.2.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.2/sekeping-1.1.2.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.3.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.3/sekeping-1.1.3.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -137,7 +137,12 @@ to move data between the two.
 1. Press **Tambah transaksi** in the sidebar, or **Tambah** in the top bar on a phone.
 2. Choose **Pengeluaran**, **Pendapatan** or **Transfer**.
 3. Type the amount with the keypad, or just type the digits on your keyboard.
-4. Pick an account and a category, then **Simpan**.
+4. Pick an account and a category. The date defaults to today and the time to now;
+   clear the time to record the entry without one.
+5. Then **Simpan**.
+
+Every entry has a date and an optional time. Lists sort by that moment (newest first),
+so two expenses on the same day keep the order you recorded them in.
 
 ### Move money between accounts
 
@@ -271,7 +276,7 @@ State is a single object in `localStorage` under `sekeping.state.v1`:
 type AppState = {
   accounts: Account[];      // name, icon, opening balance, active flag
   categories: Category[];   // name, icon, expense | income, active flag
-  txs: Tx[];                // expense | income | transfer, amount, account, category, date, note
+  txs: Tx[];                // expense | income | transfer, amount, account, category, date, optional time, note
   debts: Debt[];            // debt | loan, total, due date
   payments: DebtPayment[];  // payments against a debt, each mirrored into txs
   recurring: Recurring[];   // schedule template plus the next unposted date

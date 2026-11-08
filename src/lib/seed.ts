@@ -79,6 +79,8 @@ export function createDemoState(): AppState {
       const amount = Math.round((pick.min + rand() * (pick.max - pick.min)) / 1000) * 1000;
       const accountRoll = rand();
       const accountId = accountRoll < 0.5 ? 'acc_ewallet' : accountRoll < 0.85 ? 'acc_cash' : 'acc_bank';
+      const hour = 7 + Math.floor(rand() * 14);
+      const minute = Math.floor(rand() * 12) * 5;
       txs.push({
         id: uid('tx'),
         type: 'expense',
@@ -86,6 +88,7 @@ export function createDemoState(): AppState {
         accountId,
         categoryId: pick.cat,
         date: day,
+        time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
         note: pick.note,
         createdAt: Date.now() - i * 86_400_000 - j * 1000,
       });
@@ -104,6 +107,7 @@ export function createDemoState(): AppState {
       accountId: 'acc_bank',
       categoryId: 'cat_salary',
       date: toISO(d),
+      time: '09:00',
       note: 'Gaji bulanan',
       createdAt: Date.now() - 1000,
     });
@@ -115,6 +119,7 @@ export function createDemoState(): AppState {
     accountId: 'acc_bank',
     categoryId: 'cat_bonus',
     date: daysAgo(5),
+    time: '10:30',
     note: 'Proyek desain lepas',
     createdAt: Date.now() - 1500,
   });
@@ -125,6 +130,7 @@ export function createDemoState(): AppState {
     accountId: 'acc_bank',
     categoryId: 'cat_bonus',
     date: daysAgo(12),
+    time: '11:15',
     note: 'Bonus proyek sampingan',
     createdAt: Date.now() - 2000,
   });
@@ -135,6 +141,7 @@ export function createDemoState(): AppState {
     accountId: 'acc_bank',
     categoryId: 'cat_invest',
     date: daysAgo(34),
+    time: '14:00',
     note: 'Dividen reksa dana',
     createdAt: Date.now() - 3000,
   });
@@ -155,6 +162,7 @@ export function createDemoState(): AppState {
       toAccountId: t.to,
       fee: idx % 2 === 0 ? 6_500 : 0,
       date: t.date,
+      time: ['08:15', '19:40', '12:05', '16:20', '09:50'][idx] ?? '10:00',
       note: 'Top up saldo',
       createdAt: Date.now() - idx * 500,
     });

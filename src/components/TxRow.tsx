@@ -1,6 +1,6 @@
 import type { Tx } from '../lib/types';
 import { useStore } from '../lib/store';
-import { money, shortDate } from '../lib/format';
+import { money, txWhen } from '../lib/format';
 import { iconFor } from '../lib/icons';
 
 export function TxRow({ tx, onClick }: { tx: Tx; onClick: () => void }) {
@@ -17,7 +17,7 @@ export function TxRow({ tx, onClick }: { tx: Tx; onClick: () => void }) {
     tx.type === 'transfer'
       ? `${acc?.name ?? 'Rekening'} → ${dest?.name ?? 'Rekening'}`
       : cat?.name ?? tx.note ?? 'Transaksi';
-  const meta = [tx.note, shortDate(tx.date)].filter(Boolean).join(' · ');
+  const meta = [tx.note, txWhen(tx)].filter(Boolean).join(' · ');
 
   return (
     <button type="button" className="sk-row" onClick={onClick} aria-label={`${title}, ${money(tx.amount)}`}>

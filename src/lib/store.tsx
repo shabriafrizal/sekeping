@@ -13,7 +13,7 @@ import type {
 } from './types';
 import { uid } from './types';
 import { createDemoState, createEmptyState } from './seed';
-import { monthRange, todayISO } from './format';
+import { monthRange, setFormatPreferences, todayISO } from './format';
 import { advanceDate, collectDue, occurrenceTx } from './recurring';
 import { nativeMode } from './native';
 
@@ -504,7 +504,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const exportCSV = useCallback(
     (filters?: Filters) => {
       const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
-      const rows = [['Tanggal', 'Jenis', 'Kategori', 'Rekening', 'Tujuan', 'Jumlah', 'Biaya', 'Catatan']];
+      const rows = [['Tanggal', 'Waktu', 'Jenis', 'Kategori', 'Rekening', 'Tujuan', 'Jumlah', 'Biaya', 'Catatan']];
       const list = [...state.txs].sort((a, b) => (a.date < b.date ? 1 : -1));
       for (const tx of list) {
         if (filters) {
@@ -517,6 +517,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
         rows.push([
           tx.date,
+          tx.time ?? '',
           tx.type === 'expense' ? 'Pengeluaran' : tx.type === 'income' ? 'Pendapatan' : 'Transfer',
           state.categories.find((c) => c.id === tx.categoryId)?.name ?? '',
           state.accounts.find((a) => a.id === tx.accountId)?.name ?? '',
@@ -530,6 +531,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     },
     [state],
   );
+
+  /* Formatting lives in module scope because `money()` is called from many
+     helpers. Update it before children render so a language or currency change
+     paints once with the new format instead of flashing the previous one. */
+  setFormatPreferences(state.settings.language, state.settings.currency);
 
   const value: StoreValue = {
     state,

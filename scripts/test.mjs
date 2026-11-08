@@ -153,6 +153,46 @@ await wait(400);
 check('payment dialog opens', (await page.$('.astryx-dialog')) !== null);
 await page.keyboard.press('Escape');
 
+/* ---------- optional time orders same-day transactions ---------- */
+await page.evaluate(() => {
+  const state = JSON.parse(localStorage.getItem('sekeping.state.v1'));
+  const date = new Date().toISOString().slice(0, 10);
+  const base = {
+    type: 'expense',
+    accountId: 'acc_cash',
+    categoryId: 'cat_food',
+    date,
+    note: '',
+    createdAt: Date.now(),
+  };
+  state.txs.push({ ...base, id: 't_early', amount: 1000, time: '08:00', note: 'Pagi' });
+  state.txs.push({ ...base, id: 't_late', amount: 2000, time: '20:00', note: 'Malam' });
+  state.settings.pin = null;
+  localStorage.setItem('sekeping.state.v1', JSON.stringify(state));
+});
+await page.reload({ waitUntil: 'networkidle0' });
+await wait(700);
+await nav('Transaksi');
+const sameDay = await page.evaluate(() =>
+  [...document.querySelectorAll('.sk-row-meta')].map((el) => el.textContent || ''),
+);
+const lateIndex = sameDay.findIndex((text) => text.includes('Malam'));
+const earlyIndex = sameDay.findIndex((text) => text.includes('Pagi'));
+check(
+  'same-day rows sort by time',
+  lateIndex >= 0 && earlyIndex >= 0 && lateIndex < earlyIndex,
+  `Malam #${lateIndex}, Pagi #${earlyIndex}`,
+);
+
+await page.evaluate(() => document.querySelector('[data-tour="add"] button')?.click());
+await wait(500);
+check(
+  'entry form has an optional time field',
+  await page.evaluate(() => Boolean(document.querySelector('input[type="time"]'))),
+);
+await page.keyboard.press('Escape');
+await wait(300);
+
 /* ---------- clearing all data uses an in-app dialog, not window.confirm ---------- */
 await nav('Pengaturan');
 await page.evaluate(() =>

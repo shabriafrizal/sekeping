@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { currentMonth, useStore } from '../lib/store';
-import { money, compactMoney, monthLabel, dayLabel, toISO } from '../lib/format';
+import { money, compactMoney, monthLabel, dayLabel, toISO, compareTxs } from '../lib/format';
 import { TxRow } from '../components/TxRow';
 import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
@@ -56,7 +56,7 @@ export default function Home({
   const flow = totals.income - totals.expense;
   const savingRate = totals.income > 0 ? Math.round((flow / totals.income) * 100) : null;
   const monthTx = state.txs.filter((t) => t.date >= from && t.date <= to);
-  const recent = [...state.txs].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt)).slice(0, 6);
+  const recent = [...state.txs].sort(compareTxs).slice(0, 6);
   const dailyAverage = totals.expense / Math.max(now.getDate(), 1);
 
   const positiveTotal = state.accounts
