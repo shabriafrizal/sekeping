@@ -11,14 +11,21 @@ import android.view.View
 import android.widget.RemoteViews
 
 /**
- * One resizable home-screen widget. It shows the selected provider (account) with
- * its balance, the total of every active account, an eye toggle that masks both
+ * One home-screen widget. It shows the selected provider (account) with its
+ * balance, the total of every active account, an eye toggle that masks both
  * amounts, and three labelled quick actions.
+ *
+ * [WidgetProvider] itself is the resizable 4×2 entry. The two subclasses below
+ * are fixed-size entries so the launcher's widget picker can offer 4×1 and 2×2
+ * directly, instead of making people add a widget and resize it afterwards.
  */
-class WidgetProvider : AppWidgetProvider() {
+open class WidgetProvider : AppWidgetProvider() {
+
+    /** Size-specific providers render one layout; the base provider follows the launcher size. */
+    protected open val fixedLayout: Int? = null
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
-        ids.forEach { update(context, manager, it) }
+        ids.forEach { update(context, manager, it, fixedLayout) }
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -27,7 +34,7 @@ class WidgetProvider : AppWidgetProvider() {
         widgetId: Int,
         newOptions: Bundle,
     ) {
-        update(context, manager, widgetId)
+        update(context, manager, widgetId, fixedLayout)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -46,9 +53,21 @@ class WidgetProvider : AppWidgetProvider() {
 
         const val ACTION_TOGGLE_HIDDEN = "dev.shabri.sekeping.widget.TOGGLE_HIDDEN"
 
-        fun update(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        /** Every entry shown by the launcher's widget picker. */
+        private val PROVIDERS: List<Pair<Class<*>, Int?>> = listOf(
+            WidgetProvider::class.java to null,
+            WidgetProviderWide::class.java to R.layout.widget_sekeping_small,
+            WidgetProviderSquare::class.java to R.layout.widget_sekeping_square,
+        )
+
+        fun update(
+            context: Context,
+            manager: AppWidgetManager,
+            widgetId: Int,
+            fixedLayout: Int? = null,
+        ) {
             try {
-                render(context, manager, widgetId)
+                render(context, manager, widgetId, fixedLayout)
             } catch (_: Throwable) {
                 /* Never leave "Problem loading widget" on the launcher. */
                 val fallback = RemoteViews(context.packageName, R.layout.widget_sekeping_fallback)
@@ -57,7 +76,12 @@ class WidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        private fun render(
+            context: Context,
+            manager: AppWidgetManager,
+            widgetId: Int,
+            fixedLayout: Int?,
+        ) {
             val config = WidgetPrefs.config(context, widgetId)
             val summary = WidgetPrefs.summary(context)
             val hidden = WidgetPrefs.hidden(context)
@@ -65,11 +89,11 @@ class WidgetProvider : AppWidgetProvider() {
             val provider = summary.accounts.firstOrNull { it.id == config.accountId }
                 ?: summary.accounts.firstOrNull()
 
-            val layout = layoutFor(manager, widgetId)
+            val layout = fixedLayout ?: layoutFor(manager, widgetId)
             val views = RemoteViews(context.packageName, layout)
 
             views.setTextViewText(R.id.widget_provider, provider?.name ?: t(language, "Belum ada rekening", "No account yet"))
-            views.setImageViewResource(R.id.widget_provider_icon, providerIcon(provider?.icon))
+            views.setImageViewResource(R.id.widget_provider_icon, providerIcon(context, provider?.icon))
             views.setTextViewText(R.id.widget_provider_balance, mask(provider?.balance ?: "—", hidden))
             views.setTextViewText(
                 R.id.widget_total,
@@ -112,8 +136,30 @@ class WidgetProvider : AppWidgetProvider() {
 
         fun refreshAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, WidgetProvider::class.java))
-            ids.forEach { update(context, manager, it) }
+            for ((provider, layout) in PROVIDERS) {
+                val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+                ids.forEach { update(context, manager, it, layout) }
+            }
+        }
+
+        /**
+         * The size key shown in the web setup dialog. Fixed providers report
+         * their own shape; the resizable base provider follows the cells it
+         * currently occupies.
+         */
+        fun sizeKey(context: Context, widgetId: Int): String {
+            val manager = AppWidgetManager.getInstance(context)
+            val className = manager.getAppWidgetInfo(widgetId)?.provider?.className
+            if (className == WidgetProviderWide::class.java.name) return "4x1"
+            if (className == WidgetProviderSquare::class.java.name) return "2x2"
+            val options = manager.getAppWidgetOptions(widgetId)
+            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            return when {
+                height in 1..89 -> "4x1"
+                width in 1..219 -> "2x2"
+                else -> "4x2"
+            }
         }
 
         private fun t(language: String, indonesian: String, english: String): String =
@@ -123,13 +169,23 @@ class WidgetProvider : AppWidgetProvider() {
         private fun mask(value: String, hidden: Boolean): String =
             if (!hidden) value else value.replace(Regex("[0-9][0-9.,]*"), "***")
 
-        private fun providerIcon(key: String?): Int = when (key) {
-            "bank" -> R.drawable.ic_provider_bank
-            "phone" -> R.drawable.ic_provider_phone
-            "cash" -> R.drawable.ic_provider_cash
-            "card" -> R.drawable.ic_provider_card
-            "store" -> R.drawable.ic_provider_store
-            else -> R.drawable.ic_wallet
+        private fun providerIcon(context: Context, key: String?): Int {
+            val id = when (key) {
+                "bank" -> R.drawable.ic_provider_bank
+                "phone" -> R.drawable.ic_provider_phone
+                "cash" -> R.drawable.ic_provider_cash
+                "card" -> R.drawable.ic_provider_card
+                "store" -> R.drawable.ic_provider_store
+                else -> R.drawable.ic_wallet
+            }
+            /* A malformed drawable would make the launcher show "Problem
+               loading widget"; fall back to the wallet before sending it. */
+            return try {
+                context.resources.getDrawable(id, context.theme)
+                id
+            } catch (_: Throwable) {
+                R.drawable.ic_wallet
+            }
         }
 
         /** Pick the layout from the cells the widget currently occupies. */
@@ -190,4 +246,14 @@ class WidgetProvider : AppWidgetProvider() {
             )
         }
     }
+}
+
+/** Fixed 4×1 entry in the launcher's widget picker. */
+class WidgetProviderWide : WidgetProvider() {
+    override val fixedLayout: Int = R.layout.widget_sekeping_small
+}
+
+/** Fixed 2×2 entry in the launcher's widget picker. */
+class WidgetProviderSquare : WidgetProvider() {
+    override val fixedLayout: Int = R.layout.widget_sekeping_square
 }

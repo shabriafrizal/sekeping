@@ -2,8 +2,12 @@
 <resources>
     <string name="app_name">Sekeping</string>
 
-    <string name="widget_name">Sekeping</string>
-    <string name="widget_description">Saldo dan tombol cepat untuk mencatat pengeluaran, pendapatan, atau transfer.</string>
+    <string name="widget_name">Sekeping 4×2</string>
+    <string name="widget_name_wide">Sekeping 4×1</string>
+    <string name="widget_name_square">Sekeping 2×2</string>
+    <string name="widget_description">Widget 4×2: saldo, total, dan tombol cepat untuk mencatat pengeluaran, pendapatan, atau transfer.</string>
+    <string name="widget_description_wide">Widget ringkas 4×1: saldo dan tombol cepat.</string>
+    <string name="widget_description_square">Widget kotak 2×2: saldo dan tombol cepat.</string>
     <string name="widget_configure">Atur widget Sekeping</string>
     <string name="widget_configure_title">Atur widget</string>
     <string name="widget_configure_subtitle">Pilih rekening, tombol, dan ukuran.</string>

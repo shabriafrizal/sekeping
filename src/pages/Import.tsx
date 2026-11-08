@@ -15,6 +15,7 @@ import {
   type CsvTable,
   type DateFormat,
 } from '../lib/csv';
+import { t } from '../lib/i18n';
 
 const DELIMITER_LABEL: Record<string, string> = {
   ',': 'koma',
@@ -24,9 +25,9 @@ const DELIMITER_LABEL: Record<string, string> = {
 };
 
 const TYPE_LABEL: Record<TxType, string> = {
-  expense: 'Pengeluaran',
-  income: 'Pendapatan',
-  transfer: 'Transfer',
+  expense: t("Pengeluaran"),
+  income: t("Pendapatan"),
+  transfer: t("Transfer"),
 };
 
 function download(name: string, content: string, mime: string) {
@@ -163,11 +164,11 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Data masuk</p>
-          <h1 className="sk-title">Impor CSV</h1>
-          <p className="sk-sub">Petakan kolom dari bank atau aplikasi lain, lalu periksa sebelum menyimpan.</p>
+          <p className="sk-eyebrow">{t("Data masuk")}</p>
+          <h1 className="sk-title">{t("Impor CSV")}</h1>
+          <p className="sk-sub">{t("Petakan kolom dari bank atau aplikasi lain, lalu periksa sebelum menyimpan.")}</p>
         </div>
-        <Button label="Kembali ke transaksi" variant="ghost" onClick={() => onNavigate('transactions')} />
+        <Button label={t("Kembali ke transaksi")} variant="ghost" onClick={() => onNavigate('transactions')} />
       </div>
 
       {imported > 0 && !table ? (
@@ -175,28 +176,22 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
           <div className="sk-card-head">
             <h2 className="sk-card-title">{imported} transaksi diimpor</h2>
           </div>
-          <p className="sk-sub" style={{ marginTop: 0 }}>
-            Semua baris yang valid sudah masuk ke buku. Baris duplikat dan bermasalah dilewati.
-          </p>
+          <p className="sk-sub" style={{ marginTop: 0 }}>{t("Semua baris yang valid sudah masuk ke buku. Baris duplikat dan bermasalah dilewati.")}</p>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.6rem' }}>
-            <Button label="Lihat transaksi" variant="secondary" size="sm" onClick={() => onNavigate('transactions')} />
-            <Button label="Impor berkas lain" variant="ghost" size="sm" onClick={() => setImported(0)} />
+            <Button label={t("Lihat transaksi")} variant="secondary" size="sm" onClick={() => onNavigate('transactions')} />
+            <Button label={t("Impor berkas lain")} variant="ghost" size="sm" onClick={() => setImported(0)} />
           </div>
         </section>
       ) : null}
 
       <section className="sk-card" aria-labelledby="import-file">
         <div className="sk-card-head">
-          <h2 className="sk-card-title" id="import-file">
-            1. Pilih berkas
-          </h2>
+          <h2 className="sk-card-title" id="import-file">{t("1. Pilih berkas")}</h2>
           <button
             type="button"
             className="sk-link"
             onClick={() => download('sekeping-contoh-impor.csv', CSV_TEMPLATE, 'text/csv;charset=utf-8')}
-          >
-            Unduh contoh
-          </button>
+          >{t("Unduh contoh")}</button>
         </div>
         <div
           className="sk-drop"
@@ -217,9 +212,9 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
             )}
           </p>
           <p className="sk-sub" style={{ marginTop: 0 }}>
-            File tetap diproses di perangkat ini; tidak ada yang diunggah.
+            {t('File tetap diproses di perangkat ini; tidak ada yang diunggah.')}
           </p>
-          <Button label="Pilih berkas CSV" variant="secondary" size="sm" onClick={() => fileRef.current?.click()} />
+          <Button label={t("Pilih berkas CSV")} variant="secondary" size="sm" onClick={() => fileRef.current?.click()} />
           <input
             ref={fileRef}
             type="file"
@@ -234,19 +229,19 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
         </div>
 
         <details className="sk-details">
-          <summary>Atau tempel teks CSV</summary>
+          <summary>{t("Atau tempel teks CSV")}</summary>
           <label className="sk-field" style={{ marginTop: '0.6rem' }}>
-            <span className="sk-eyebrow">Teks CSV</span>
+            <span className="sk-eyebrow">{t("Teks CSV")}</span>
             <textarea
               className="sk-input sk-textarea"
               rows={5}
               value={paste}
-              placeholder="Tanggal,Jenis,Kategori,Rekening,Jumlah,Catatan…"
+              placeholder={t("Tanggal,Jenis,Kategori,Rekening,Jumlah,Catatan…")}
               onChange={(e) => setPaste(e.target.value)}
             />
           </label>
           <Button
-            label="Gunakan teks ini"
+            label={t("Gunakan teks ini")}
             variant="secondary"
             size="sm"
             isDisabled={paste.trim().length === 0}
@@ -259,18 +254,14 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
         <>
           <section className="sk-card" aria-labelledby="import-map">
             <div className="sk-card-head">
-              <h2 className="sk-card-title" id="import-map">
-                2. Petakan kolom
-              </h2>
-              <button type="button" className="sk-link" onClick={() => setMapping(guessMapping(table.headers))}>
-                Tebak ulang
-              </button>
+              <h2 className="sk-card-title" id="import-map">{t("2. Petakan kolom")}</h2>
+              <button type="button" className="sk-link" onClick={() => setMapping(guessMapping(table.headers))}>{t("Tebak ulang")}</button>
             </div>
             <div className="sk-map-grid">
               {CSV_FIELDS.map((field) => (
                 <Selector
                   key={field.key}
-                  label={field.required ? `${field.label} *` : field.label}
+                  label={field.required ? `${t(field.label)} *` : t(field.label)}
                   options={[
                     { value: '', label: '— tidak dipakai —' },
                     ...table.headers.map((header, i) => ({
@@ -292,24 +283,22 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
               ))}
             </div>
             {!mappingComplete ? (
-              <p className="sk-inline-warning" role="status">
-                Tanggal dan jumlah wajib dipetakan sebelum bisa diimpor.
-              </p>
+              <p className="sk-inline-warning" role="status">{t("Tanggal dan jumlah wajib dipetakan sebelum bisa diimpor.")}</p>
             ) : null}
             <div className="sk-two" style={{ marginTop: '0.8rem' }}>
               <Selector
-                label="Jenis bawaan"
+                label={t("Jenis bawaan")}
                 options={[
-                  { value: 'expense', label: 'Pengeluaran' },
-                  { value: 'income', label: 'Pendapatan' },
-                  { value: 'transfer', label: 'Transfer' },
+                  { value: 'expense', label: t("Pengeluaran") },
+                  { value: 'income', label: t("Pendapatan") },
+                  { value: 'transfer', label: t("Transfer") },
                 ]}
                 value={defaultType}
                 onChange={(v) => setDefaultType(v as TxType)}
                 width="100%"
               />
               <Selector
-                label="Format tanggal"
+                label={t("Format tanggal")}
                 options={[
                   { value: 'auto', label: 'Deteksi otomatis' },
                   { value: 'ymd', label: 'Tahun-Bulan-Hari' },
@@ -323,18 +312,18 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
             </div>
             <div className="sk-two" style={{ marginTop: '0.6rem' }}>
               <Selector
-                label="Rekening bawaan"
+                label={t("Rekening bawaan")}
                 options={activeAccounts.map((a) => ({ value: a.id, label: a.name }))}
                 value={defaultAccountId}
                 onChange={setDefaultAccountId}
                 width="100%"
               />
               <div className="sk-field">
-                <span className="sk-eyebrow">Opsi</span>
+                <span className="sk-eyebrow">{t("Opsi")}</span>
                 <label className="sk-check" style={{ padding: '0.5rem 0.65rem' }}>
                   <input type="checkbox" checked={inferSign} onChange={(e) => setInferSign(e.target.checked)} />
                   <span>
-                    <b>Arah dari tanda angka</b>
+                    <b>{t("Arah dari tanda angka")}</b>
                     <small>Negatif = pengeluaran, positif = pendapatan. Abaikan kolom jenis.</small>
                   </span>
                 </label>
@@ -344,15 +333,15 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
               <label className="sk-check">
                 <input type="checkbox" checked={dedupe} onChange={(e) => setDedupe(e.target.checked)} />
                 <span>
-                  <b>Lewati duplikat</b>
-                  <small>Baris dengan tanggal, jenis, jumlah, dan catatan yang sama tidak diimpor ulang.</small>
+                  <b>{t("Lewati duplikat")}</b>
+                  <small>{t("Baris dengan tanggal, jenis, jumlah, dan catatan yang sama tidak diimpor ulang.")}</small>
                 </span>
               </label>
               <label className="sk-check">
                 <input type="checkbox" checked={createMissing} onChange={(e) => setCreateMissing(e.target.checked)} />
                 <span>
                   <b>Buat rekening &amp; kategori baru</b>
-                  <small>Nama yang belum ada ditambahkan otomatis, bukan dibuang.</small>
+                  <small>{t("Nama yang belum ada ditambahkan otomatis, bukan dibuang.")}</small>
                 </span>
               </label>
             </div>
@@ -378,21 +367,21 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
                 </span>
               </div>
 
-              <div className="sk-table-wrap" tabIndex={0} role="region" aria-label="Pratinjau impor, dapat digulir">
+              <div className="sk-table-wrap" tabIndex={0} role="region" aria-label={t("Pratinjau impor, dapat digulir")}>
                 <table className="sk-table">
                   <caption className="sk-visually-hidden">
                     Pratinjau {preview.rows.length} baris, {preview.valid} siap diimpor
                   </caption>
                   <thead>
                     <tr>
-                      <th scope="col">Baris</th>
-                      <th scope="col">Tanggal</th>
-                      <th scope="col">Jenis</th>
-                      <th scope="col">Jumlah</th>
-                      <th scope="col">Kategori</th>
-                      <th scope="col">Rekening</th>
-                      <th scope="col">Catatan</th>
-                      <th scope="col">Status</th>
+                      <th scope="col">{t("Baris")}</th>
+                      <th scope="col">{t("Tanggal")}</th>
+                      <th scope="col">{t("Jenis")}</th>
+                      <th scope="col">{t("Jumlah")}</th>
+                      <th scope="col">{t("Kategori")}</th>
+                      <th scope="col">{t("Rekening")}</th>
+                      <th scope="col">{t("Catatan")}</th>
+                      <th scope="col">{t("Status")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -411,11 +400,9 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
                               {row.error}
                             </span>
                           ) : row.duplicate ? (
-                            <span className="sk-badge">Duplikat</span>
+                            <span className="sk-badge">{t("Duplikat")}</span>
                           ) : (
-                            <span className="sk-badge" data-tone="success">
-                              Siap
-                            </span>
+                            <span className="sk-badge" data-tone="success">{t("Siap")}</span>
                           )}
                         </td>
                       </tr>
@@ -428,7 +415,7 @@ export default function ImportPage({ onNavigate }: { onNavigate: (page: string) 
               ) : null}
 
               <div className="sk-sheet-actions">
-                <Button label="Batalkan" variant="ghost" onClick={() => setTable(null)} />
+                <Button label={t("Batalkan")} variant="ghost" onClick={() => setTable(null)} />
                 <Button
                   label={`Impor ${preview.valid} transaksi`}
                   variant="primary"

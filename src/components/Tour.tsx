@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent } from 'react';
+import { t } from '../lib/i18n';
 
 /**
  * A guided walk over the real interface: each step dims the page, cuts a hole
@@ -177,21 +178,17 @@ export default function Tour({ steps, onDone }: { steps: TourStep[]; onDone: () 
           ))}
         </div>
         <h2 className="sk-tour-title" id="sk-tour-title">
-          {step.title}
+          {t(step.title)}
         </h2>
-        <p className="sk-tour-body">{step.body}</p>
+        <p className="sk-tour-body">{t(step.body)}</p>
         <div className="sk-tour-actions">
-          <button type="button" className="sk-tour-skip" onClick={finish}>
-            Lewati
-          </button>
+          <button type="button" className="sk-tour-skip" onClick={finish}>{t("Lewati")}</button>
           <div className="sk-tour-next-group">
             {index > 0 ? (
-              <button type="button" className="sk-tour-back" onClick={() => setIndex((i) => i - 1)}>
-                Kembali
-              </button>
+              <button type="button" className="sk-tour-back" onClick={() => setIndex((i) => i - 1)}>{t("Kembali")}</button>
             ) : null}
             <button type="button" className="sk-tour-primary" data-tour-primary onClick={next}>
-              {last ? 'Selesai' : 'Lanjut'}
+              {last ? 'Selesai' : t("Lanjut")}
             </button>
           </div>
         </div>

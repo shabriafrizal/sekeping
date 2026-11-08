@@ -6,6 +6,7 @@ import { money, compactMoney, monthLabel } from '../lib/format';
 import { budgetProgress, currentMonthKey, shiftMonth, toneFor } from '../lib/budgets';
 import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 export default function Budgets({
   onAdd,
@@ -50,35 +51,33 @@ export default function Budgets({
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Rencana</p>
-          <h1 className="sk-title">Anggaran</h1>
+          <p className="sk-eyebrow">{t("Rencana")}</p>
+          <h1 className="sk-title">{t("Anggaran")}</h1>
           <p className="sk-sub">
-            {activeProgress.length} kategori · {overCount > 0 ? `${overCount} melewati batas` : 'semua dalam batas'}
+            {t('{n} kategori · {status}', { n: activeProgress.length, status: overCount > 0 ? t('{n} melewati batas', { n: overCount }) : t('semua dalam batas') })}
           </p>
         </div>
-        <div className="sk-month-nav" role="group" aria-label="Pilih bulan anggaran">
-          <button type="button" className="sk-month-btn" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bulan sebelumnya">
+        <div className="sk-month-nav" role="group" aria-label={t("Pilih bulan anggaran")}>
+          <button type="button" className="sk-month-btn" onClick={() => setMonth(shiftMonth(month, -1))} aria-label={t("Bulan sebelumnya")}>
             ‹
           </button>
           <span aria-live="polite">{monthLabel(`${month}-01`)}</span>
-          <button type="button" className="sk-month-btn" onClick={() => setMonth(shiftMonth(month, 1))} aria-label="Bulan berikutnya">
+          <button type="button" className="sk-month-btn" onClick={() => setMonth(shiftMonth(month, 1))} aria-label={t("Bulan berikutnya")}>
             ›
           </button>
           {!isCurrent ? (
-            <button type="button" className="sk-link" onClick={() => setMonth(currentMonthKey())}>
-              Bulan ini
-            </button>
+            <button type="button" className="sk-link" onClick={() => setMonth(currentMonthKey())}>{t("Bulan ini")}</button>
           ) : null}
         </div>
       </div>
 
       <div className="sk-kpis">
         <div className="sk-kpi">
-          <span>Dana tersedia</span>
+          <span>{t("Dana tersedia")}</span>
           <strong>{compactMoney(totalAvailable)}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Terpakai</span>
+          <span>{t("Terpakai")}</span>
           <strong>{compactMoney(totalSpent)}</strong>
         </div>
         <div className="sk-kpi" data-tone={totalRemaining < 0 ? 'error' : undefined}>
@@ -86,25 +85,23 @@ export default function Budgets({
           <strong>{compactMoney(Math.abs(totalRemaining))}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Rollover terkumpul</span>
+          <span>{t("Rollover terkumpul")}</span>
           <strong>{compactMoney(rolloverIn)}</strong>
         </div>
       </div>
 
       <section className="sk-card" aria-labelledby="budget-list">
         <div className="sk-card-head">
-          <h2 className="sk-card-title" id="budget-list">
-            Anggaran per kategori
-          </h2>
-          <Button label="+ Tambah" variant="secondary" size="sm" onClick={() => onAdd()} />
+          <h2 className="sk-card-title" id="budget-list">{t("Anggaran per kategori")}</h2>
+          <Button label={t("+ Tambah")} variant="secondary" size="sm" onClick={() => onAdd()} />
         </div>
 
         {progress.length === 0 ? (
           <EmptyState
             icon="budget"
-            title="Belum ada anggaran"
-            hint="Tetapkan batas bulanan untuk kategori yang paling sering kamu pakai."
-            action={<Button label="Buat anggaran" variant="secondary" onClick={() => onAdd()} />}
+            title={t("Belum ada anggaran")}
+            hint={t("Tetapkan batas bulanan untuk kategori yang paling sering kamu pakai.")}
+            action={<Button label={t("Buat anggaran")} variant="secondary" onClick={() => onAdd()} />}
           />
         ) : (
           <div className="sk-budget-list">
@@ -118,7 +115,7 @@ export default function Budgets({
                   type="button"
                   className="sk-budget-row"
                   onClick={() => onEdit(p.budget)}
-                  aria-label={`${p.category?.name ?? 'Kategori'}: terpakai ${money(p.spent)} dari ${money(p.available)}`}
+                  aria-label={`${p.category?.name ?? t("Kategori")}: terpakai ${money(p.spent)} dari ${money(p.available)}`}
                 >
                   <span className="sk-row-icon" data-tone="expense">
                     <Icon />
@@ -129,9 +126,9 @@ export default function Budgets({
                       <span className="sk-badge" data-tone={tone === 'over' ? 'error' : tone === 'warning' ? 'success' : undefined}>
                         {percent}%
                       </span>
-                      {p.budget.rollover ? <span className="sk-badge">Rollover</span> : null}
-                      {!p.budget.active ? <span className="sk-badge">Nonaktif</span> : null}
-                      {p.budget.startMonth > month ? <span className="sk-badge">Belum mulai</span> : null}
+                      {p.budget.rollover ? <span className="sk-badge">{t("Rollover")}</span> : null}
+                      {!p.budget.active ? <span className="sk-badge">{t("Nonaktif")}</span> : null}
+                      {p.budget.startMonth > month ? <span className="sk-badge">{t("Belum mulai")}</span> : null}
                     </span>
                     <span className="sk-progress" data-tone={tone === 'over' ? 'error' : tone === 'warning' ? 'warning' : undefined}>
                       <i style={{ width: `${Math.min(p.ratio * 100, 100)}%` }} />
@@ -156,11 +153,9 @@ export default function Budgets({
       {unbudgeted.length > 0 ? (
         <section className="sk-card">
           <div className="sk-card-head">
-            <h2 className="sk-card-title">Kategori tanpa anggaran</h2>
+            <h2 className="sk-card-title">{t("Kategori tanpa anggaran")}</h2>
           </div>
-          <p className="sk-sub" style={{ marginTop: 0 }}>
-            Pilih kategori untuk menetapkan batas bulanannya.
-          </p>
+          <p className="sk-sub" style={{ marginTop: 0 }}>{t("Pilih kategori untuk menetapkan batas bulanannya.")}</p>
           <div className="sk-chips">
             {unbudgeted.map((c) => {
               const Icon = iconFor(c.icon);
@@ -176,7 +171,7 @@ export default function Budgets({
       ) : null}
 
       <p className="sk-sub" style={{ fontSize: '0.74rem' }}>
-        Rollover hanya meneruskan sisa positif ke bulan berikutnya; kelebihan tidak mengurangi jatah bulan depan.
+        {t("Rollover hanya meneruskan sisa positif ke bulan berikutnya; kelebihan tidak mengurangi jatah bulan depan.")}
       </p>
     </div>
   );

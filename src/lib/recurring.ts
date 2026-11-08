@@ -1,11 +1,12 @@
 import type { Interval, Recurring, Tx } from './types';
 import { parseISO, toISO, todayISO } from './format';
 import { uid } from './types';
+import { t } from './i18n';
 
 export const INTERVAL_LABEL: Record<Interval, string> = {
-  weekly: 'Mingguan',
-  monthly: 'Bulanan',
-  yearly: 'Tahunan',
+  weekly: "Mingguan",
+  monthly: "Bulanan",
+  yearly: "Tahunan",
 };
 
 const MAX_CATCH_UP = 240;

@@ -7,6 +7,7 @@ import { useStore } from '../lib/store';
 import type { Account, Category, CategoryType, Debt, DebtKind } from '../lib/types';
 import { todayISO } from '../lib/format';
 import { IconPicker } from '../components/IconPicker';
+import { t } from '../lib/i18n';
 
 /* ------------------------------------------------------------------ */
 /* Account                                                             */
@@ -64,15 +65,15 @@ export function AccountSheet({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={430} maxHeight="90dvh">
       <DialogHeader
-        title={account ? 'Ubah rekening' : 'Tambah rekening'}
-        subtitle="Tempat uangmu disimpan"
+        title={t(account ? 'Ubah rekening' : 'Tambah rekening')}
+        subtitle={t("Tempat uangmu disimpan")}
         onOpenChange={onOpenChange}
       />
       <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
-        <TextInput label="Nama rekening" value={name} placeholder="Cash, BCA, GoPay…" onChange={setName} />
+        <TextInput label={t("Nama rekening")} value={name} placeholder={t("Cash, BCA, GoPay…")} onChange={setName} />
         <div className="sk-field">
           <TextInput
-            label="Saldo awal"
+            label={t("Saldo awal")}
             value={initial ? String(initial) : ''}
             placeholder="0"
             onChange={(v) => setInitial(Number(v.replace(/\D/g, '')) || 0)}
@@ -82,18 +83,18 @@ export function AccountSheet({
         <label className="sk-check">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
           <span>
-            <b>Aktif</b>
-            <small>Rekening tidak aktif disembunyikan saat mencatat transaksi.</small>
+            <b>{t("Aktif")}</b>
+            <small>{t("Rekening tidak aktif disembunyikan saat mencatat transaksi.")}</small>
           </span>
         </label>
       </div>
       <div className="sk-sheet-actions">
         {account ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label="Simpan" variant="primary" onClick={save} />
+        <Button label={t("Simpan")} variant="primary" onClick={save} />
       </div>
     </Dialog>
   );
@@ -153,12 +154,12 @@ export function CategorySheet({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={430} maxHeight="90dvh">
       <DialogHeader
-        title={category ? 'Ubah kategori' : 'Tambah kategori'}
-        subtitle="Kelompokkan transaksimu"
+        title={t(category ? 'Ubah kategori' : 'Tambah kategori')}
+        subtitle={t("Kelompokkan transaksimu")}
         onOpenChange={onOpenChange}
       />
       <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
-        <div className="sk-type-row" role="radiogroup" aria-label="Jenis kategori">
+        <div className="sk-type-row" role="radiogroup" aria-label={t("Jenis kategori")}>
           <button
             type="button"
             className="sk-type-btn"
@@ -167,9 +168,7 @@ export function CategorySheet({
             aria-checked={type === 'expense'}
             role="radio"
             onClick={() => setType('expense')}
-          >
-            Pengeluaran
-          </button>
+          >{t("Pengeluaran")}</button>
           <button
             type="button"
             className="sk-type-btn"
@@ -178,27 +177,25 @@ export function CategorySheet({
             aria-checked={type === 'income'}
             role="radio"
             onClick={() => setType('income')}
-          >
-            Pendapatan
-          </button>
+          >{t("Pendapatan")}</button>
         </div>
-        <TextInput label="Nama kategori" value={name} placeholder="Makan & Minum" onChange={setName} />
+        <TextInput label={t("Nama kategori")} value={name} placeholder="Makan & Minum" onChange={setName} />
         <IconPicker value={icon} onChange={setIcon} />
         <label className="sk-check">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
           <span>
-            <b>Aktif</b>
-            <small>Kategori tidak aktif disembunyikan saat mencatat transaksi.</small>
+            <b>{t("Aktif")}</b>
+            <small>{t("Kategori tidak aktif disembunyikan saat mencatat transaksi.")}</small>
           </span>
         </label>
       </div>
       <div className="sk-sheet-actions">
         {category ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label="Simpan" variant="primary" onClick={save} />
+        <Button label={t("Simpan")} variant="primary" onClick={save} />
       </div>
     </Dialog>
   );
@@ -283,12 +280,12 @@ export function DebtSheet({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={440} maxHeight="92dvh">
       <DialogHeader
-        title={debt ? 'Ubah catatan' : form.kind === 'debt' ? 'Catat utang' : 'Catat piutang'}
-        subtitle={form.kind === 'debt' ? 'Uang yang kamu pinjam' : 'Uang yang kamu pinjamkan'}
+        title={t(debt ? 'Ubah catatan' : form.kind === 'debt' ? 'Catat utang' : 'Catat piutang')}
+        subtitle={t(form.kind === 'debt' ? 'Uang yang kamu pinjam' : 'Uang yang kamu pinjamkan')}
         onOpenChange={onOpenChange}
       />
       <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
-        <div className="sk-type-row" role="radiogroup" aria-label="Jenis">
+        <div className="sk-type-row" role="radiogroup" aria-label={t("Jenis")}>
           <button
             type="button"
             role="radio"
@@ -297,9 +294,7 @@ export function DebtSheet({
             data-tone="expense"
             data-active={form.kind === 'debt'}
             onClick={() => setForm((f) => ({ ...f, kind: 'debt' }))}
-          >
-            Utang
-          </button>
+          >{t("Utang")}</button>
           <button
             type="button"
             role="radio"
@@ -308,24 +303,22 @@ export function DebtSheet({
             data-tone="income"
             data-active={form.kind === 'loan'}
             onClick={() => setForm((f) => ({ ...f, kind: 'loan' }))}
-          >
-            Piutang
-          </button>
+          >{t("Piutang")}</button>
         </div>
         <TextInput
-          label="Nama"
+          label={t("Nama")}
           value={form.name}
           placeholder={form.kind === 'debt' ? 'Pinjaman motor' : 'Dipinjam Rani'}
           onChange={(v) => setForm((f) => ({ ...f, name: v }))}
         />
         <TextInput
-          label="Jumlah"
+          label={t("Jumlah")}
           value={form.total ? String(form.total) : ''}
           placeholder="0"
           onChange={(v) => setForm((f) => ({ ...f, total: Number(v.replace(/\D/g, '')) || 0 }))}
         />
         <Selector
-          label="Rekening"
+          label={t("Rekening")}
           options={options}
           value={form.accountId}
           onChange={(v) => setForm((f) => ({ ...f, accountId: v }))}
@@ -333,7 +326,7 @@ export function DebtSheet({
         />
         <div className="sk-two">
           <label className="sk-field">
-            <span className="sk-eyebrow">Tanggal mulai</span>
+            <span className="sk-eyebrow">{t("Tanggal mulai")}</span>
             <input
               className="sk-input"
               type="date"
@@ -342,7 +335,7 @@ export function DebtSheet({
             />
           </label>
           <label className="sk-field">
-            <span className="sk-eyebrow">Jatuh tempo</span>
+            <span className="sk-eyebrow">{t("Jatuh tempo")}</span>
             <input
               className="sk-input"
               type="date"
@@ -352,20 +345,20 @@ export function DebtSheet({
           </label>
         </div>
         <TextInput
-          label="Catatan"
+          label={t("Catatan")}
           value={form.note}
-          placeholder="Opsional"
+          placeholder={t("Opsional")}
           onChange={(v) => setForm((f) => ({ ...f, note: v }))}
         />
         {!debt ? (
           <label className="sk-check">
             <input type="checkbox" checked={bookNow} onChange={(e) => setBookNow(e.target.checked)} />
             <span>
-              <b>Catat di rekening sekarang</b>
+              <b>{t("Catat di rekening sekarang")}</b>
               <small>
                 {form.kind === 'debt'
-                  ? 'Tambahkan pemasukan sebesar pinjaman ke rekening.'
-                  : 'Tambahkan pengeluaran sebesar pinjaman ke rekening.'}
+                  ? t('Tambahkan pemasukan sebesar pinjaman ke rekening.')
+                  : t('Tambahkan pengeluaran sebesar pinjaman ke rekening.')}
               </small>
             </span>
           </label>
@@ -373,11 +366,11 @@ export function DebtSheet({
       </div>
       <div className="sk-sheet-actions">
         {debt ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label="Simpan" variant="primary" onClick={save} />
+        <Button label={t("Simpan")} variant="primary" onClick={save} />
       </div>
     </Dialog>
   );
@@ -432,27 +425,27 @@ export function PaymentSheet({
       />
       <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
         <TextInput
-          label="Jumlah"
+          label={t("Jumlah")}
           value={amount ? String(amount) : ''}
           placeholder="0"
           onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
         />
         <Selector
-          label="Rekening"
+          label={t("Rekening")}
           options={options}
           value={accountId}
           onChange={setAccountId}
           width="100%"
         />
         <label className="sk-field">
-          <span className="sk-eyebrow">Tanggal</span>
+          <span className="sk-eyebrow">{t("Tanggal")}</span>
           <input className="sk-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
-        <TextInput label="Catatan" value={note} placeholder="Opsional" onChange={setNote} />
+        <TextInput label={t("Catatan")} value={note} placeholder={t("Opsional")} onChange={setNote} />
       </div>
       <div className="sk-sheet-actions">
-        <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
-        <Button label="Simpan" variant="primary" onClick={save} />
+        <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
+        <Button label={t("Simpan")} variant="primary" onClick={save} />
       </div>
     </Dialog>
   );

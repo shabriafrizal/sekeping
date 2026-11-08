@@ -33,6 +33,7 @@ import { iconFor } from './lib/icons';
 import { closeSheet, nativeMode, openApp, signalReady, syncWidgetAccounts, syncWidgetSummary, toast } from './lib/native';
 import { daysUntilNext } from './lib/recurring';
 import Tour, { type TourStep } from './components/Tour';
+import { setLanguage, t } from './lib/i18n';
 
 type Page = 'home' | 'transactions' | 'recurring' | 'budgets' | 'reports' | 'debts' | 'import' | 'settings';
 
@@ -49,67 +50,60 @@ const SHEET_START = (() => {
 })();
 
 const NAV: Array<{ id: Page; label: string; icon: string; short?: string }> = [
-  { id: 'home', label: 'Ringkasan', icon: 'house', short: 'h' },
-  { id: 'transactions', label: 'Transaksi', icon: 'receipt', short: 't' },
-  { id: 'recurring', label: 'Rutin', icon: 'repeat', short: 'r' },
-  { id: 'budgets', label: 'Anggaran', icon: 'budget', short: 'b' },
-  { id: 'reports', label: 'Laporan', icon: 'pie', short: 'l' },
-  { id: 'debts', label: 'Utang & Piutang', icon: 'arrows', short: 'd' },
+  { id: 'home', label: "Ringkasan", icon: 'house', short: 'h' },
+  { id: 'transactions', label: "Transaksi", icon: 'receipt', short: 't' },
+  { id: 'recurring', label: "Rutin", icon: 'repeat', short: 'r' },
+  { id: 'budgets', label: "Anggaran", icon: 'budget', short: 'b' },
+  { id: 'reports', label: "Laporan", icon: 'pie', short: 'l' },
+  { id: 'debts', label: "Utang & Piutang", icon: 'arrows', short: 'd' },
 ];
 
 const MAIN_IDS: Page[] = ['home', 'transactions', 'reports', 'debts'];
 const PLAN_IDS: Page[] = ['recurring', 'budgets'];
 
-const MORE_NAV: Array<{ id: Page; label: string; hint: string; icon: string }> = [
-  { id: 'recurring', label: 'Rutin & langganan', hint: 'Jadwal transaksi otomatis', icon: 'repeat' },
-  { id: 'budgets', label: 'Anggaran', hint: 'Batas bulanan per kategori', icon: 'budget' },
-  { id: 'debts', label: 'Utang & piutang', hint: 'Cicilan dan pinjaman', icon: 'arrows' },
-  { id: 'import', label: 'Impor CSV', hint: 'Pemetaan kolom dari bank', icon: 'receipt' },
-  { id: 'settings', label: 'Pengaturan', hint: 'Profil, data, dan keamanan', icon: 'house' },
-];
 
 const SHORTCUTS: Array<{ keys: string; label: string }> = [
-  { keys: 'Alt + 1…6', label: 'Langsung ke halaman (urutan menu)' },
-  { keys: 'g lalu h', label: 'Ringkasan' },
-  { keys: 'g lalu t', label: 'Transaksi' },
-  { keys: 'g lalu r', label: 'Rutin & langganan' },
-  { keys: 'g lalu b', label: 'Anggaran' },
-  { keys: 'g lalu l', label: 'Laporan' },
+  { keys: 'Alt + 1…6', label: "Langsung ke halaman (urutan menu)" },
+  { keys: 'g lalu h', label: "Ringkasan" },
+  { keys: 'g lalu t', label: "Transaksi" },
+  { keys: 'g lalu r', label: "Rutin & langganan" },
+  { keys: 'g lalu b', label: "Anggaran" },
+  { keys: 'g lalu l', label: "Laporan" },
   { keys: 'g lalu d', label: 'Utang & piutang' },
-  { keys: 'g lalu s', label: 'Pengaturan' },
-  { keys: 'n', label: 'Catat pengeluaran baru' },
-  { keys: '?', label: 'Buka atau tutup daftar pintasan ini' },
-  { keys: 'Esc', label: 'Tutup dialog' },
-  { keys: 'Tab / Shift + Tab', label: 'Pindah antar kontrol' },
-  { keys: '↑ ↓ ← →', label: 'Pindah antar item menu' },
+  { keys: 'g lalu s', label: "Pengaturan" },
+  { keys: 'n', label: "Catat pengeluaran baru" },
+  { keys: '?', label: "Buka atau tutup daftar pintasan ini" },
+  { keys: 'Esc', label: "Tutup dialog" },
+  { keys: 'Tab / Shift + Tab', label: "Pindah antar kontrol" },
+  { keys: '↑ ↓ ← →', label: "Pindah antar item menu" },
 ];
 
 /* Each target lists the desktop and the mobile home of the same control. */
 const TOUR_STEPS: TourStep[] = [
   {
     target: ['[data-tour="balance"]'],
-    title: 'Saldo semua rekening',
-    body: 'Angka ini berubah setiap kali kamu mencatat transaksi. Di bawahnya, uang masuk dan keluar bulan ini.',
+    title: "Saldo semua rekening",
+    body: "Angka ini berubah setiap kali kamu mencatat transaksi. Di bawahnya, uang masuk dan keluar bulan ini.",
   },
   {
     target: ['[data-tour="accounts"]'],
-    title: 'Rekeningmu',
-    body: 'Dompet, bank, dan dompet digital. Tiap rekening menghitung saldonya sendiri.',
+    title: "Rekeningmu",
+    body: "Dompet, bank, dan dompet digital. Tiap rekening menghitung saldonya sendiri.",
   },
   {
     target: ['[data-tour="add"]'],
-    title: 'Catat transaksi',
-    body: 'Tekan di sini untuk pengeluaran, pemasukan, atau transfer antar rekening.',
+    title: "Catat transaksi",
+    body: "Tekan di sini untuk pengeluaran, pemasukan, atau transfer antar rekening.",
   },
   {
     target: ['[data-tour="month"]'],
-    title: 'Bulan ini',
-    body: 'Tingkat tabungan, pola belanja tujuh hari, dan kategori paling boros.',
+    title: "Bulan ini",
+    body: "Tingkat tabungan, pola belanja tujuh hari, dan kategori paling boros.",
   },
   {
     target: ['.astryx-side-nav'],
-    title: 'Semua ada di sini',
-    body: 'Transaksi, laporan, utang dan piutang. Pengaturan berisi ekspor dan cadangan.',
+    title: "Semua ada di sini",
+    body: "Transaksi, laporan, utang dan piutang. Pengaturan berisi ekspor dan cadangan.",
   },
 ];
 
@@ -122,6 +116,7 @@ export default function App() {
     (r) => r.active && r.type === 'expense' && daysUntilNext(r) <= 7 && (!r.endDate || r.nextDate <= r.endDate),
   ).length;
   const [locked, setLocked] = useState<boolean>(Boolean(state.settings.pin));
+  const [, forceLanguage] = useState(0);
   const [tourOpen, setTourOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [pin, setPin] = useState('');
@@ -184,7 +179,7 @@ export default function App() {
     if (!state.settings.onboarded || locked || postedRef.current) return;
     postedRef.current = true;
     const count = runRecurring();
-    if (count > 0) notify(`${count} transaksi berulang dicatat otomatis`, 'info');
+    if (count > 0) notify(t('{n} transaksi berulang dicatat otomatis', { n: count }), 'info');
   }, [state.settings.onboarded, locked, runRecurring, notify]);
 
   /* Global shortcuts: Alt+1…6 jumps, g-prefix jumps, n adds, ? shows help. */
@@ -398,9 +393,7 @@ export default function App() {
       <div className="sk-native-surface">
         {locked ? (
           <div className="sk-native-lock">
-            <button type="button" className="sk-native-dismiss" onClick={closeSheet} aria-label="Tutup">
-              Batal
-            </button>
+            <button type="button" className="sk-native-dismiss" onClick={closeSheet} aria-label={t("Tutup")}>{t("Batal")}</button>
             <LockScreen
               value={pin}
               error={pinError}
@@ -483,7 +476,7 @@ export default function App() {
           endContent={
             <span data-tour="add" data-add="expense">
               <Button
-                label="Tambah"
+                label={t("Tambah")}
                 size="sm"
                 variant="primary"
                 icon={<PlusGlyph />}
@@ -498,7 +491,7 @@ export default function App() {
           topContent={
             <span data-tour="add" data-add="expense" className="sk-add-wrap">
               <Button
-                label="Tambah transaksi"
+                label={t("Tambah transaksi")}
                 variant="primary"
                 width="100%"
                 icon={<PlusGlyph />}
@@ -507,15 +500,15 @@ export default function App() {
             </span>
           }
           footer={
-            <SideNavSection title="Akun">
+            <SideNavSection title={t("Akun")}>
               <SideNavItem
-                label="Pintasan"
+                label={t("Pintasan")}
                 icon={iconFor('key')}
                 endContent={<Badge label="?" />}
                 onClick={() => setHelpOpen(true)}
               />
               <SideNavItem
-                label="Pengaturan"
+                label={t("Pengaturan")}
                 icon={iconFor('cog')}
                 isSelected={page === 'settings'}
                 onClick={() => setPage('settings')}
@@ -523,7 +516,7 @@ export default function App() {
             </SideNavSection>
           }
         >
-          <SideNavSection title="Menu">
+          <SideNavSection title={t("Menu")}>
             {NAV.filter((item) => MAIN_IDS.includes(item.id)).map((item) => {
               const Icon = iconFor(item.icon);
               const count =
@@ -531,7 +524,7 @@ export default function App() {
               return (
                 <SideNavItem
                   key={item.id}
-                  label={item.label}
+                  label={t(item.label)}
                   icon={Icon}
                   isSelected={page === item.id}
                   endContent={count > 0 ? <Badge label={String(count)} /> : undefined}
@@ -541,7 +534,7 @@ export default function App() {
             })}
           </SideNavSection>
 
-          <SideNavSection title="Perencanaan">
+          <SideNavSection title={t("Perencanaan")}>
             {NAV.filter((item) => PLAN_IDS.includes(item.id)).map((item) => {
               const Icon = iconFor(item.icon);
               const due =
@@ -553,7 +546,7 @@ export default function App() {
               return (
                 <SideNavItem
                   key={item.id}
-                  label={item.label}
+                  label={t(item.label)}
                   icon={Icon}
                   isSelected={page === item.id}
                   endContent={due > 0 ? <Badge label={String(due)} variant="warning" /> : undefined}
@@ -562,7 +555,7 @@ export default function App() {
               );
             })}
             <SideNavItem
-              label="Impor CSV"
+              label={t("Impor CSV")}
               icon={iconFor('receipt')}
               isSelected={page === 'import'}
               onClick={() => setPage('import')}
@@ -667,18 +660,16 @@ export default function App() {
       />
 
       <Dialog isOpen={helpOpen} onOpenChange={setHelpOpen} purpose="info" width={460}>
-        <DialogHeader title="Pintasan keyboard" subtitle="Bekerja tanpa mouse" onOpenChange={setHelpOpen} />
+        <DialogHeader title={t("Pintasan keyboard")} subtitle={t("Bekerja tanpa mouse")} onOpenChange={setHelpOpen} />
         <div className="sk-shortcuts">
           {SHORTCUTS.map((item) => (
             <div className="sk-shortcut" key={item.keys}>
               <span className="sk-kbd">{item.keys}</span>
-              <span>{item.label}</span>
+              <span>{t(item.label)}</span>
             </div>
           ))}
         </div>
-        <p className="sk-sub" style={{ fontSize: '0.74rem' }}>
-          Pintasan nonaktif saat kamu mengetik di kolom isian. Dialog selalu bisa ditutup dengan Esc.
-        </p>
+        <p className="sk-sub" style={{ fontSize: '0.74rem' }}>{t("Pintasan nonaktif saat kamu mengetik di kolom isian. Dialog selalu bisa ditutup dengan Esc.")}</p>
       </Dialog>
 
       {tourOpen ? <Tour steps={TOUR_STEPS} onDone={endTour} /> : null}
@@ -710,19 +701,19 @@ function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void })
           <LogoGlyph />
         </span>
         <h1 className="sk-start-name">Sekeping</h1>
-        <p className="sk-start-line">Catatan keuangan yang tenang.</p>
+        <p className="sk-start-line">{t("Catatan keuangan yang tenang.")}</p>
         <span className="sk-start-rule" aria-hidden="true" />
 
         <div className="sk-start-settings">
           <Selector
-            label="Bahasa"
+            label={t("Bahasa")}
             options={LANGUAGE_OPTIONS}
             value={language}
             onChange={(v) => updateSettings({ language: v as typeof language })}
             width="100%"
           />
           <Selector
-            label="Mata uang"
+            label={t("Mata uang")}
             options={CURRENCY_OPTIONS}
             value={currency}
             onChange={(v) => updateSettings({ currency: v as typeof currency })}
@@ -733,13 +724,9 @@ function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void })
           {language === 'en' ? 'Sample' : 'Contoh'}: {money(1_234_567)}
         </p>
 
-        <button type="button" className="sk-start-primary" data-start="empty" onClick={onEmpty}>
-          Mulai dari kosong
-        </button>
-        <button type="button" className="sk-start-secondary" data-start="demo" onClick={onDemo}>
-          Lihat data contoh
-        </button>
-        <p className="sk-start-note">Mulai tanpa data. Data contoh hanya dimuat jika kamu memilihnya.</p>
+        <button type="button" className="sk-start-primary" data-start="empty" onClick={onEmpty}>{t("Mulai dari kosong")}</button>
+        <button type="button" className="sk-start-secondary" data-start="demo" onClick={onDemo}>{t("Lihat data contoh")}</button>
+        <p className="sk-start-note">{t("Mulai tanpa data. Data contoh hanya dimuat jika kamu memilihnya.")}</p>
       </div>
     </div>
   );
@@ -769,10 +756,8 @@ function LockScreen({
           <LogoGlyph />
         </span>
         <div>
-          <h2 className="sk-title" style={{ textAlign: 'center' }}>
-            Masukkan PIN
-          </h2>
-          <p className="sk-sub">Sekeping terkunci di perangkat ini.</p>
+          <h2 className="sk-title" style={{ textAlign: 'center' }}>{t("Masukkan PIN")}</h2>
+          <p className="sk-sub">{t("Sekeping terkunci di perangkat ini.")}</p>
         </div>
         <div className="sk-pin-dots" style={{ outline: error ? '2px solid var(--color-error)' : 'none', borderRadius: 20 }}>
           {[0, 1, 2, 3].map((i) => (
@@ -791,11 +776,11 @@ function LockScreen({
           <button type="button" className="sk-key" onClick={() => onDigit('0')}>
             0
           </button>
-          <button type="button" className="sk-key" data-variant="util" onClick={onDelete} aria-label="Hapus">
+          <button type="button" className="sk-key" data-variant="util" onClick={onDelete} aria-label={t("Hapus")}>
             ⌫
           </button>
         </div>
-        {error ? <p className="sk-sub" style={{ color: 'var(--color-error)' }}>PIN salah, coba lagi.</p> : null}
+        {error ? <p className="sk-sub" style={{ color: 'var(--color-error)' }}>{t("PIN salah, coba lagi.")}</p> : null}
       </div>
     </div>
   );

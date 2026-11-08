@@ -27,6 +27,8 @@ export interface NativeWidgetConfig {
   showExpense: boolean;
   showIncome: boolean;
   showTransfer: boolean;
+  /** Fixed size chosen from the launcher's widget picker. */
+  size?: '4x1' | '4x2' | '2x2';
 }
 
 export interface NativeWidgetAccount {
@@ -114,6 +116,10 @@ export function readWidgetConfig(fallbackId: number): NativeWidgetConfig {
       showExpense: parsed.showExpense !== false,
       showIncome: parsed.showIncome !== false,
       showTransfer: parsed.showTransfer !== false,
+      size:
+        parsed.size === '4x1' || parsed.size === '4x2' || parsed.size === '2x2'
+          ? parsed.size
+          : undefined,
     };
   } catch {
     return fallback;

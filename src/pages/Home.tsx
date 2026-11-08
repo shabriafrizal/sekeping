@@ -6,6 +6,7 @@ import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
 import type { Tx } from '../lib/types';
 import { daysUntilNext } from '../lib/recurring';
+import { t } from '../lib/i18n';
 
 const BellIcon = iconFor('bell');
 const CheckIcon = iconFor('check');
@@ -21,10 +22,10 @@ const CHART_COLORS = [
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 11) return 'Selamat pagi';
-  if (h < 15) return 'Selamat siang';
-  if (h < 19) return 'Selamat sore';
-  return 'Selamat malam';
+  if (h < 11) return t("Selamat pagi");
+  if (h < 15) return t("Selamat siang");
+  if (h < 19) return t("Selamat sore");
+  return t("Selamat malam");
 }
 
 function longDate(d: Date) {
@@ -32,10 +33,10 @@ function longDate(d: Date) {
 }
 
 function reminderLabel(days: number) {
-  if (days < 0) return `Terlambat ${Math.abs(days)} hari`;
-  if (days === 0) return 'Jatuh tempo hari ini';
-  if (days === 1) return 'Jatuh tempo besok';
-  return `Jatuh tempo dalam ${days} hari`;
+  if (days < 0) return t('Terlambat {n} hari', { n: Math.abs(days) });
+  if (days === 0) return t("Jatuh tempo hari ini");
+  if (days === 1) return t("Jatuh tempo besok");
+  return t('Jatuh tempo dalam {n} hari', { n: days });
 }
 
 export default function Home({
@@ -72,7 +73,7 @@ export default function Home({
     return [...map.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4)
-      .map(([id, value]) => ({ id, value, name: categoryById(id)?.name ?? 'Lainnya' }));
+      .map(([id, value]) => ({ id, value, name: categoryById(id)?.name ?? t("Lainnya") }));
   }, [monthTx, categoryById]);
 
   const last7 = useMemo(() => {
@@ -113,41 +114,33 @@ export default function Home({
     <div className="sk-page sk-home">
       <header className="sk-page-head">
         <div>
-          <h1 className="sk-title">Ringkasan</h1>
+          <h1 className="sk-title">{t("Ringkasan")}</h1>
           <p className="sk-sub">
             {greeting()}, {state.settings.userName || 'Kamu'}. {longDate(now)}
           </p>
         </div>
         <div className="sk-chips">
-          <button className="sk-chip" type="button" onClick={() => onAdd('transfer')}>
-            Transfer
-          </button>
-          <button className="sk-chip" type="button" onClick={() => onAdd('income')}>
-            + Pendapatan
-          </button>
-          <button className="sk-chip" data-active="true" type="button" onClick={() => onAdd('expense')}>
-            + Pengeluaran
-          </button>
+          <button className="sk-chip" type="button" onClick={() => onAdd('transfer')}>{t("Transfer")}</button>
+          <button className="sk-chip" type="button" onClick={() => onAdd('income')}>{t("+ Pendapatan")}</button>
+          <button className="sk-chip" data-active="true" type="button" onClick={() => onAdd('expense')}>{t("+ Pengeluaran")}</button>
         </div>
       </header>
 
       <div className="sk-home-top">
         <section className="sk-ledger" aria-labelledby="home-total" data-tour="balance">
-          <p className="sk-ledger-label" id="home-total">
-            Total saldo
-          </p>
+          <p className="sk-ledger-label" id="home-total">{t("Total saldo")}</p>
           <p className="sk-ledger-total">{money(netWorth)}</p>
           <dl className="sk-ledger-lines">
             <div>
-              <dt>Masuk bulan ini</dt>
+              <dt>{t("Masuk bulan ini")}</dt>
               <dd data-tone="income">+{money(totals.income)}</dd>
             </div>
             <div>
-              <dt>Keluar bulan ini</dt>
+              <dt>{t("Keluar bulan ini")}</dt>
               <dd>−{money(totals.expense)}</dd>
             </div>
             <div data-total="true">
-              <dt>Sisa bulan ini</dt>
+              <dt>{t("Sisa bulan ini")}</dt>
               <dd data-tone={flow < 0 ? 'expense' : 'income'}>
                 {flow < 0 ? '−' : ''}
                 {money(Math.abs(flow))}
@@ -158,10 +151,8 @@ export default function Home({
 
         <section className="sk-home-block" data-tour="accounts">
           <div className="sk-home-head">
-            <h2 className="sk-home-title">Rekening</h2>
-            <button className="sk-link" type="button" onClick={() => onNavigate('settings')}>
-              Kelola
-            </button>
+            <h2 className="sk-home-title">{t("Rekening")}</h2>
+            <button className="sk-link" type="button" onClick={() => onNavigate('settings')}>{t("Kelola")}</button>
           </div>
           <ul className="sk-accounts">
             {state.accounts.map((acc) => {
@@ -202,18 +193,13 @@ export default function Home({
           <div className="sk-reminder-head">
             <div>
               <h2 className="sk-home-title" id="home-reminders">
-                <BellIcon aria-hidden="true" /> Pengingat
-                <span className="sk-badge" data-tone="neutral">
+                <BellIcon aria-hidden="true" />{t("Pengingat")}<span className="sk-badge" data-tone="neutral">
                   {reminders.length}
                 </span>
               </h2>
-              <p className="sk-sub" style={{ marginTop: '0.15rem' }}>
-                Tagihan &amp; langganan jatuh tempo dalam 7 hari. Tandai selesai untuk mencatatnya hari ini.
-              </p>
+              <p className="sk-sub" style={{ marginTop: '0.15rem' }}>{t("Tagihan &amp; langganan jatuh tempo dalam 7 hari. Tandai selesai untuk mencatatnya hari ini.")}</p>
             </div>
-            <button className="sk-link" type="button" onClick={() => onNavigate('recurring')}>
-              Kelola
-            </button>
+            <button className="sk-link" type="button" onClick={() => onNavigate('recurring')}>{t("Kelola")}</button>
           </div>
           <ul className="sk-reminder-list">
             {reminders.map((item) => {
@@ -232,7 +218,7 @@ export default function Home({
                   <span className="sk-reminder-main">
                     <span className="sk-reminder-title">
                       {item.name}
-                      {item.isSubscription ? <span className="sk-badge">Langganan</span> : null}
+                      {item.isSubscription ? <span className="sk-badge">{t("Langganan")}</span> : null}
                     </span>
                     <span className="sk-reminder-meta">
                       {[category?.name, reminderLabel(days)].filter(Boolean).join(' · ')}
@@ -249,9 +235,7 @@ export default function Home({
                     }}
                     aria-label={`Tandai ${item.name} selesai dan catat pengeluaran hari ini`}
                   >
-                    <CheckIcon aria-hidden="true" />
-                    Selesai
-                  </button>
+                    <CheckIcon aria-hidden="true" />{t("Selesai")}</button>
                 </li>
               );
             })}
@@ -262,16 +246,14 @@ export default function Home({
       <div className="sk-home-bottom">
         <section className="sk-home-block">
           <div className="sk-home-head">
-            <h2 className="sk-home-title">Transaksi terakhir</h2>
-            <button className="sk-link" type="button" onClick={() => onNavigate('transactions')}>
-              Lihat semua
-            </button>
+            <h2 className="sk-home-title">{t("Transaksi terakhir")}</h2>
+            <button className="sk-link" type="button" onClick={() => onNavigate('transactions')}>{t("Lihat semua")}</button>
           </div>
           {recent.length === 0 ? (
             <EmptyState
-              title="Belum ada transaksi"
-              hint="Mulai catat pengeluaran pertamamu."
-              action={<button className="sk-chip" onClick={() => onAdd('expense')}>Tambah transaksi</button>}
+              title={t("Belum ada transaksi")}
+              hint={t("Mulai catat pengeluaran pertamamu.")}
+              action={<button className="sk-chip" onClick={() => onAdd('expense')}>{t("Tambah transaksi")}</button>}
             />
           ) : (
             <div className="sk-rows">
@@ -280,17 +262,17 @@ export default function Home({
               ))}
             </div>
           )}
-          <p className="sk-sub">{monthTx.length} transaksi bulan ini.</p>
+          <p className="sk-sub">{t('{n} transaksi bulan ini.', { n: monthTx.length })}</p>
         </section>
 
         <section className="sk-home-block sk-home-month" data-tour="month">
           <div className="sk-home-head">
-            <h2 className="sk-home-title">Bulan ini</h2>
+            <h2 className="sk-home-title">{t("Bulan ini")}</h2>
             <span className="sk-day-total">{monthLabel(iso)}</span>
           </div>
 
           <div className="sk-save">
-            <span className="sk-save-label">Tingkat tabungan</span>
+            <span className="sk-save-label">{t("Tingkat tabungan")}</span>
             <strong className="sk-save-figure" data-tone={savingRate !== null && savingRate < 0 ? 'error' : undefined}>
               {savingRate === null ? '–' : `${savingRate}%`}
             </strong>
@@ -299,16 +281,16 @@ export default function Home({
             </div>
             <p className="sk-sub">
               {totals.income === 0
-                ? 'Belum ada pemasukan bulan ini.'
+                ? t("Belum ada pemasukan bulan ini.")
                 : flow >= 0
-                  ? `Dari ${money(totals.income)} pemasukan, ${money(flow)} tersisa.`
-                  : `Pengeluaran melebihi pemasukan sebesar ${money(-flow)}.`}
+                  ? t('Dari {income} pemasukan, {flow} tersisa.', { income: money(totals.income), flow: money(flow) })
+                  : t('Pengeluaran melebihi pemasukan sebesar {amount}.', { amount: money(-flow) })}
             </p>
           </div>
 
           <div className="sk-week">
             <div className="sk-subhead">
-              <span>7 hari terakhir</span>
+              <span>{t("7 hari terakhir")}</span>
               <span className="sk-day-total">{compactMoney(week)}</span>
             </div>
             <div
@@ -331,18 +313,16 @@ export default function Home({
                 </div>
               ))}
             </div>
-            <p className="sk-sub">Rata-rata {compactMoney(dailyAverage)} per hari bulan ini.</p>
+            <p className="sk-sub">{t('Rata-rata {amount} per hari bulan ini.', { amount: compactMoney(dailyAverage) })}</p>
           </div>
 
           <div className="sk-rank">
             <div className="sk-subhead">
-              <span>Paling boros</span>
-              <button className="sk-link" type="button" onClick={() => onNavigate('reports')}>
-                Laporan
-              </button>
+              <span>{t("Paling boros")}</span>
+              <button className="sk-link" type="button" onClick={() => onNavigate('reports')}>{t("Laporan")}</button>
             </div>
             {topCategories.length === 0 ? (
-              <p className="sk-sub">Belum ada pengeluaran bulan ini.</p>
+              <p className="sk-sub">{t("Belum ada pengeluaran bulan ini.")}</p>
             ) : (
               topCategories.map((c, i) => (
                 <div className="sk-rank-row" key={c.id}>

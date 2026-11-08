@@ -4,6 +4,7 @@ import { useStore } from '../lib/store';
 import type { Debt, DebtKind } from '../lib/types';
 import { money, shortDate, daysBetween, todayISO, clamp } from '../lib/format';
 import { EmptyState } from '../components/EmptyState';
+import { t } from '../lib/i18n';
 
 export default function Debts({
   onAdd,
@@ -37,21 +38,21 @@ export default function Debts({
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">{tab === 'debt' ? 'Kewajiban' : 'Piutang'}</p>
-          <h1 className="sk-title">{tab === 'debt' ? 'Utang' : 'Piutang'}</h1>
+          <p className="sk-eyebrow">{t(tab === 'debt' ? 'Kewajiban' : 'Piutang')}</p>
+          <h1 className="sk-title">{t(tab === 'debt' ? 'Utang' : 'Piutang')}</h1>
           <p className="sk-sub">
-            {tab === 'debt' ? 'Sisa yang harus kamu bayar' : 'Sisa yang harus kamu tagih'} ·{' '}
-            {money(totals.total - totals.paid)} dari {money(totals.total)}
+            {t(tab === 'debt' ? 'Sisa yang harus kamu bayar' : 'Sisa yang harus kamu tagih')} ·{' '}
+            {t('{left} dari {total}', { left: money(totals.total - totals.paid), total: money(totals.total) })}
           </p>
         </div>
         <Button
-          label={tab === 'debt' ? 'Catat utang' : 'Catat piutang'}
+          label={t(tab === 'debt' ? 'Catat utang' : 'Catat piutang')}
           variant="primary"
           onClick={() => onAdd(tab)}
         />
       </div>
 
-      <div className="sk-type-row" style={{ maxWidth: 320 }} role="radiogroup" aria-label="Jenis catatan">
+      <div className="sk-type-row" style={{ maxWidth: 320 }} role="radiogroup" aria-label={t("Jenis catatan")}>
         <button
           type="button"
           role="radio"
@@ -60,9 +61,7 @@ export default function Debts({
           data-tone="expense"
           data-active={tab === 'debt'}
           onClick={() => setTab('debt')}
-        >
-          Utang
-        </button>
+        >{t("Utang")}</button>
         <button
           type="button"
           role="radio"
@@ -71,20 +70,18 @@ export default function Debts({
           data-tone="income"
           data-active={tab === 'loan'}
           onClick={() => setTab('loan')}
-        >
-          Piutang
-        </button>
+        >{t("Piutang")}</button>
       </div>
 
       {list.length === 0 ? (
         <div className="sk-card">
           <EmptyState
             icon="receipt"
-            title={tab === 'debt' ? 'Belum ada utang' : 'Belum ada piutang'}
+            title={t(tab === 'debt' ? 'Belum ada utang' : 'Belum ada piutang')}
             hint={tab === 'debt' ? 'Catat pinjaman supaya cicilannya terpantau.' : 'Catat uang yang kamu pinjamkan ke orang lain.'}
             action={
               <Button
-                label={tab === 'debt' ? 'Catat utang' : 'Catat piutang'}
+                label={t(tab === 'debt' ? 'Catat utang' : 'Catat piutang')}
                 variant="secondary"
                 onClick={() => onAdd(tab)}
               />
@@ -107,20 +104,20 @@ export default function Debts({
                   <div>
                     <div className="sk-card-title">{debt.name}</div>
                     <div className="sk-sub" style={{ fontSize: '0.78rem' }}>
-                      {accountById(debt.accountId)?.name} · mulai {shortDate(debt.startDate)}
+                      {accountById(debt.accountId)?.name} · {t('mulai')} {shortDate(debt.startDate)}
                     </div>
                   </div>
                   <span
                     className="sk-badge"
                     data-tone={settled ? 'success' : overdue ? 'error' : 'neutral'}
                   >
-                    {settled ? 'Lunas' : overdue ? `Lewat ${overdueDays} hari` : debt.dueDate ? `Jatuh tempo ${shortDate(debt.dueDate)}` : 'Berjalan'}
+                    {settled ? t('Lunas') : overdue ? t('Lewat {n} hari', { n: overdueDays }) : debt.dueDate ? t('Jatuh tempo {date}', { date: shortDate(debt.dueDate) }) : t('Berjalan')}
                   </span>
                 </div>
 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 6 }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>Sisa</span>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>{t("Sisa")}</span>
                     <b style={{ fontVariantNumeric: 'tabular-nums' }}>{money(remaining)}</b>
                   </div>
                   <div className="sk-progress" data-tone={settled ? undefined : overdue ? 'error' : undefined}>
@@ -148,7 +145,7 @@ export default function Debts({
                     isDisabled={settled}
                     onClick={() => onPay(debt)}
                   />
-                  <Button label="Ubah" variant="ghost" size="sm" onClick={() => onEdit(debt)} />
+                  <Button label={t("Ubah")} variant="ghost" size="sm" onClick={() => onEdit(debt)} />
                 </div>
               </article>
             );

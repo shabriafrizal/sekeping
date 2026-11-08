@@ -25,7 +25,14 @@ function installBridge() {
     },
     ready: () => {},
     getWidgetConfig: () =>
-      JSON.stringify({ widgetId: 7, accountId: 'acc_cash', showExpense: true, showIncome: true, showTransfer: true }),
+      JSON.stringify({
+        widgetId: 7,
+        accountId: 'acc_cash',
+        showExpense: true,
+        showIncome: true,
+        showTransfer: true,
+        size: new URLSearchParams(location.search).get('size') || '4x1',
+      }),
     saveWidgetConfig: (json) => {
       window.__saved = json;
     },
@@ -61,7 +68,12 @@ async function seededPage(context) {
 
   check('config opens as a native modal', (await page.evaluate(() => document.documentElement.dataset.native)) === 'config');
   check('Atur widget dialog is visible', (await page.$('dialog.astryx-dialog[open]')) !== null);
-  check('three size previews are offered', (await page.$$('.skw-tab')).length === 3);
+  check(
+    'size comes from the launcher picker, not the config sheet',
+    (await page.$$('.skw-tab')).length === 0 &&
+      (await page.$('.skw-widget[data-size="4x1"]')) !== null &&
+      (await page.evaluate(() => document.querySelector('.skw-size')?.textContent?.includes('4×1'))),
+  );
   check(
     '4x1 preview shows balance and three actions',
     await page.evaluate(() => {
@@ -72,12 +84,16 @@ async function seededPage(context) {
     }),
   );
 
-  await page.evaluate(() => document.querySelectorAll('.skw-tab')[1]?.click());
-  await wait(250);
-  check('4x2 preview switches shape', (await page.$('.skw-widget[data-size="4x2"]')) !== null);
-  await page.evaluate(() => document.querySelectorAll('.skw-tab')[2]?.click());
-  await wait(250);
-  check('2x2 preview switches shape', (await page.$('.skw-widget[data-size="2x2"]')) !== null);
+  for (const size of ['4x2', '2x2']) {
+    await page.goto(`${BASE}?widget_config=7&size=${size}`, { waitUntil: 'networkidle0' });
+    await wait(500);
+    const label = size.replace('x', '×');
+    check(
+      `${size} widget previews its launcher size`,
+      (await page.$(`.skw-widget[data-size="${size}"]`)) !== null &&
+        (await page.evaluate((expected) => document.querySelector('.skw-size')?.textContent?.includes(expected) ?? false, label)),
+    );
+  }
 
   check('every account is selectable', (await page.$$('input[type="radio"]')).length === 3);
   check('three action switches are shown', (await page.$$('input[type="checkbox"]')).length === 3);

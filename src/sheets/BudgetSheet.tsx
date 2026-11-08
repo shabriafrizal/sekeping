@@ -6,6 +6,7 @@ import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Budget } from '../lib/types';
 import { currentMonthKey } from '../lib/budgets';
+import { t } from '../lib/i18n';
 
 export function BudgetSheet({
   isOpen,
@@ -76,26 +77,26 @@ export function BudgetSheet({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={430} maxHeight="90dvh">
       <DialogHeader
-        title={budget ? 'Ubah anggaran' : 'Buat anggaran'}
-        subtitle="Batas pengeluaran bulanan"
+        title={budget ? 'Ubah anggaran' : t("Buat anggaran")}
+        subtitle={t("Batas pengeluaran bulanan")}
         onOpenChange={onOpenChange}
       />
       <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
         <Selector
-          label="Kategori"
+          label={t("Kategori")}
           options={options}
           value={categoryId}
           onChange={setCategoryId}
           width="100%"
         />
         <TextInput
-          label="Batas per bulan"
+          label={t("Batas per bulan")}
           value={amount ? String(amount) : ''}
           placeholder="0"
           onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
         />
         <label className="sk-field">
-          <span className="sk-eyebrow">Mulai bulan</span>
+          <span className="sk-eyebrow">{t("Mulai bulan")}</span>
           <input
             className="sk-input"
             type="month"
@@ -106,30 +107,28 @@ export function BudgetSheet({
         <label className="sk-check">
           <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
           <span>
-            <b>Rollover bulanan</b>
-            <small>Sisa anggaran yang tidak terpakai ditambahkan ke jatah bulan berikutnya.</small>
+            <b>{t("Rollover bulanan")}</b>
+            <small>{t("Sisa anggaran yang tidak terpakai ditambahkan ke jatah bulan berikutnya.")}</small>
           </span>
         </label>
         <label className="sk-check">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
           <span>
-            <b>Aktif</b>
-            <small>Anggaran nonaktif disembunyikan dari daftar dan ringkasan.</small>
+            <b>{t("Aktif")}</b>
+            <small>{t("Anggaran nonaktif disembunyikan dari daftar dan ringkasan.")}</small>
           </span>
         </label>
         {duplicate ? (
-          <p className="sk-sub" style={{ color: 'var(--color-error)', fontSize: '0.78rem', margin: 0 }}>
-            Kategori ini sudah punya anggaran. Ubah yang sudah ada agar rollover-nya tetap benar.
-          </p>
+          <p className="sk-sub" style={{ color: 'var(--color-error)', fontSize: '0.78rem', margin: 0 }}>{t("Kategori ini sudah punya anggaran. Ubah yang sudah ada agar rollover-nya tetap benar.")}</p>
         ) : null}
       </div>
       <div className="sk-sheet-actions">
         {budget ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label="Simpan" variant="primary" onClick={save} isDisabled={Boolean(duplicate)} />
+        <Button label={t("Simpan")} variant="primary" onClick={save} isDisabled={Boolean(duplicate)} />
       </div>
     </Dialog>
   );

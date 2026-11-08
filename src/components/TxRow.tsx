@@ -2,6 +2,7 @@ import type { Tx } from '../lib/types';
 import { useStore } from '../lib/store';
 import { money, txWhen } from '../lib/format';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 export function TxRow({ tx, onClick }: { tx: Tx; onClick: () => void }) {
   const { accountById, categoryById } = useStore();
@@ -15,8 +16,8 @@ export function TxRow({ tx, onClick }: { tx: Tx; onClick: () => void }) {
 
   const title =
     tx.type === 'transfer'
-      ? `${acc?.name ?? 'Rekening'} → ${dest?.name ?? 'Rekening'}`
-      : cat?.name ?? tx.note ?? 'Transaksi';
+      ? `${acc?.name ?? t("Rekening")} → ${dest?.name ?? t("Rekening")}`
+      : cat?.name ?? tx.note ?? t("Transaksi");
   const meta = [tx.note, txWhen(tx)].filter(Boolean).join(' · ');
 
   return (

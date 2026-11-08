@@ -25,12 +25,24 @@ await wait(900);
 check('start screen dismissed', (await page.$('.astryx-side-nav')) !== null);
 
 async function nav(label) {
-  const ok = await page.evaluate((name) => {
-    const el = [...document.querySelectorAll('.astryx-side-nav button')].find((b) => (b.textContent || '').trim().startsWith(name));
+  const aliases = {
+    Ringkasan: ['Ringkasan', 'Overview'],
+    Transaksi: ['Transaksi', 'Transactions'],
+    Laporan: ['Laporan', 'Reports'],
+    Utang: ['Utang', 'Debt'],
+    Rutin: ['Rutin', 'Recurring'],
+    Anggaran: ['Anggaran', 'Budgets'],
+    Pengaturan: ['Pengaturan', 'Settings'],
+  };
+  const names = aliases[label] ?? [label];
+  const ok = await page.evaluate((wanted) => {
+    const el = [...document.querySelectorAll('.astryx-side-nav button')].find((b) =>
+      wanted.some((name) => (b.textContent || '').trim().startsWith(name)),
+    );
     if (!el) return false;
     el.click();
     return true;
-  }, label);
+  }, names);
   await wait(650);
   return ok;
 }
@@ -217,12 +229,13 @@ check(
 
 /* ---------- language and currency from the start screen ---------- */
 async function choose(labelText, optionText) {
-  const listId = await page.evaluate((name) => {
-    const label = [...document.querySelectorAll('label')].find((el) => el.textContent === name);
+  const names = Array.isArray(labelText) ? labelText : [labelText];
+  const listId = await page.evaluate((wanted) => {
+    const label = [...document.querySelectorAll('label')].find((el) => wanted.includes(el.textContent));
     const combobox = label ? document.getElementById(label.getAttribute('for')) : null;
     combobox?.click();
     return combobox?.getAttribute('aria-controls') ?? '';
-  }, labelText);
+  }, names);
   await wait(120);
   await page.evaluate(
     ({ id, option }) => {
@@ -243,8 +256,8 @@ check(
   'start screen offers language and currency',
   await page.evaluate(() => document.querySelectorAll('.sk-start [role="combobox"]').length === 2),
 );
-await choose('Bahasa', 'English');
-await choose('Mata uang', 'USD');
+await choose(['Bahasa', 'Language'], 'English');
+await choose(['Mata uang', 'Currency'], 'USD');
 const startSample = await page.evaluate(() => document.querySelector('.sk-start-sample')?.textContent?.trim() ?? '');
 check(
   'start preview follows the chosen language and currency',
@@ -266,10 +279,10 @@ check('currency applies across the app', /\$\s[\d,]+\.\d{2}/.test(englishNav), e
 
 await nav('Pengaturan');
 await wait(400);
-await choose('Mata uang', 'IDR');
+await choose(['Mata uang', 'Currency'], 'IDR');
 const idrNav = await page.evaluate(() => document.querySelector('.astryx-top-nav')?.innerText ?? '');
 check('currency changes without leaving Settings', /Rp\s/.test(idrNav), idrNav.split('\n')[1]);
-await choose('Bahasa', 'Bahasa Indonesia');
+await choose(['Bahasa', 'Language'], 'Bahasa Indonesia');
 const localizedNav = await page.evaluate(() => document.querySelector('.astryx-top-nav')?.innerText ?? '');
 check(
   'language changes without leaving Settings',
@@ -280,7 +293,7 @@ check(
 /* Loading the demo ledger must not throw the person back to onboarding or
    reset the language/currency they just chose. */
 await page.evaluate(() =>
-  [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Muat data contoh')?.click(),
+  [...document.querySelectorAll('button')].find((b) => ['Muat data contoh', 'Load sample data'].includes(b.textContent?.trim() ?? ''))?.click(),
 );
 await wait(700);
 const reloaded = await page.evaluate(() => ({

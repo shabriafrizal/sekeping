@@ -6,16 +6,17 @@ import { money, compactMoney, shortDate } from '../lib/format';
 import { INTERVAL_LABEL, daysUntilNext, isDue, monthlyEquivalent } from '../lib/recurring';
 import { EmptyState } from '../components/EmptyState';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 type Filter = 'all' | 'subscription' | 'bill';
 
 function dueLabel(item: Recurring): { text: string; tone: string } {
   const days = daysUntilNext(item);
-  if (!item.active) return { text: 'Nonaktif', tone: 'muted' };
-  if (days < 0) return { text: `Terlambat ${Math.abs(days)} hari`, tone: 'error' };
-  if (days === 0) return { text: 'Jatuh tempo hari ini', tone: 'warning' };
-  if (days === 1) return { text: 'Jatuh tempo besok', tone: 'warning' };
-  if (days <= 7) return { text: `Dalam ${days} hari`, tone: 'warning' };
+  if (!item.active) return { text: t("Nonaktif"), tone: 'muted' };
+  if (days < 0) return { text: t('Terlambat {n} hari', { n: Math.abs(days) }), tone: 'error' };
+  if (days === 0) return { text: t("Jatuh tempo hari ini"), tone: 'warning' };
+  if (days === 1) return { text: t("Jatuh tempo besok"), tone: 'warning' };
+  if (days <= 7) return { text: t('Dalam {n} hari', { n: days }), tone: 'warning' };
   return { text: shortDate(item.nextDate), tone: 'muted' };
 }
 
@@ -39,7 +40,7 @@ export function RecurringRow({
         type="button"
         className="sk-rec-main"
         onClick={() => onEdit(item)}
-        aria-label={`Ubah ${item.name}, ${INTERVAL_LABEL[item.interval]}, ${money(item.amount)}`}
+        aria-label={`Ubah ${item.name}, ${t(INTERVAL_LABEL[item.interval])}, ${money(item.amount)}`}
       >
         <span className="sk-row-icon" data-tone={item.type}>
           <Icon />
@@ -47,11 +48,11 @@ export function RecurringRow({
         <span className="sk-row-main">
           <span className="sk-row-title">
             {item.name}
-            {item.isSubscription ? <span className="sk-badge">Langganan</span> : null}
-            {!item.active ? <span className="sk-badge">Nonaktif</span> : null}
+            {item.isSubscription ? <span className="sk-badge">{t("Langganan")}</span> : null}
+            {!item.active ? <span className="sk-badge">{t("Nonaktif")}</span> : null}
           </span>
           <span className="sk-row-meta">
-            {[category?.name, account?.name, INTERVAL_LABEL[item.interval]].filter(Boolean).join(' · ')}
+            {[category?.name, account?.name, t(INTERVAL_LABEL[item.interval])].filter(Boolean).join(' · ')}
           </span>
         </span>
       </button>
@@ -72,9 +73,7 @@ export function RecurringRow({
           notify(`${item.name} dicatat`);
         }}
         aria-label={`Catat ${item.name} sekarang`}
-      >
-        Catat
-      </button>
+      >{t("Catat")}</button>
     </div>
   );
 }
@@ -109,30 +108,30 @@ export default function RecurringPage({
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Otomatis</p>
-          <h1 className="sk-title">Rutin &amp; langganan</h1>
+          <p className="sk-eyebrow">{t("Otomatis")}</p>
+          <h1 className="sk-title">{t("Rutin &amp; langganan")}</h1>
           <p className="sk-sub">
-            {active.length} jadwal aktif · {due.length} menunggu dicatat
+            {t('{n} jadwal aktif · {m} menunggu dicatat', { n: active.length, m: due.length })}
           </p>
         </div>
-        <Button label="Tambah jadwal" variant="primary" onClick={onAdd} />
+        <Button label={t("Tambah jadwal")} variant="primary" onClick={onAdd} />
       </div>
 
       <div className="sk-kpis">
         <div className="sk-kpi">
-          <span>Keluar per bulan</span>
+          <span>{t("Keluar per bulan")}</span>
           <strong>{compactMoney(monthlyOut)}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Jadwal aktif</span>
+          <span>{t("Jadwal aktif")}</span>
           <strong>{active.length}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Langganan</span>
+          <span>{t("Langganan")}</span>
           <strong>{subscriptions.length}</strong>
         </div>
         <div className="sk-kpi" data-tone={due.length ? 'warning' : undefined}>
-          <span>Jatuh tempo</span>
+          <span>{t("Jatuh tempo")}</span>
           <strong>{due.length}</strong>
         </div>
       </div>
@@ -140,16 +139,12 @@ export default function RecurringPage({
       {due.length > 0 ? (
         <section className="sk-card" aria-labelledby="rec-due">
           <div className="sk-card-head">
-            <h2 className="sk-card-title" id="rec-due">
-              Menunggu dicatat
-            </h2>
+            <h2 className="sk-card-title" id="rec-due">{t("Menunggu dicatat")}</h2>
             <span className="sk-badge" data-tone="error">
               {due.length}
             </span>
           </div>
-          <p className="sk-sub" style={{ marginTop: 0 }}>
-            Transaksi ini otomatis masuk ke buku saat aplikasi dibuka. Kamu juga bisa mencatatnya sekarang.
-          </p>
+          <p className="sk-sub" style={{ marginTop: 0 }}>{t("Transaksi ini otomatis masuk ke buku saat aplikasi dibuka. Kamu juga bisa mencatatnya sekarang.")}</p>
           <div className="sk-rows">
             {due.map((item) => (
               <RecurringRow key={item.id} item={item} onEdit={onEdit} />
@@ -160,14 +155,12 @@ export default function RecurringPage({
 
       <section className="sk-card" aria-labelledby="rec-all">
         <div className="sk-card-head">
-          <h2 className="sk-card-title" id="rec-all">
-            Semua jadwal
-          </h2>
+          <h2 className="sk-card-title" id="rec-all">{t("Semua jadwal")}</h2>
         </div>
-        <div className="sk-chips" style={{ marginBottom: '0.5rem' }} role="group" aria-label="Saring jadwal">
+        <div className="sk-chips" style={{ marginBottom: '0.5rem' }} role="group" aria-label={t("Saring jadwal")}>
           {([
-            ['all', 'Semua'],
-            ['subscription', 'Langganan'],
+            ['all', t("Semua")],
+            ['subscription', t("Langganan")],
             ['bill', 'Tagihan rutin'],
           ] as const).map(([value, label]) => (
             <button
@@ -185,13 +178,13 @@ export default function RecurringPage({
         {items.length === 0 ? (
           <EmptyState
             icon="repeat"
-            title={state.recurring.length === 0 ? 'Belum ada jadwal' : 'Tidak ada yang cocok'}
+            title={t(state.recurring.length === 0 ? 'Belum ada jadwal' : 'Tidak ada yang cocok')}
             hint={
               state.recurring.length === 0
-                ? 'Tambahkan gaji, sewa, atau langganan agar tercatat otomatis.'
+                ? t('Tambahkan gaji, sewa, atau langganan agar tercatat otomatis.')
                 : 'Coba pilih saringan lain.'
             }
-            action={<Button label="Tambah jadwal" variant="secondary" onClick={onAdd} />}
+            action={<Button label={t("Tambah jadwal")} variant="secondary" onClick={onAdd} />}
           />
         ) : (
           <div className="sk-rows">

@@ -9,6 +9,7 @@ import { money } from '../lib/format';
 import { CURRENCY_OPTIONS, LANGUAGE_OPTIONS } from '../lib/settings-options';
 import { iconFor } from '../lib/icons';
 import { decryptJson, encryptJson, isEncryptedExport } from '../lib/crypto';
+import { t } from '../lib/i18n';
 
 const RepeatIcon = iconFor('repeat');
 const BudgetIcon = iconFor('budget');
@@ -147,32 +148,32 @@ export default function Settings({
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Preferensi</p>
-          <h1 className="sk-title">Pengaturan</h1>
-          <p className="sk-sub">Data tersimpan di perangkatmu sendiri.</p>
+          <p className="sk-eyebrow">{t("Preferensi")}</p>
+          <h1 className="sk-title">{t("Pengaturan")}</h1>
+          <p className="sk-sub">{t("Data tersimpan di perangkatmu sendiri.")}</p>
         </div>
       </div>
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Profil</h2>
+          <h2 className="sk-card-title">{t("Profil")}</h2>
         </div>
         <div className="sk-two">
           <TextInput
-            label="Nama panggilan"
+            label={t("Nama panggilan")}
             value={state.settings.userName}
             onChange={(v) => updateSettings({ userName: v })}
             placeholder="Kamu"
           />
           <Selector
-            label="Mata uang"
+            label={t("Mata uang")}
             options={CURRENCY_OPTIONS}
             value={state.settings.currency}
             onChange={(v) => updateSettings({ currency: v as typeof state.settings.currency })}
             width="100%"
           />
           <Selector
-            label="Bahasa"
+            label={t("Bahasa")}
             options={LANGUAGE_OPTIONS}
             value={state.settings.language}
             onChange={(v) => updateSettings({ language: v as 'id' | 'en' })}
@@ -183,7 +184,7 @@ export default function Settings({
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Perencanaan</h2>
+          <h2 className="sk-card-title">{t("Perencanaan")}</h2>
         </div>
         <div className="sk-rows">
           <button type="button" className="sk-row" onClick={() => onNavigate('recurring')}>
@@ -191,9 +192,9 @@ export default function Settings({
               <RepeatIcon />
             </span>
             <span className="sk-row-main">
-              <span className="sk-row-title">Rutin &amp; langganan</span>
+              <span className="sk-row-title">{t("Rutin &amp; langganan")}</span>
               <span className="sk-row-meta">
-                {state.recurring.filter((r) => r.active).length} jadwal aktif · transaksi otomatis
+                {t('{n} jadwal aktif · transaksi otomatis', { n: state.recurring.filter((r) => r.active).length })}
               </span>
             </span>
           </button>
@@ -202,8 +203,8 @@ export default function Settings({
               <BudgetIcon />
             </span>
             <span className="sk-row-main">
-              <span className="sk-row-title">Anggaran</span>
-              <span className="sk-row-meta">{state.budgets.filter((b) => b.active).length} kategori dengan batas bulanan</span>
+              <span className="sk-row-title">{t("Anggaran")}</span>
+              <span className="sk-row-meta">{t('{n} kategori dengan batas bulanan', { n: state.budgets.filter((b) => b.active).length })}</span>
             </span>
           </button>
         </div>
@@ -211,10 +212,8 @@ export default function Settings({
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Rekening</h2>
-          <button className="sk-link" type="button" onClick={onAddAccount}>
-            + Tambah
-          </button>
+          <h2 className="sk-card-title">{t("Rekening")}</h2>
+          <button className="sk-link" type="button" onClick={onAddAccount}>{t("+ Tambah")}</button>
         </div>
         <div className="sk-rows">
           {state.accounts.map((acc) => {
@@ -228,7 +227,7 @@ export default function Settings({
                   <span className="sk-row-title">
                     {acc.name} {!acc.active ? <em style={{ opacity: 0.6 }}>(nonaktif)</em> : null}
                   </span>
-                  <span className="sk-row-meta">Saldo awal {money(acc.initial)}</span>
+                  <span className="sk-row-meta">{t('Saldo awal {amount}', { amount: money(acc.initial) })}</span>
                 </span>
                 <span className="sk-row-amount">{money(balanceOf(acc.id))}</span>
               </button>
@@ -239,10 +238,8 @@ export default function Settings({
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Kategori</h2>
-          <button className="sk-link" type="button" onClick={() => onAddCategory(catTab)}>
-            + Tambah
-          </button>
+          <h2 className="sk-card-title">{t("Kategori")}</h2>
+          <button className="sk-link" type="button" onClick={() => onAddCategory(catTab)}>{t("+ Tambah")}</button>
         </div>
         <div className="sk-chips" style={{ marginBottom: '0.5rem' }}>
           <button
@@ -250,17 +247,13 @@ export default function Settings({
             className="sk-chip"
             data-active={catTab === 'expense'}
             onClick={() => setCatTab('expense')}
-          >
-            Pengeluaran
-          </button>
+          >{t("Pengeluaran")}</button>
           <button
             type="button"
             className="sk-chip"
             data-active={catTab === 'income'}
             onClick={() => setCatTab('income')}
-          >
-            Pendapatan
-          </button>
+          >{t("Pendapatan")}</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.4rem' }}>
           {categories.map((cat) => {
@@ -278,7 +271,7 @@ export default function Settings({
                 </span>
                 <span className="sk-row-main">
                   <span className="sk-row-title">{cat.name}</span>
-                  <span className="sk-row-meta">{cat.active ? 'Aktif' : 'Nonaktif'}</span>
+                  <span className="sk-row-meta">{t(cat.active ? 'Aktif' : 'Nonaktif')}</span>
                 </span>
               </button>
             );
@@ -293,7 +286,7 @@ export default function Settings({
             }}
           >
             <span className="sk-row-main" style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-              + Kategori cepat
+              {t('+ Kategori cepat')}
             </span>
           </button>
         </div>
@@ -301,22 +294,22 @@ export default function Settings({
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Keamanan</h2>
+          <h2 className="sk-card-title">{t("Keamanan")}</h2>
         </div>
         <div className="sk-kv">
-          <span>Kunci PIN</span>
-          <b>{state.settings.pin ? 'Aktif' : 'Nonaktif'}</b>
+          <span>{t("Kunci PIN")}</span>
+          <b>{t(state.settings.pin ? 'Aktif' : 'Nonaktif')}</b>
         </div>
         <p className="sk-sub" style={{ fontSize: '0.78rem' }}>
-          PIN hanya tersimpan di perangkat ini, bukan di server. Ini pengaman layar, bukan enkripsi data — untuk
-          cadangan yang terkunci, gunakan <b>Ekspor terenkripsi</b> di bagian Data.
+          {t("PIN hanya tersimpan di perangkat ini, bukan di server. Ini pengaman layar, bukan enkripsi data — untuk cadangan yang terkunci, gunakan")}{' '}
+          <b>{t("Ekspor terenkripsi")}</b> {t("di bagian Data.")}
         </p>
         <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
           {state.settings.pin ? (
             <>
-              <Button label="Kunci sekarang" variant="secondary" size="sm" onClick={onLock} />
+              <Button label={t("Kunci sekarang")} variant="secondary" size="sm" onClick={onLock} />
               <Button
-                label="Hapus PIN"
+                label={t("Hapus PIN")}
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -326,43 +319,43 @@ export default function Settings({
               />
             </>
           ) : (
-            <Button label="Pasang PIN" variant="secondary" size="sm" onClick={() => setPinOpen(true)} />
+            <Button label={t("Pasang PIN")} variant="secondary" size="sm" onClick={() => setPinOpen(true)} />
           )}
         </div>
       </section>
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Data</h2>
+          <h2 className="sk-card-title">{t("Data")}</h2>
         </div>
         <div className="sk-kv">
-          <span>Total transaksi</span>
+          <span>{t("Total transaksi")}</span>
           <b>{state.txs.length}</b>
         </div>
         <div className="sk-kv">
-          <span>Jadwal berulang</span>
+          <span>{t("Jadwal berulang")}</span>
           <b>{state.recurring.length}</b>
         </div>
         <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.8rem' }}>
           <Button
-            label="Ekspor CSV"
+            label={t("Ekspor CSV")}
             variant="secondary"
             size="sm"
             onClick={() => download(`sekeping-${new Date().toISOString().slice(0, 10)}.csv`, exportCSV(), 'text/csv;charset=utf-8')}
           />
           <Button
-            label="Cadangkan JSON"
+            label={t("Cadangkan JSON")}
             variant="secondary"
             size="sm"
             onClick={() =>
               download(`sekeping-backup-${new Date().toISOString().slice(0, 10)}.json`, exportJSON(), 'application/json')
             }
           />
-          <Button label="Ekspor terenkripsi" variant="secondary" size="sm" onClick={() => setExportOpen(true)} />
-          <Button label="Impor CSV" variant="secondary" size="sm" onClick={() => onNavigate('import')} />
-          <Button label="Pulihkan" variant="ghost" size="sm" onClick={() => fileRef.current?.click()} />
+          <Button label={t("Ekspor terenkripsi")} variant="secondary" size="sm" onClick={() => setExportOpen(true)} />
+          <Button label={t("Impor CSV")} variant="secondary" size="sm" onClick={() => onNavigate('import')} />
+          <Button label={t("Pulihkan")} variant="ghost" size="sm" onClick={() => fileRef.current?.click()} />
           <Button
-            label="Muat data contoh"
+            label={t("Muat data contoh")}
             variant="ghost"
             size="sm"
             onClick={() => {
@@ -371,15 +364,14 @@ export default function Settings({
             }}
           />
           <Button
-            label="Hapus semua"
+            label={t("Hapus semua")}
             variant="destructive"
             size="sm"
             onClick={() => setConfirmClear(true)}
           />
         </div>
         <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.55rem' }}>
-          Ekspor terenkripsi memakai AES-GCM dengan kunci dari kata sandimu (PBKDF2). Tanpa kata sandi, berkas
-          tidak bisa dibuka — simpan baik-baik.
+          {t("Ekspor terenkripsi memakai AES-GCM dengan kunci dari kata sandimu (PBKDF2). Tanpa kata sandi, berkas tidak bisa dibuka — simpan baik-baik.")}
         </p>
         <input
           ref={fileRef}
@@ -396,41 +388,37 @@ export default function Settings({
 
       <section className="sk-card">
         <div className="sk-card-head">
-          <h2 className="sk-card-title">Tentang Sekeping</h2>
+          <h2 className="sk-card-title">{t("Tentang Sekeping")}</h2>
         </div>
         <p className="sk-sub" style={{ fontSize: '0.82rem', marginTop: 0 }}>
-          Sekeping adalah aplikasi pencatat keuangan pribadi untuk web. Semua perhitungan berjalan di
-          browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.
+          {t("Sekeping adalah aplikasi pencatat keuangan pribadi untuk web. Semua perhitungan berjalan di browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.")}
         </p>
-        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>
-          Versi 1.1 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.
-        </p>
+        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.1 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          <Button label="Tur antarmuka" variant="ghost" size="sm" onClick={onTour} />
-          <Button label="Pintasan keyboard (?)" variant="ghost" size="sm" onClick={onShortcuts} />
+          <Button label={t("Tur antarmuka")} variant="ghost" size="sm" onClick={onTour} />
+          <Button label={t("Pintasan keyboard (?)")} variant="ghost" size="sm" onClick={onShortcuts} />
         </div>
       </section>
 
       <Dialog isOpen={exportOpen} onOpenChange={setExportOpen} purpose="form" width={420}>
         <DialogHeader
-          title="Ekspor terenkripsi"
-          subtitle="Cadangan JSON yang dikunci kata sandi"
+          title={t("Ekspor terenkripsi")}
+          subtitle={t("Cadangan JSON yang dikunci kata sandi")}
           onOpenChange={setExportOpen}
         />
         <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
-          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>
-            Berkas <code>.sekeping</code> ini memuat semua rekening, transaksi, jadwal, dan anggaran. Tanpa kata
+          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>{t("Berkas")}<code>.sekeping</code> ini memuat semua rekening, transaksi, jadwal, dan anggaran. Tanpa kata
             sandi, isinya tidak bisa dipulihkan.
           </p>
           <TextInput
-            label="Kata sandi (min. 8 karakter)"
+            label={t("Kata sandi (min. 8 karakter)")}
             value={exportPassword}
             onChange={setExportPassword}
             type="password"
             placeholder="••••••••"
           />
           <TextInput
-            label="Ulangi kata sandi"
+            label={t("Ulangi kata sandi")}
             value={exportPassword2}
             onChange={setExportPassword2}
             type="password"
@@ -438,7 +426,7 @@ export default function Settings({
           />
         </div>
         <div className="sk-sheet-actions">
-          <Button label="Batal" variant="ghost" onClick={() => setExportOpen(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => setExportOpen(false)} />
           <Button
             label={exportBusy ? 'Mengenkripsi…' : 'Unduh terenkripsi'}
             variant="primary"
@@ -450,16 +438,14 @@ export default function Settings({
 
       <Dialog isOpen={Boolean(unlock)} onOpenChange={(open) => !open && setUnlock(null)} purpose="form" width={420}>
         <DialogHeader
-          title="Buka cadangan terenkripsi"
+          title={t("Buka cadangan terenkripsi")}
           subtitle={unlock?.name}
           onOpenChange={(open) => !open && setUnlock(null)}
         />
         <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
-          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>
-            Masukkan kata sandi yang dipakai saat mengekspor. Kata sandi tidak disimpan di mana pun.
-          </p>
+          <p className="sk-sub" style={{ marginTop: 0, fontSize: '0.8rem' }}>{t("Masukkan kata sandi yang dipakai saat mengekspor. Kata sandi tidak disimpan di mana pun.")}</p>
           <TextInput
-            label="Kata sandi"
+            label={t("Kata sandi")}
             value={unlockPassword}
             onChange={setUnlockPassword}
             type="password"
@@ -467,9 +453,9 @@ export default function Settings({
           />
         </div>
         <div className="sk-sheet-actions">
-          <Button label="Batal" variant="ghost" onClick={() => setUnlock(null)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => setUnlock(null)} />
           <Button
-            label={unlockBusy ? 'Membuka…' : 'Pulihkan'}
+            label={unlockBusy ? 'Membuka…' : t("Pulihkan")}
             variant="primary"
             isDisabled={unlockBusy || unlockPassword.length === 0}
             onClick={doUnlock}
@@ -478,17 +464,17 @@ export default function Settings({
       </Dialog>
 
       <Dialog isOpen={pinOpen} onOpenChange={setPinOpen} purpose="form" width={360}>
-        <DialogHeader title="Pasang PIN" subtitle="4 angka, hanya di perangkat ini" onOpenChange={setPinOpen} />
+        <DialogHeader title={t("Pasang PIN")} subtitle={t("4 angka, hanya di perangkat ini")} onOpenChange={setPinOpen} />
         <div className="sk-sheet" style={{ paddingTop: '1rem' }}>
           <TextInput
-            label="PIN baru"
+            label={t("PIN baru")}
             value={pin}
             onChange={(v) => setPin(v.replace(/\D/g, '').slice(0, 4))}
             type="password"
             placeholder="••••"
           />
           <TextInput
-            label="Ulangi PIN"
+            label={t("Ulangi PIN")}
             value={pin2}
             onChange={(v) => setPin2(v.replace(/\D/g, '').slice(0, 4))}
             type="password"
@@ -496,14 +482,14 @@ export default function Settings({
           />
         </div>
         <div className="sk-sheet-actions">
-          <Button label="Batal" variant="ghost" onClick={() => setPinOpen(false)} />
-          <Button label="Aktifkan" variant="primary" onClick={savePin} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => setPinOpen(false)} />
+          <Button label={t("Aktifkan")} variant="primary" onClick={savePin} />
         </div>
       </Dialog>
       <Dialog isOpen={confirmClear} onOpenChange={setConfirmClear} purpose="form" width={380}>
         <DialogHeader
-          title="Hapus semua data?"
-          subtitle="Tindakan ini tidak bisa dibatalkan"
+          title={t("Hapus semua data?")}
+          subtitle={t("Tindakan ini tidak bisa dibatalkan")}
           onOpenChange={setConfirmClear}
         />
         <p className="sk-sub" style={{ margin: '1rem 0' }}>
@@ -511,9 +497,9 @@ export default function Settings({
           akan dihapus. Cadangkan JSON dulu bila ragu.
         </p>
         <div className="sk-sheet-actions">
-          <Button label="Batal" variant="ghost" onClick={() => setConfirmClear(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => setConfirmClear(false)} />
           <Button
-            label="Hapus semua"
+            label={t("Hapus semua")}
             variant="destructive"
             onClick={() => {
               clearAll();

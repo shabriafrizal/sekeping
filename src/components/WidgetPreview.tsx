@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 export type WidgetSize = '4x1' | '4x2' | '2x2';
 
@@ -18,24 +19,24 @@ export interface WidgetLabels {
 export function widgetLabels(language: string): WidgetLabels {
   if (language === 'en') {
     return {
-      total: 'Total',
+      total: t("Total"),
       balance: 'Balance',
       provider: 'Account',
       expense: 'Expense',
       income: 'Income',
-      transfer: 'Transfer',
+      transfer: t("Transfer"),
       empty: 'No account yet',
       hide: 'Hide amounts',
       show: 'Show amounts',
     };
   }
   return {
-    total: 'Total',
+    total: t("Total"),
     balance: 'Saldo',
-    provider: 'Rekening',
-    expense: 'Pengeluaran',
-    income: 'Pendapatan',
-    transfer: 'Transfer',
+    provider: t("Rekening"),
+    expense: t("Pengeluaran"),
+    income: t("Pendapatan"),
+    transfer: t("Transfer"),
     empty: 'Belum ada rekening',
     hide: 'Sembunyikan nominal',
     show: 'Tampilkan nominal',

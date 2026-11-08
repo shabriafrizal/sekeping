@@ -1,4 +1,5 @@
 import type { Tx, TxType } from './types';
+import { t } from './i18n';
 
 /* ------------------------------------------------------------------ */
 /* Parsing                                                             */
@@ -101,14 +102,14 @@ export interface CsvFieldInfo {
 }
 
 export const CSV_FIELDS: CsvFieldInfo[] = [
-  { key: 'date', label: 'Tanggal', hint: 'YYYY-MM-DD, DD/MM/YYYY atau MM/DD/YYYY', required: true },
-  { key: 'amount', label: 'Jumlah', hint: 'Angka; simbol mata uang dan pemisah ribuan diabaikan', required: true },
-  { key: 'type', label: 'Jenis', hint: 'Pengeluaran, Pendapatan atau Transfer' },
-  { key: 'category', label: 'Kategori', hint: 'Nama kategori; dibuat otomatis bila diizinkan' },
-  { key: 'account', label: 'Rekening', hint: 'Nama rekening sumber' },
+  { key: 'date', label: "Tanggal", hint: 'YYYY-MM-DD, DD/MM/YYYY atau MM/DD/YYYY', required: true },
+  { key: 'amount', label: "Jumlah", hint: 'Angka; simbol mata uang dan pemisah ribuan diabaikan', required: true },
+  { key: 'type', label: "Jenis", hint: 'Pengeluaran, Pendapatan atau Transfer' },
+  { key: 'category', label: "Kategori", hint: 'Nama kategori; dibuat otomatis bila diizinkan' },
+  { key: 'account', label: "Rekening", hint: 'Nama rekening sumber' },
   { key: 'toAccount', label: 'Rekening tujuan', hint: 'Hanya untuk transfer' },
   { key: 'fee', label: 'Biaya', hint: 'Biaya admin transfer (opsional)' },
-  { key: 'note', label: 'Catatan', hint: 'Keterangan transaksi' },
+  { key: 'note', label: "Catatan", hint: 'Keterangan transaksi' },
 ];
 
 export type CsvMapping = Partial<Record<CsvField, number>>;
@@ -121,7 +122,7 @@ const ALIASES: Record<CsvField, string[]> = {
   account: ['rekening', 'akun', 'account', 'sumber', 'fromaccount', 'dompet', 'source'],
   toAccount: ['tujuan', 'kerekening', 'toaccount', 'destination', 'penerima'],
   fee: ['biaya', 'fee', 'admin', 'biayaadmin', 'charges'],
-  note: ['catatan', 'keterangan', 'note', 'memo', 'deskripsi', 'description', 'remarks', 'detail'],
+  note: [t("catatan"), 'keterangan', 'note', 'memo', 'deskripsi', 'description', 'remarks', 'detail'],
 };
 
 function normalizeHeader(value: string): string {

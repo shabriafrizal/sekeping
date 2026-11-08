@@ -22,6 +22,7 @@ import {
   daysBetween,
 } from '../lib/format';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 type Period =
   | 'today'
@@ -48,16 +49,16 @@ const CHART_COLORS = [
 ];
 
 const PERIOD_LABEL: Record<Period, string> = {
-  today: 'Hari ini',
-  yesterday: 'Kemarin',
-  '7d': '7 hari',
-  month: 'Bulan ini',
-  lastmonth: 'Bulan lalu',
-  '3m': '3 bulan',
-  year: 'Tahun ini',
-  '12m': '1 tahun',
-  all: 'Semua',
-  custom: 'Rentang',
+  today: "Hari ini",
+  yesterday: "Kemarin",
+  '7d': "7 hari",
+  month: "Bulan ini",
+  lastmonth: "Bulan lalu",
+  '3m': "3 bulan",
+  year: "Tahun ini",
+  '12m': "1 tahun",
+  all: t("Semua"),
+  custom: t("Rentang"),
 };
 
 const PERIODS: Period[] = [
@@ -175,7 +176,7 @@ export default function Reports() {
       .map(([id, value]) => ({
         id,
         value,
-        name: id === 'none' ? 'Tanpa kategori' : categoryById(id)?.name ?? 'Lainnya',
+        name: id === 'none' ? 'Tanpa kategori' : categoryById(id)?.name ?? t("Lainnya"),
         icon: id === 'none' ? 'wallet' : categoryById(id)?.icon,
       }))
       .sort((a, b) => b.value - a.value);
@@ -207,21 +208,21 @@ export default function Reports() {
   const usePerDay = rangeDays !== null && Boolean(from) && Boolean(to);
   const rangeSubtitle =
     period === 'all' || !from || !to
-      ? 'Semua waktu'
-      : `${shortDate(from)} – ${shortDate(to)}${rangeDays ? ` · ${rangeDays} hari` : ''}`;
+      ? t('Semua waktu')
+      : `${shortDate(from)} – ${shortDate(to)}${rangeDays ? t(' · {n} hari', { n: rangeDays }) : ''}`;
 
   return (
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Analisis</p>
-          <h1 className="sk-title">Laporan</h1>
-          <p className="sk-sub">{rangeSubtitle} · transfer antar rekening tidak dihitung</p>
+          <p className="sk-eyebrow">{t("Analisis")}</p>
+          <h1 className="sk-title">{t("Laporan")}</h1>
+          <p className="sk-sub">{rangeSubtitle} · {t('transfer antar rekening tidak dihitung')}</p>
         </div>
       </div>
 
       <div className="sk-toolbar">
-        <div className="sk-type-row" style={{ maxWidth: 280 }} role="radiogroup" aria-label="Jenis laporan">
+        <div className="sk-type-row" style={{ maxWidth: 280 }} role="radiogroup" aria-label={t("Jenis laporan")}>
           <button
             type="button"
             role="radio"
@@ -230,9 +231,7 @@ export default function Reports() {
             data-tone="expense"
             data-active={mode === 'expense'}
             onClick={() => setMode('expense')}
-          >
-            Pengeluaran
-          </button>
+          >{t("Pengeluaran")}</button>
           <button
             type="button"
             role="radio"
@@ -241,9 +240,7 @@ export default function Reports() {
             data-tone="income"
             data-active={mode === 'income'}
             onClick={() => setMode('income')}
-          >
-            Pendapatan
-          </button>
+          >{t("Pendapatan")}</button>
         </div>
         <div className="sk-chips">
           {PERIODS.map((p) => (
@@ -255,16 +252,16 @@ export default function Reports() {
               aria-pressed={period === p}
               onClick={() => choosePeriod(p)}
             >
-              {PERIOD_LABEL[p]}
+              {t(PERIOD_LABEL[p])}
             </button>
           ))}
         </div>
       </div>
 
       {period === 'custom' ? (
-        <div className="sk-range" role="group" aria-label="Rentang tanggal laporan">
+        <div className="sk-range" role="group" aria-label={t("Rentang tanggal laporan")}>
           <label className="sk-field">
-            <span className="sk-eyebrow">Dari tanggal</span>
+            <span className="sk-eyebrow">{t("Dari tanggal")}</span>
             <input
               className="sk-input"
               type="date"
@@ -277,7 +274,7 @@ export default function Reports() {
             –
           </span>
           <label className="sk-field">
-            <span className="sk-eyebrow">Sampai tanggal</span>
+            <span className="sk-eyebrow">{t("Sampai tanggal")}</span>
             <input
               className="sk-input"
               type="date"
@@ -286,29 +283,27 @@ export default function Reports() {
               onChange={(e) => changeTo(e.target.value)}
             />
           </label>
-          <button type="button" className="sk-link sk-range-reset" onClick={resetRange}>
-            Bulan ini
-          </button>
+          <button type="button" className="sk-link sk-range-reset" onClick={resetRange}>{t("Bulan ini")}</button>
         </div>
       ) : null}
 
       <section className="sk-kpis">
         <div className="sk-kpi">
-          <span>Total {mode === 'expense' ? 'pengeluaran' : 'pendapatan'}</span>
+          <span>{t(mode === 'expense' ? 'Total pengeluaran' : 'Total pendapatan')}</span>
           <strong style={{ color: mode === 'expense' ? 'var(--color-error)' : 'var(--color-success)' }}>
             {money(total)}
           </strong>
         </div>
         <div className="sk-kpi">
-          <span>Transaksi</span>
+          <span>{t("Transaksi")}</span>
           <strong>{filtered.length}</strong>
         </div>
         <div className="sk-kpi">
-          <span>{usePerDay ? 'Rata-rata / hari' : 'Rata-rata / bulan'}</span>
+          <span>{usePerDay ? t('Rata-rata / hari') : t('Rata-rata / bulan')}</span>
           <strong>{compactMoney(usePerDay ? perDay : avgValue)}</strong>
         </div>
         <div className="sk-kpi">
-          <span>Terbesar</span>
+          <span>{t("Terbesar")}</span>
           <strong>{top ? top.name : '—'}</strong>
         </div>
       </section>
@@ -316,12 +311,10 @@ export default function Reports() {
       <section className="sk-report-grid">
         <div className="sk-card">
           <div className="sk-card-head">
-            <h2 className="sk-card-title">Komposisi kategori</h2>
+            <h2 className="sk-card-title">{t("Komposisi kategori")}</h2>
           </div>
           {byCategory.length === 0 ? (
-            <p className="sk-sub" style={{ padding: '2rem 0', textAlign: 'center' }}>
-              Belum ada data pada periode ini.
-            </p>
+            <p className="sk-sub" style={{ padding: '2rem 0', textAlign: 'center' }}>{t("Belum ada data pada periode ini.")}</p>
           ) : (
             <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(0,1fr)' }}>
               <div
@@ -372,9 +365,7 @@ export default function Reports() {
                   }}
                 >
                   <div>
-                    <div className="sk-eyebrow" style={{ fontSize: '0.62rem' }}>
-                      Total
-                    </div>
+                    <div className="sk-eyebrow" style={{ fontSize: '0.62rem' }}>{t("Total")}</div>
                     <div style={{ fontSize: '1.05rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                       {compactMoney(total)}
                     </div>
@@ -412,8 +403,8 @@ export default function Reports() {
 
         <div className="sk-card">
           <div className="sk-card-head">
-            <h2 className="sk-card-title">Tren 6 bulan</h2>
-            <span className="sk-day-total">{mode === 'expense' ? 'Pengeluaran' : 'Pendapatan'}</span>
+            <h2 className="sk-card-title">{t("Tren 6 bulan")}</h2>
+            <span className="sk-day-total">{t(mode === 'expense' ? 'Pengeluaran' : 'Pendapatan')}</span>
           </div>
           <div
             style={{ height: 220 }}
@@ -455,7 +446,7 @@ export default function Reports() {
             </ResponsiveContainer>
           </div>
           <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.6rem' }}>
-            Rata-rata {compactMoney(avgValue)} per bulan dalam 6 bulan terakhir.
+            {t('Rata-rata {amount} per bulan dalam 6 bulan terakhir.', { amount: compactMoney(avgValue) })}
           </p>
         </div>
       </section>

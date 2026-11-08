@@ -6,19 +6,14 @@ import { Switch } from '@astryxdesign/core/Switch';
 import { useStore, currentMonth } from '../lib/store';
 import { currencySymbol, money } from '../lib/format';
 import { iconFor } from '../lib/icons';
-import WidgetPreview, { type WidgetSize } from '../components/WidgetPreview';
+import WidgetPreview from '../components/WidgetPreview';
 import { closeSheet, openApp, readWidgetConfig, saveWidgetConfig } from '../lib/native';
-
-const SIZES: Array<{ id: WidgetSize; label: string; hint: string }> = [
-  { id: '4x1', label: '4×1', hint: 'Ringkas' },
-  { id: '4x2', label: '4×2', hint: 'Lengkap' },
-  { id: '2x2', label: '2×2', hint: 'Kotak' },
-];
+import { t } from '../lib/i18n';
 
 /**
  * The "Atur widget" dialog. It runs inside the APK's configuration activity,
- * on top of the same Astryx theme as the app, and previews the exact widget
- * layouts in 4×1, 4×2 and 2×2 before saving to the host.
+ * on top of the same Astryx theme as the app. The launcher already asked which
+ * size to add, so this only previews that size and edits its account/buttons.
  */
 export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
   const { state, netWorth, balanceOf } = useStore();
@@ -33,12 +28,11 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
     language === 'en'
       ? {
           title: 'Widget setup',
-          subtitle: 'Pick the account, buttons and size.',
+          subtitle: 'Pick the account and buttons.',
           preview: 'Preview',
           saved: 'Saved',
           sizes: { '4x1': 'Compact', '4x2': 'Full', '2x2': 'Square' },
-          sizeAria: 'Widget size',
-          sizeHint: 'The size follows the space you give it on the home screen.',
+          sizeHint: 'This is the size you picked in the launcher.',
           account: 'Account',
           noAccounts: 'Open Sekeping once so the account list appears here.',
           openApp: 'Open app',
@@ -49,33 +43,32 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
           expenseHint: 'Record money out',
           income: 'Income',
           incomeHint: 'Record money in',
-          transfer: 'Transfer',
+          transfer: t("Transfer"),
           transferHint: 'Move between accounts',
           cancel: 'Cancel',
           save: 'Save',
         }
       : {
           title: 'Atur widget',
-          subtitle: 'Pilih rekening, tombol, dan ukuran.',
+          subtitle: 'Pilih rekening dan tombol.',
           preview: 'Pratinjau',
           saved: 'Tersimpan',
           sizes: { '4x1': 'Ringkas', '4x2': 'Lengkap', '2x2': 'Kotak' },
-          sizeAria: 'Ukuran widget',
-          sizeHint: 'Ukuran mengikuti berapa banyak ruang yang kamu beri di layar utama.',
-          account: 'Rekening',
+          sizeHint: 'Ukuran ini yang kamu pilih dari layar utama.',
+          account: t("Rekening"),
           noAccounts: '{L.noAccounts}',
           openApp: 'Buka aplikasi',
           accountHint:
             'Rekening ini menjadi pilihan awal saat mencatat dari widget. Nominal kedua adalah total semua rekening aktif.',
           actions: 'Tombol yang tampil',
-          expense: 'Pengeluaran',
+          expense: t("Pengeluaran"),
           expenseHint: 'Catat uang keluar',
-          income: 'Pendapatan',
+          income: t("Pendapatan"),
           incomeHint: 'Catat uang masuk',
-          transfer: 'Transfer',
+          transfer: t("Transfer"),
           transferHint: 'Pindah antar rekening',
-          cancel: 'Batal',
-          save: 'Simpan',
+          cancel: t("Batal"),
+          save: t("Simpan"),
         };
 
   const activeAccounts = state.accounts.filter((a) => a.active);
@@ -88,7 +81,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
   const [showExpense, setShowExpense] = useState(initial.showExpense);
   const [showIncome, setShowIncome] = useState(initial.showIncome);
   const [showTransfer, setShowTransfer] = useState(initial.showTransfer);
-  const [size, setSize] = useState<WidgetSize>('4x1');
+  const size = initial.size ?? '4x2';
   const [saved, setSaved] = useState(false);
 
   const { from, to } = currentMonth();
@@ -146,22 +139,10 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
               </span>
             </div>
 
-            <div className="skw-tabs" role="tablist" aria-label={L.sizeAria}>
-              {SIZES.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={size === item.id}
-                  className="skw-tab"
-                  data-active={size === item.id}
-                  onClick={() => setSize(item.id)}
-                >
-                  <strong>{item.label}</strong>
-                  <small>{L.sizes[item.id]}</small>
-                </button>
-              ))}
-            </div>
+            <p className="skw-size">
+              <strong>{size.replace('x', '×')}</strong>
+              <span>{L.sizes[size]}</span>
+            </p>
 
             <WidgetPreview
               size={size}

@@ -98,6 +98,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                 put("showExpense", config.showExpense)
                 put("showIncome", config.showIncome)
                 put("showTransfer", config.showTransfer)
+                put("size", WidgetProvider.sizeKey(this@WidgetConfigActivity, widgetId))
             }.toString()
         }
 

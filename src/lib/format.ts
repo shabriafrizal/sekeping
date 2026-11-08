@@ -52,13 +52,13 @@ function compactBody(value: number): string {
   let unit = '';
   if (n >= 1_000_000_000) {
     divisor = 1_000_000_000;
-    unit = english ? 'B' : 'M';
+    unit = english ? 'B' : 'Mil';
   } else if (n >= 1_000_000) {
     divisor = 1_000_000;
-    unit = english ? 'M' : 'jt';
+    unit = english ? 'M' : 'Jt';
   } else if (n >= 1_000) {
     divisor = 1_000;
-    unit = english ? 'K' : 'rb';
+    unit = english ? 'K' : 'Rb';
   }
   const body = unit
     ? (n / divisor).toLocaleString(LOCALE, { maximumFractionDigits: 1 })

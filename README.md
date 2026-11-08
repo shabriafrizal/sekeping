@@ -59,7 +59,7 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Settings** | Profile and currency, account and category CRUD with icon picker, PIN lock, CSV export, CSV import, JSON backup, password-encrypted backup, demo reset |
 | **Keyboard** | Skip link, arrow-key menus, `Alt+1…6` page jumps, `g`-prefix jumps, `n` for a new expense, `?` for the shortcut sheet |
 | **Responsive** | Sidebar and top bar on desktop; drawer navigation and a top action bar on phones |
-| **Android app** | Offline APK plus a resizable 4×1 / 4×2 / 2×2 home-screen widget: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three labelled actions (see [Android app](#android-app)) |
+| **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three quick actions (see [Android app](#android-app)) |
 | **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
 
 ## Quick start
@@ -90,21 +90,22 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.4.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.4/sekeping-1.1.4.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.5.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.5/sekeping-1.1.5.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
 ### Use the widget
 
 1. Long-press an empty spot on the home screen → **Widgets**.
-2. Find **Sekeping** and drag the widget onto the home screen.
-3. The **Atur widget** dialog opens with a live preview. Pick the **default account**,
-   which square buttons to show, and preview the **4×1**, **4×2** or **2×2** shape.
-   Long-press the widget → **Reconfigure** to change it later.
+2. Find **Sekeping** and choose the size you want up front: **Sekeping 4×1**,
+   **Sekeping 4×2** or **Sekeping 2×2**.
+3. The **Atur widget** dialog opens with a live preview of that size. Pick the
+   **default account** and which quick buttons to show. Long-press the widget →
+   **Reconfigure** to change it later.
 4. The widget shows the **provider** you picked (icon and name) with its own balance, and
    the **total** of every active account. Tap the **eye** to mask both amounts with `***`;
-   tap it again to show them. Drag its handles to resize; one widget adapts to the space:
-   - **4×1** — compact: provider, total and the three actions.
+   tap it again to show them. Each entry keeps its size:
+   - **4×1** — compact: provider, total and three icon actions.
    - **4×2** — roomier: larger amounts and labelled buttons.
    - **2×2** — square: provider, total and compact actions.
 5. **Pengeluaran**, **Pendapatan** and **Transfer** do not open the dashboard. They show
@@ -205,8 +206,9 @@ month. Switch months with the arrows to look back.
 
 **Pengaturan → Profil** sets two things:
 
-- **Bahasa** — Bahasa Indonesia (default) or English. It drives number and date
-  formatting and the widget labels, including the setup dialog.
+- **Bahasa** — Bahasa Indonesia (default) or English. It translates the whole interface
+  (pages, dialogs, toasts, empty states) and drives number and date formatting plus the
+  widget labels, including the setup dialog.
 - **Mata uang** — IDR (default), USD, EUR, SGD or MYR. It changes the symbol and grouping
   everywhere, including the widget.
 
@@ -365,8 +367,8 @@ adding a transaction, search, deleting, PIN set → reload → unlock, persisten
 and the payment dialog. A second suite covers recurring catch-up, the Ringkasan reminder and its
 **Selesai** action, budget rollover, CSV column mapping, encrypted export/restore and
 the keyboard shortcuts. A third suite stubs the Android bridge to cover the **Atur
-widget** dialog (sizes, account picker, switches, save payload) and the quick-add sheet
-(no dashboard, bottom anchoring, PIN gate, persistence before closing).
+widget** dialog (size from the launcher, account picker, switches, save payload) and the
+quick-add sheet (no dashboard, bottom anchoring, PIN gate, persistence before closing).
 
 ```bash
 npm run build
@@ -423,6 +425,7 @@ Shipped in 1.1:
 - [x] CSV import with column mapping
 - [x] Password-encrypted export
 - [x] Full keyboard navigation audit
+- [x] English translation of the whole interface
 
 Next:
 
@@ -431,7 +434,6 @@ Next:
 - [ ] Split transactions across categories
 - [ ] Installable PWA with an offline cache
 - [ ] Merge two ledgers from a shared export
-- [ ] Translate the remaining page copy into English
 - [ ] iOS and desktop packaging from the same build
 
 ## Acknowledgments

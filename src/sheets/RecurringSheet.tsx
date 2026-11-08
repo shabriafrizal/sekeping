@@ -7,6 +7,7 @@ import { useStore } from '../lib/store';
 import type { Interval, Recurring } from '../lib/types';
 import { todayISO } from '../lib/format';
 import { advanceDate, initialNextDate } from '../lib/recurring';
+import { t } from '../lib/i18n';
 
 export function RecurringSheet({
   isOpen,
@@ -73,9 +74,9 @@ export function RecurringSheet({
   }, [categories, categoryId]);
 
   const intervalOptions = [
-    { value: 'weekly', label: 'Mingguan' },
-    { value: 'monthly', label: 'Bulanan' },
-    { value: 'yearly', label: 'Tahunan' },
+    { value: 'weekly', label: t("Mingguan") },
+    { value: 'monthly', label: t("Bulanan") },
+    { value: 'yearly', label: t("Tahunan") },
   ];
 
   function save() {
@@ -117,16 +118,16 @@ export function RecurringSheet({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460} maxHeight="92dvh">
       <DialogHeader
-        title={item ? 'Ubah jadwal' : 'Tambah jadwal'}
-        subtitle="Transaksi berulang & langganan"
+        title={item ? 'Ubah jadwal' : t("Tambah jadwal")}
+        subtitle={t("Transaksi berulang & langganan")}
         onOpenChange={onOpenChange}
       />
       <div className="sk-dialog-body">
         <div className="sk-sheet">
-          <div className="sk-type-row" role="radiogroup" aria-label="Jenis transaksi">
+          <div className="sk-type-row" role="radiogroup" aria-label={t("Jenis transaksi")}>
             {([
-              ['expense', 'Pengeluaran'],
-              ['income', 'Pendapatan'],
+              ['expense', t("Pengeluaran")],
+              ['income', t("Pendapatan")],
             ] as const).map(([value, label]) => (
               <button
                 key={value}
@@ -144,34 +145,34 @@ export function RecurringSheet({
           </div>
 
           <TextInput
-            label="Nama jadwal"
+            label={t("Nama jadwal")}
             value={name}
-            placeholder="Netflix, sewa kos, gaji…"
+            placeholder={t("Netflix, sewa kos, gaji…")}
             onChange={setName}
           />
           <TextInput
-            label="Jumlah"
+            label={t("Jumlah")}
             value={amount ? String(amount) : ''}
             placeholder="0"
             onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
           />
 
           <Selector
-            label="Rekening"
+            label={t("Rekening")}
             options={accountOptions}
             value={accountId}
             onChange={setAccountId}
             width="100%"
           />
           <Selector
-            label="Kategori"
+            label={t("Kategori")}
             options={categories.map((c) => ({ value: c.id, label: c.name }))}
             value={categoryId}
             onChange={setCategoryId}
             width="100%"
           />
           <Selector
-            label="Ulangi setiap"
+            label={t("Ulangi setiap")}
             options={intervalOptions}
             value={interval}
             onChange={(v) => {
@@ -184,7 +185,7 @@ export function RecurringSheet({
 
           <div className="sk-two">
             <label className="sk-field">
-              <span className="sk-eyebrow">Mulai</span>
+              <span className="sk-eyebrow">{t("Mulai")}</span>
               <input
                 className="sk-input"
                 type="date"
@@ -196,7 +197,7 @@ export function RecurringSheet({
               />
             </label>
             <label className="sk-field">
-              <span className="sk-eyebrow">Jatuh tempo berikutnya</span>
+              <span className="sk-eyebrow">{t("Jatuh tempo berikutnya")}</span>
               <input
                 className="sk-input"
                 type="date"
@@ -206,12 +207,11 @@ export function RecurringSheet({
             </label>
           </div>
           <label className="sk-field">
-            <span className="sk-eyebrow">Berakhir (opsional)</span>
+            <span className="sk-eyebrow">{t("Berakhir (opsional)")}</span>
             <input className="sk-input" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </label>
           <p className="sk-sub" style={{ fontSize: '0.74rem', margin: 0 }}>
-            Saat aplikasi dibuka pada atau setelah tanggal itu, transaksi dibuat otomatis. Tanggal yang terlewat
-            dicatat sekaligus.
+            {t("Saat aplikasi dibuka pada atau setelah tanggal itu, transaksi dibuat otomatis. Tanggal yang terlewat dicatat sekaligus.")}
           </p>
 
           <label className="sk-check">
@@ -221,21 +221,21 @@ export function RecurringSheet({
               onChange={(e) => setIsSubscription(e.target.checked)}
             />
             <span>
-              <b>Langganan</b>
-              <small>Tandai sebagai langganan berbayar untuk ringkasan biaya bulanan.</small>
+              <b>{t("Langganan")}</b>
+              <small>{t("Tandai sebagai langganan berbayar untuk ringkasan biaya bulanan.")}</small>
             </span>
           </label>
           <label className="sk-check">
             <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
             <span>
-              <b>Aktif</b>
-              <small>Jadwal nonaktif tidak membuat transaksi baru.</small>
+              <b>{t("Aktif")}</b>
+              <small>{t("Jadwal nonaktif tidak membuat transaksi baru.")}</small>
             </span>
           </label>
           {item ? (
             <div className="sk-rec-sheet-actions">
               <Button
-                label="Lewati sekali"
+                label={t("Lewati sekali")}
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -245,7 +245,7 @@ export function RecurringSheet({
                 }}
               />
               <Button
-                label="Catat sekarang"
+                label={t("Catat sekarang")}
                 variant="secondary"
                 size="sm"
                 onClick={() => {
@@ -260,11 +260,11 @@ export function RecurringSheet({
       </div>
       <div className="sk-sheet-actions">
         {item ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label={item ? 'Simpan perubahan' : 'Simpan'} variant="primary" onClick={save} />
+        <Button label={item ? 'Simpan perubahan' : t("Simpan")} variant="primary" onClick={save} />
       </div>
     </Dialog>
   );

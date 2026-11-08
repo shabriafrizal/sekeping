@@ -8,7 +8,7 @@ two Astryx dialogs that float over the launcher.
 | WebView host, asset loader, deep links | `app/src/main/java/dev/shabri/sekeping/MainActivity.kt` |
 | Shared WebView setup for the dialogs | `WebAppHost.kt` |
 | Widget preferences, accounts and saldo summary | `WidgetPrefs.kt` |
-| Resizable 4×1 / 4×2 / 2×2 widget | `WidgetProvider.kt`, `res/layout/widget_sekeping_*.xml` |
+| 4×1 / 4×2 / 2×2 widgets | `WidgetProvider.kt`, `res/layout/widget_sekeping_*.xml` |
 | “Atur widget” dialog (web modal) | `WidgetConfigActivity.kt`, `src/sheets/WidgetConfigSheet.tsx` |
 | Quick-add sheet over the home screen | `WidgetSheetActivity.kt` |
 
@@ -35,18 +35,24 @@ two Astryx dialogs that float over the launcher.
 
 ## Widget sizes
 
-One resizable widget, three layouts chosen from the cells it occupies:
+The launcher's widget picker offers three entries, so the size is chosen **before**
+placing the widget:
 
-| Shape | Layout | Content |
-| --- | --- | --- |
-| 4×1 | `widget_sekeping_small.xml` | Saldo + icon row |
-| 4×2 | `widget_sekeping_medium.xml` | Saldo, month in/out, icon column |
-| 2×2 | `widget_sekeping_square.xml` | Compact saldo + icon row |
+| Entry | Provider | Layout | Content |
+| --- | --- | --- | --- |
+| Sekeping 4×1 | `WidgetProviderWide` | `widget_sekeping_small.xml` | Compact saldo + three icon actions |
+| Sekeping 4×2 | `WidgetProvider` | `widget_sekeping_medium.xml` | Saldo, provider, total + labelled actions |
+| Sekeping 2×2 | `WidgetProviderSquare` | `widget_sekeping_square.xml` | Square saldo + compact actions |
 
-The layout switches in `WidgetProvider.onAppWidgetOptionsChanged`. Saldo and the month
-figures are formatted by the web app (`money()`), so the widget uses the same currency
-and separators as the ledger. Fraunces is bundled as a static semibold TTF for API 26+;
-API 24–25 fall back to the platform serif through `values/styles.xml`.
+The four-by-two entry keeps its original resizable behaviour for people who already
+have a widget from an older version. The fixed entries use `resizeMode="none"` and
+pass their layout to `WidgetProvider.update()`. The setup dialog reads the actual size
+through `getWidgetConfig()` and previews that shape; it no longer asks for a size.
+
+Saldo and the month figures are formatted by the web app (`money()`), so the widget
+uses the same currency and separators as the ledger. Fraunces is bundled as a static
+semibold TTF for API 26+; API 24–25 fall back to the platform serif through
+`values/styles.xml`.
 
 ## Data
 

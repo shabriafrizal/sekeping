@@ -8,6 +8,7 @@ import type { Tx, TxType } from '../lib/types';
 import { nowTime, todayISO } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import AmountPad from '../components/AmountPad';
+import { t } from '../lib/i18n';
 
 interface Props {
   isOpen: boolean;
@@ -20,9 +21,9 @@ interface Props {
 }
 
 const TYPE_LABEL: Record<TxType, string> = {
-  expense: 'Pengeluaran',
-  income: 'Pendapatan',
-  transfer: 'Transfer',
+  expense: t("Pengeluaran"),
+  income: t("Pendapatan"),
+  transfer: t("Transfer"),
 };
 
 export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType, initialAccountId, onSaved }: Props) {
@@ -129,13 +130,13 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460} maxHeight="92dvh">
       <DialogHeader
-        title={tx ? 'Ubah transaksi' : 'Tambah transaksi'}
+        title={tx ? 'Ubah transaksi' : t("Tambah transaksi")}
         subtitle={TYPE_LABEL[type]}
         onOpenChange={onOpenChange}
       />
       <div className="sk-dialog-body">
       <div className="sk-sheet">
-        <div className="sk-type-row" role="radiogroup" aria-label="Jenis transaksi">
+        <div className="sk-type-row" role="radiogroup" aria-label={t("Jenis transaksi")}>
           {(['expense', 'income', 'transfer'] as TxType[]).map((t) => (
             <button
               key={t}
@@ -156,7 +157,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
 
         <div className="sk-field">
           <Selector
-            label={type === 'transfer' ? 'Dari rekening' : 'Rekening'}
+            label={type === 'transfer' ? 'Dari rekening' : t("Rekening")}
             options={accountOptions}
             value={accountId}
             onChange={setAccountId}
@@ -168,7 +169,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
           <>
             <div className="sk-field">
               <Selector
-                label="Ke rekening"
+                label={t("Ke rekening")}
                 options={accountOptions.filter((o) => o.value !== accountId)}
                 value={toAccountId}
                 onChange={setToAccountId}
@@ -177,7 +178,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
             </div>
             <div className="sk-field">
               <TextInput
-                label="Biaya admin"
+                label={t("Biaya admin")}
                 value={fee ? String(fee) : ''}
                 placeholder="0"
                 onChange={(v) => setFee(Number(v.replace(/\D/g, '')) || 0)}
@@ -186,10 +187,8 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
           </>
         ) : (
           <div className="sk-field">
-            <p className="sk-eyebrow" style={{ marginBottom: '0.45rem' }}>
-              Kategori
-            </p>
-            <div className="sk-cat-grid" role="radiogroup" aria-label="Kategori">
+            <p className="sk-eyebrow" style={{ marginBottom: '0.45rem' }}>{t("Kategori")}</p>
+            <div className="sk-cat-grid" role="radiogroup" aria-label={t("Kategori")}>
               {categories.map((c) => {
                 const Icon = iconFor(c.icon);
                 return (
@@ -213,26 +212,26 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
 
         <div className="sk-two">
           <label className="sk-field">
-            <span className="sk-eyebrow">Tanggal</span>
+            <span className="sk-eyebrow">{t("Tanggal")}</span>
             <input className="sk-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
           <label className="sk-field">
-            <span className="sk-eyebrow">Waktu · opsional</span>
+            <span className="sk-eyebrow">{t("Waktu · opsional")}</span>
             <input className="sk-input" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
           </label>
         </div>
 
-        <TextInput label="Catatan" value={note} placeholder="Opsional" onChange={setNote} />
+        <TextInput label={t("Catatan")} value={note} placeholder={t("Opsional")} onChange={setNote} />
       </div>
       </div>
 
       <div className="sk-sheet-actions">
         {tx ? (
-          <Button label="Hapus" variant="destructive" onClick={destroy} />
+          <Button label={t("Hapus")} variant="destructive" onClick={destroy} />
         ) : (
-          <Button label="Batal" variant="ghost" onClick={() => onOpenChange(false)} />
+          <Button label={t("Batal")} variant="ghost" onClick={() => onOpenChange(false)} />
         )}
-        <Button label={tx ? 'Simpan perubahan' : 'Simpan'} variant="primary" onClick={submit} isDisabled={!canSave} />
+        <Button label={tx ? 'Simpan perubahan' : t("Simpan")} variant="primary" onClick={submit} isDisabled={!canSave} />
       </div>
     </Dialog>
   );

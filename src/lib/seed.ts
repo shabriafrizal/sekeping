@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import type { AppState, Category, Account, Tx, Debt, Recurring, Budget } from './types';
 import { uid } from './types';
 import { monthKey, toISO, todayISO } from './format';
@@ -66,6 +67,10 @@ const expensePlan: Array<{ cat: string; note: string; min: number; max: number; 
 
 const expandedExpenses = expensePlan.flatMap((item) => Array.from({ length: item.weight }, () => item));
 
+function defaultCategories(): Category[] {
+  return DEFAULT_CATEGORIES.map((category) => ({ ...category, name: t(category.name) }));
+}
+
 export function createDemoState(): AppState {
   const rand = mulberry32(20261108);
   const txs: Tx[] = [];
@@ -108,7 +113,7 @@ export function createDemoState(): AppState {
       categoryId: 'cat_salary',
       date: toISO(d),
       time: '09:00',
-      note: 'Gaji bulanan',
+      note: t('Gaji bulanan'),
       createdAt: Date.now() - 1000,
     });
   }
@@ -120,7 +125,7 @@ export function createDemoState(): AppState {
     categoryId: 'cat_bonus',
     date: daysAgo(5),
     time: '10:30',
-    note: 'Proyek desain lepas',
+    note: t('Proyek desain lepas'),
     createdAt: Date.now() - 1500,
   });
   txs.push({
@@ -131,7 +136,7 @@ export function createDemoState(): AppState {
     categoryId: 'cat_bonus',
     date: daysAgo(12),
     time: '11:15',
-    note: 'Bonus proyek sampingan',
+    note: t('Bonus proyek sampingan'),
     createdAt: Date.now() - 2000,
   });
   txs.push({
@@ -142,7 +147,7 @@ export function createDemoState(): AppState {
     categoryId: 'cat_invest',
     date: daysAgo(34),
     time: '14:00',
-    note: 'Dividen reksa dana',
+    note: t('Dividen reksa dana'),
     createdAt: Date.now() - 3000,
   });
 
@@ -153,17 +158,17 @@ export function createDemoState(): AppState {
     { amount: 1_200_000, date: daysAgo(22), from: 'acc_bank', to: 'acc_ewallet' },
     { amount: 400_000, date: daysAgo(38), from: 'acc_bank', to: 'acc_cash' },
     { amount: 900_000, date: daysAgo(52), from: 'acc_bank', to: 'acc_ewallet' },
-  ].forEach((t, idx) => {
+  ].forEach((transfer, idx) => {
     txs.push({
       id: uid('tx'),
       type: 'transfer',
-      amount: t.amount,
-      accountId: t.from,
-      toAccountId: t.to,
+      amount: transfer.amount,
+      accountId: transfer.from,
+      toAccountId: transfer.to,
       fee: idx % 2 === 0 ? 6_500 : 0,
-      date: t.date,
+      date: transfer.date,
       time: ['08:15', '19:40', '12:05', '16:20', '09:50'][idx] ?? '10:00',
-      note: 'Top up saldo',
+      note: t('Top up saldo'),
       createdAt: Date.now() - idx * 500,
     });
   });
@@ -179,7 +184,7 @@ export function createDemoState(): AppState {
       amount: 54_000,
       accountId: 'acc_bank',
       categoryId: 'cat_fun',
-      note: 'Langganan Netflix',
+      note: t('Langganan Netflix'),
       interval: 'monthly',
       startDate: daysAgo(92),
       nextDate: daysAgo(2),
@@ -204,7 +209,7 @@ export function createDemoState(): AppState {
     },
     {
       id: 'rec_internet',
-      name: 'Internet rumah',
+      name: t('Internet rumah'),
       type: 'expense',
       amount: 320_000,
       accountId: 'acc_bank',
@@ -219,12 +224,12 @@ export function createDemoState(): AppState {
     },
     {
       id: 'rec_salary',
-      name: 'Gaji bulanan',
+      name: t('Gaji bulanan'),
       type: 'income',
       amount: 14_500_000,
       accountId: 'acc_bank',
       categoryId: 'cat_salary',
-      note: 'Gaji bulanan',
+      note: t('Gaji bulanan'),
       interval: 'monthly',
       startDate: daysAgo(120),
       nextDate: initialNextDate(daysAgo(120), 'monthly', today),
@@ -277,7 +282,7 @@ export function createDemoState(): AppState {
     {
       id: 'debt_1',
       kind: 'debt',
-      name: 'Pinjaman motor',
+      name: t('Pinjaman motor'),
       note: 'Cicilan 12 bulan, tenor ke-4',
       total: 9_600_000,
       accountId: 'acc_bank',
@@ -288,7 +293,7 @@ export function createDemoState(): AppState {
     {
       id: 'debt_2',
       kind: 'loan',
-      name: 'Dipinjam Rani',
+      name: t('Dipinjam Rani'),
       note: 'Buat biaya kos',
       total: 1_800_000,
       accountId: 'acc_bank',
@@ -307,7 +312,7 @@ export function createDemoState(): AppState {
   return {
     version: 2,
     accounts: DEFAULT_ACCOUNTS,
-    categories: DEFAULT_CATEGORIES,
+    categories: defaultCategories(),
     txs,
     debts,
     payments,
@@ -329,7 +334,7 @@ export function createEmptyState(): AppState {
   return {
     version: 2,
     accounts: DEFAULT_ACCOUNTS.map((a) => ({ ...a, initial: 0 })),
-    categories: DEFAULT_CATEGORIES,
+    categories: defaultCategories(),
     txs: [],
     debts: [],
     payments: [],

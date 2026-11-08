@@ -4,6 +4,7 @@ import { useStore } from '../lib/store';
 import type { Tx } from '../lib/types';
 import { money, shortDate } from '../lib/format';
 import { iconFor } from '../lib/icons';
+import { t } from '../lib/i18n';
 
 export default function TxDetail({
   tx,
@@ -28,7 +29,7 @@ export default function TxDetail({
   return (
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={400}>
       <DialogHeader
-        title={tx.type === 'transfer' ? 'Detail transfer' : 'Detail transaksi'}
+        title={t(tx.type === 'transfer' ? 'Detail transfer' : 'Detail transaksi')}
         subtitle={shortDate(tx.date)}
         onOpenChange={onOpenChange}
       />
@@ -41,47 +42,47 @@ export default function TxDetail({
           {money(tx.amount)}
         </div>
         <p className="sk-sub" style={{ margin: 0 }}>
-          {tx.type === 'transfer' ? 'Transfer antar rekening' : cat?.name ?? 'Tanpa kategori'}
+          {tx.type === 'transfer' ? 'Transfer antar rekening' : cat?.name ?? t("Tanpa kategori")}
         </p>
       </div>
 
       <div style={{ paddingTop: '0.8rem' }}>
         <div className="sk-kv">
-          <span>Jenis</span>
-          <b>{tx.type === 'expense' ? 'Pengeluaran' : tx.type === 'income' ? 'Pendapatan' : 'Transfer'}</b>
+          <span>{t("Jenis")}</span>
+          <b>{t(tx.type === 'expense' ? 'Pengeluaran' : tx.type === 'income' ? 'Pendapatan' : 'Transfer')}</b>
         </div>
         <div className="sk-kv">
-          <span>{tx.type === 'transfer' ? 'Dari' : 'Rekening'}</span>
+          <span>{tx.type === 'transfer' ? 'Dari' : t("Rekening")}</span>
           <b>{acc?.name ?? '—'}</b>
         </div>
         {tx.type === 'transfer' ? (
           <>
             <div className="sk-kv">
-              <span>Ke</span>
+              <span>{t("Ke")}</span>
               <b>{dest?.name ?? '—'}</b>
             </div>
             <div className="sk-kv">
-              <span>Biaya admin</span>
+              <span>{t("Biaya admin")}</span>
               <b>{money(tx.fee ?? 0)}</b>
             </div>
           </>
         ) : null}
         <div className="sk-kv">
-          <span>Tanggal</span>
+          <span>{t("Tanggal")}</span>
           <b>
             {shortDate(tx.date)}
             {tx.time ? ` · ${tx.time}` : ''}
           </b>
         </div>
         <div className="sk-kv">
-          <span>Catatan</span>
+          <span>{t("Catatan")}</span>
           <b>{tx.note || '—'}</b>
         </div>
       </div>
 
       <div className="sk-sheet-actions">
         <Button
-          label="Hapus"
+          label={t("Hapus")}
           variant="destructive"
           onClick={() => {
             removeTx(tx.id);
@@ -89,7 +90,7 @@ export default function TxDetail({
             onOpenChange(false);
           }}
         />
-        <Button label="Ubah" variant="primary" onClick={() => onEdit(tx)} />
+        <Button label={t("Ubah")} variant="primary" onClick={() => onEdit(tx)} />
       </div>
     </Dialog>
   );

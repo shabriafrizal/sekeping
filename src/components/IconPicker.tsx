@@ -1,9 +1,10 @@
+import { t } from '../lib/i18n';
 import { ICON_KEYS, iconFor } from '../lib/icons';
 
 export function IconPicker({
   value,
   onChange,
-  label = 'Pilih ikon',
+  label = t('Pilih ikon'),
 }: {
   value: string;
   onChange: (key: string) => void;

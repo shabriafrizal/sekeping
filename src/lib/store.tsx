@@ -16,6 +16,8 @@ import { createDemoState, createEmptyState } from './seed';
 import { monthRange, setFormatPreferences, todayISO } from './format';
 import { advanceDate, collectDue, occurrenceTx } from './recurring';
 import { nativeMode } from './native';
+import { setLanguage } from './i18n';
+import { t } from './i18n';
 
 const STORAGE_KEY = 'sekeping.state.v1';
 
@@ -492,10 +494,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateSettings = useCallback((patch: Partial<Settings>) => {
+    /* Apply the language before the state commits so the re-render that
+       follows already uses the new dictionary. */
+    if (patch.language) setLanguage(patch.language);
     setState((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } }));
   }, []);
 
-  const replaceState = useCallback((next: AppState) => setState(next), []);
+  const replaceState = useCallback((next: AppState) => {
+    if (next.settings?.language) setLanguage(next.settings.language);
+    setState(next);
+  }, []);
 
   /* Replacing the ledger must not silently change the person's profile,
      language, currency, PIN or onboarding state. */
@@ -522,7 +530,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const exportCSV = useCallback(
     (filters?: Filters) => {
       const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
-      const rows = [['Tanggal', 'Waktu', 'Jenis', 'Kategori', 'Rekening', 'Tujuan', 'Jumlah', 'Biaya', 'Catatan']];
+      const rows = [[t("Tanggal"), 'Waktu', t("Jenis"), t("Kategori"), t("Rekening"), 'Tujuan', t("Jumlah"), 'Biaya', t("Catatan")]];
       const list = [...state.txs].sort((a, b) => (a.date < b.date ? 1 : -1));
       for (const tx of list) {
         if (filters) {
@@ -536,7 +544,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         rows.push([
           tx.date,
           tx.time ?? '',
-          tx.type === 'expense' ? 'Pengeluaran' : tx.type === 'income' ? 'Pendapatan' : 'Transfer',
+          tx.type === 'expense' ? 'Pengeluaran' : tx.type === 'income' ? 'Pendapatan' : t("Transfer"),
           state.categories.find((c) => c.id === tx.categoryId)?.name ?? '',
           state.accounts.find((a) => a.id === tx.accountId)?.name ?? '',
           state.accounts.find((a) => a.id === tx.toAccountId)?.name ?? '',

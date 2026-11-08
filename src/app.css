@@ -2131,6 +2131,23 @@ input.sk-input:focus-visible {
   box-shadow: 0 1px 3px rgba(35, 30, 24, 0.1);
 }
 
+/* The size comes from the launcher's picker; this is a label, not a control. */
+.skw-size {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0 0.1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+}
+
+.skw-size strong {
+  color: var(--color-text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 /* ---------- preview stage ---------- */
 .skw-stage {
   display: grid;
@@ -2167,9 +2184,30 @@ input.sk-input:focus-visible {
   padding: 0.7rem 0.9rem;
 }
 
+/* Match the compact native 4×1 layout: no room for action labels. */
+.skw-widget[data-size='4x1'] .skw-action-label {
+  display: none;
+}
+
+.skw-widget[data-size='4x1'] .skw-action {
+  min-width: 2.1rem;
+  padding: 0.25rem;
+}
+
+.skw-widget[data-size='4x1'] .skw-amounts {
+  gap: 0.6rem;
+}
+
+.skw-widget[data-size='4x1'] .skw-amounts b {
+  font-size: 0.68rem;
+}
+
+/* 4×2 mirrors the native layout: amounts above, labelled actions below. */
 .skw-widget[data-size='4x2'] {
   aspect-ratio: 2 / 1;
+  flex-direction: column;
   align-items: stretch;
+  justify-content: space-between;
 }
 
 .skw-widget[data-size='2x2'] {

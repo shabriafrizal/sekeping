@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { money } from '../lib/format';
+import { compactNumber, money } from '../lib/format';
+import { t } from '../lib/i18n';
 
 interface AmountPadProps {
   value: number;
@@ -10,16 +11,7 @@ interface AmountPadProps {
   isActive?: boolean;
 }
 
-const QUICK = [
-  { amount: 500, label: '500' },
-  { amount: 1_000, label: '1 rb' },
-  { amount: 2_000, label: '2 rb' },
-  { amount: 5_000, label: '5 rb' },
-  { amount: 10_000, label: '10 rb' },
-  { amount: 25_000, label: '25 rb' },
-  { amount: 50_000, label: '50 rb' },
-  { amount: 100_000, label: '100 rb' },
-];
+const QUICK = [500, 1_000, 2_000, 5_000, 10_000, 25_000, 50_000, 100_000];
 
 export default function AmountPad({ value, onChange, currency, tone = 'expense', isActive = true }: AmountPadProps) {
   useEffect(() => {
@@ -48,22 +40,22 @@ export default function AmountPad({ value, onChange, currency, tone = 'expense',
   return (
     <div className="sk-sheet">
       <div className="sk-amount-display">
-        <p className="sk-eyebrow">Jumlah</p>
+        <p className="sk-eyebrow">{t("Jumlah")}</p>
         <div className="sk-amount-value" data-tone={tone} aria-live="polite">
           {money(value, currency)}
         </div>
-        <p className="sk-amount-hint">Ketuk angka atau ketik di keyboard</p>
+        <p className="sk-amount-hint">{t("Ketuk angka atau ketik di keyboard")}</p>
       </div>
 
-      <div className="sk-quick" role="group" aria-label="Jumlah cepat">
-        {QUICK.map((q) => (
-          <button key={q.amount} type="button" onClick={() => onChange(value + q.amount)}>
-            +{q.label}
+      <div className="sk-quick" role="group" aria-label={t("Jumlah cepat")}>
+        {QUICK.map((amount) => (
+          <button key={amount} type="button" onClick={() => onChange(value + amount)}>
+            +{compactNumber(amount)}
           </button>
         ))}
       </div>
 
-      <div className="sk-keypad" role="group" aria-label="Papan angka">
+      <div className="sk-keypad" role="group" aria-label={t("Papan angka")}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
           <button key={n} type="button" className="sk-key" onClick={() => digit(n)}>
             {n}
@@ -79,7 +71,7 @@ export default function AmountPad({ value, onChange, currency, tone = 'expense',
           type="button"
           className="sk-key"
           data-variant="util"
-          aria-label="Hapus satu angka"
+          aria-label={t("Hapus satu angka")}
           onClick={() => onChange(Math.floor(value / 10))}
         >
           ⌫

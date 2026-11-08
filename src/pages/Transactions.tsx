@@ -7,6 +7,7 @@ import type { Tx, TxType } from '../lib/types';
 import { money, dayLabel, monthRange, toISO, compareTxs } from '../lib/format';
 import { TxRow } from '../components/TxRow';
 import { EmptyState } from '../components/EmptyState';
+import { t } from '../lib/i18n';
 
 type Period = 'month' | '3m' | 'year' | 'all';
 
@@ -26,10 +27,10 @@ function periodRange(period: Period): { from?: string; to?: string } {
 }
 
 const PERIOD_LABEL: Record<Period, string> = {
-  month: 'Bulan ini',
-  '3m': '3 bulan',
-  year: 'Tahun ini',
-  all: 'Semua',
+  month: t("Bulan ini"),
+  '3m': t("3 bulan"),
+  year: t("Tahun ini"),
+  all: t("Semua"),
 };
 
 export default function Transactions({
@@ -90,11 +91,11 @@ export default function Transactions({
   const hasFilters = search !== '' || type !== 'all' || accountId !== 'all' || categoryId !== 'all' || period !== 'month';
 
   const accountOptions = [
-    { value: 'all', label: 'Semua rekening' },
+    { value: 'all', label: t("Semua rekening") },
     ...state.accounts.map((a) => ({ value: a.id, label: a.name })),
   ];
   const categoryOptions = [
-    { value: 'all', label: 'Semua kategori' },
+    { value: 'all', label: t("Semua kategori") },
     ...state.categories.map((c) => ({ value: c.id, label: c.name })),
   ];
 
@@ -102,30 +103,30 @@ export default function Transactions({
     <div className="sk-page">
       <div className="sk-page-head">
         <div>
-          <p className="sk-eyebrow">Riwayat</p>
-          <h1 className="sk-title">Transaksi</h1>
+          <p className="sk-eyebrow">{t("Riwayat")}</p>
+          <h1 className="sk-title">{t("Transaksi")}</h1>
           <p className="sk-sub">
-            {filtered.length} catatan · masuk {money(totals.income)} · keluar {money(totals.expense)}
+            {t('{n} catatan · masuk {in} · keluar {out}', { n: filtered.length, in: money(totals.income), out: money(totals.expense) })}
           </p>
         </div>
-        <Button label="Tambah transaksi" variant="primary" onClick={() => onAdd('expense')} />
+        <Button label={t("Tambah transaksi")} variant="primary" onClick={() => onAdd('expense')} />
       </div>
 
       <div className="sk-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
         <TextInput
-          label="Cari transaksi"
+          label={t("Cari transaksi")}
           isLabelHidden
           type="search"
           value={search}
-          placeholder="Cari catatan, kategori, atau rekening…"
+          placeholder={t("Cari catatan, kategori, atau rekening…")}
           onChange={setSearch}
         />
         <div className="sk-chips">
           {([
-            ['all', 'Semua'],
-            ['expense', 'Pengeluaran'],
-            ['income', 'Pendapatan'],
-            ['transfer', 'Transfer'],
+            ['all', t("Semua")],
+            ['expense', t("Pengeluaran")],
+            ['income', t("Pendapatan")],
+            ['transfer', t("Transfer")],
           ] as const).map(([value, label]) => (
             <button
               key={value}
@@ -153,7 +154,7 @@ export default function Transactions({
         <div className="sk-toolbar">
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <Selector
-              label="Rekening"
+              label={t("Rekening")}
               isLabelHidden
               options={accountOptions}
               value={accountId}
@@ -162,7 +163,7 @@ export default function Transactions({
               size="sm"
             />
             <Selector
-              label="Kategori"
+              label={t("Kategori")}
               isLabelHidden
               options={categoryOptions}
               value={categoryId}
@@ -182,9 +183,7 @@ export default function Transactions({
                 setCategoryId('all');
                 setPeriod('month');
               }}
-            >
-              Reset filter
-            </button>
+            >{t("Reset filter")}</button>
           ) : null}
         </div>
       </div>
@@ -193,9 +192,9 @@ export default function Transactions({
         {groups.length === 0 ? (
           <EmptyState
             icon="receipt"
-            title="Tidak ada transaksi"
-            hint="Coba ubah filter atau catat transaksi baru."
-            action={<Button label="Tambah transaksi" variant="secondary" onClick={() => onAdd('expense')} />}
+            title={t("Tidak ada transaksi")}
+            hint={t("Coba ubah filter atau catat transaksi baru.")}
+            action={<Button label={t("Tambah transaksi")} variant="secondary" onClick={() => onAdd('expense')} />}
           />
         ) : (
           groups.map(([date, list]) => {
