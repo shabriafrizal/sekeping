@@ -99,6 +99,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                 put("showIncome", config.showIncome)
                 put("showTransfer", config.showTransfer)
                 put("size", WidgetProvider.sizeKey(this@WidgetConfigActivity, widgetId))
+                put("amountsHidden", WidgetPrefs.hidden(this@WidgetConfigActivity))
             }.toString()
         }
 

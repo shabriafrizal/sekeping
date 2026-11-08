@@ -75,12 +75,13 @@ async function seededPage(context) {
       (await page.evaluate(() => document.querySelector('.skw-size')?.textContent?.includes('4×1'))),
   );
   check(
-    '4x1 preview shows balance and three actions',
+    '4x1 preview shows balance, total and three icon-only actions',
     await page.evaluate(() => {
       const widget = document.querySelector('.skw-widget[data-size="4x1"]');
       const amounts = widget?.querySelectorAll('.skw-amounts b').length ?? 0;
       const labels = widget?.querySelectorAll('.skw-action-label').length ?? 0;
-      return Boolean(widget && amounts === 2 && labels === 3);
+      const actions = widget?.querySelectorAll('.skw-action').length ?? 0;
+      return Boolean(widget && amounts === 2 && labels === 0 && actions === 3);
     }),
   );
 

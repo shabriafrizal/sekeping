@@ -40,9 +40,9 @@ placing the widget:
 
 | Entry | Provider | Layout | Content |
 | --- | --- | --- | --- |
-| Sekeping 4×1 | `WidgetProviderWide` | `widget_sekeping_small.xml` | Compact saldo + three icon actions |
+| Sekeping 4×1 | `WidgetProviderWide` | `widget_sekeping_small.xml` | Provider, balance, total + three large icon actions |
 | Sekeping 4×2 | `WidgetProvider` | `widget_sekeping_medium.xml` | Saldo, provider, total + labelled actions |
-| Sekeping 2×2 | `WidgetProviderSquare` | `widget_sekeping_square.xml` | Square saldo + compact actions |
+| Sekeping 2×2 | `WidgetProviderSquare` | `widget_sekeping_square.xml` | Provider, total + three square icon actions |
 
 The four-by-two entry keeps its original resizable behaviour for people who already
 have a widget from an older version. The fixed entries use `resizeMode="none"` and

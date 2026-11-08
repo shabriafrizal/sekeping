@@ -5,7 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Account, Category, CategoryType, Debt, DebtKind } from '../lib/types';
-import { todayISO } from '../lib/format';
+import { parseAmountInput, todayISO } from '../lib/format';
 import { IconPicker } from '../components/IconPicker';
 import { t } from '../lib/i18n';
 
@@ -76,7 +76,8 @@ export function AccountSheet({
             label={t("Saldo awal")}
             value={initial ? String(initial) : ''}
             placeholder="0"
-            onChange={(v) => setInitial(Number(v.replace(/\D/g, '')) || 0)}
+            inputMode="decimal"
+            onChange={(v) => setInitial(parseAmountInput(v, state.settings.currency))}
           />
         </div>
         <IconPicker value={icon} onChange={setIcon} />
@@ -315,7 +316,8 @@ export function DebtSheet({
           label={t("Jumlah")}
           value={form.total ? String(form.total) : ''}
           placeholder="0"
-          onChange={(v) => setForm((f) => ({ ...f, total: Number(v.replace(/\D/g, '')) || 0 }))}
+          inputMode="decimal"
+          onChange={(v) => setForm((f) => ({ ...f, total: parseAmountInput(v, state.settings.currency) }))}
         />
         <Selector
           label={t("Rekening")}
@@ -428,7 +430,8 @@ export function PaymentSheet({
           label={t("Jumlah")}
           value={amount ? String(amount) : ''}
           placeholder="0"
-          onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
+          inputMode="decimal"
+          onChange={(v) => setAmount(parseAmountInput(v, state.settings.currency))}
         />
         <Selector
           label={t("Rekening")}

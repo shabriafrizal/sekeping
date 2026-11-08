@@ -5,7 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Tx, TxType } from '../lib/types';
-import { nowTime, todayISO } from '../lib/format';
+import { nowTime, parseAmountInput, todayISO } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import AmountPad from '../components/AmountPad';
 import { t } from '../lib/i18n';
@@ -83,7 +83,10 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
 
   const accountOptions = state.accounts
     .filter((a) => a.active)
-    .map((a) => ({ value: a.id, label: a.name }));
+    .map((a) => {
+      const Icon = iconFor(a.icon);
+      return { value: a.id, label: a.name, icon: Icon };
+    });
 
   const canSave =
     amount > 0 &&
@@ -181,7 +184,8 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
                 label={t("Biaya admin")}
                 value={fee ? String(fee) : ''}
                 placeholder="0"
-                onChange={(v) => setFee(Number(v.replace(/\D/g, '')) || 0)}
+                inputMode="decimal"
+                onChange={(v) => setFee(parseAmountInput(v, state.settings.currency))}
               />
             </div>
           </>

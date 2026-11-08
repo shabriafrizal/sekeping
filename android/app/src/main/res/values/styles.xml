@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pre-26 fallback: the platform serif keeps the editorial shape. -->
+    <style name="WidgetBalance">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

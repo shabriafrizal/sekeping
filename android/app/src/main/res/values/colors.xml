@@ -8,10 +8,10 @@
     <color name="muted">#6E6357</color>
     <color name="ic_launcher_background">#2F6B57</color>
 
-    <!-- Home-screen widget: a deep-green card that stays legible on any wallpaper. -->
+    <!-- Home-screen widget: a deep-green card with bright, bold action glyphs. -->
     <color name="widget_cream">#F6F2E9</color>
-    <color name="widget_muted">#B9D6CA</color>
-    <color name="widget_icon_expense">#FFE1BC</color>
-    <color name="widget_icon_income">#D8F6EA</color>
-    <color name="widget_icon_transfer">#DCEBF7</color>
+    <color name="widget_muted">#C2DCD1</color>
+    <color name="widget_icon_expense">#FFC48F</color>
+    <color name="widget_icon_income">#8FF2C9</color>
+    <color name="widget_icon_transfer">#B7D7FF</color>
 </resources>

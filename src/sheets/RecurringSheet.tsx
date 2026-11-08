@@ -5,7 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Interval, Recurring } from '../lib/types';
-import { todayISO } from '../lib/format';
+import { parseAmountInput, todayISO } from '../lib/format';
 import { advanceDate, initialNextDate } from '../lib/recurring';
 import { t } from '../lib/i18n';
 
@@ -154,7 +154,8 @@ export function RecurringSheet({
             label={t("Jumlah")}
             value={amount ? String(amount) : ''}
             placeholder="0"
-            onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
+            inputMode="decimal"
+            onChange={(v) => setAmount(parseAmountInput(v, state.settings.currency))}
           />
 
           <Selector

@@ -6,6 +6,7 @@ export type WidgetSize = '4x1' | '4x2' | '2x2';
 
 export interface WidgetLabels {
   total: string;
+  totalAll: string;
   balance: string;
   provider: string;
   expense: string;
@@ -19,7 +20,8 @@ export interface WidgetLabels {
 export function widgetLabels(language: string): WidgetLabels {
   if (language === 'en') {
     return {
-      total: t("Total"),
+      total: 'Total',
+      totalAll: 'All accounts total',
       balance: 'Balance',
       provider: 'Account',
       expense: 'Expense',
@@ -32,6 +34,7 @@ export function widgetLabels(language: string): WidgetLabels {
   }
   return {
     total: t("Total"),
+    totalAll: t("Total semua rekening"),
     balance: 'Saldo',
     provider: t("Rekening"),
     expense: t("Pengeluaran"),
@@ -56,37 +59,19 @@ interface Props {
   showTransfer: boolean;
 }
 
-function WalletGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M4.5 8.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <path d="M4.5 9.8h11.2a1 1 0 0 1 1 1v2.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="16.4" cy="13.4" r="1.3" fill="#E2B15A" />
-    </svg>
-  );
-}
-
-function EyeGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      />
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
-    </svg>
-  );
-}
+/* Glyph geometry matches the vector drawables in android/app/src/main/res/drawable,
+   with the same stroke weights, so the preview and the launcher read the same. */
 
 function ExpenseGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6 18 18 6M8.5 6H18v9.5"
+        stroke="currentColor"
+        strokeWidth="2.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -94,7 +79,13 @@ function ExpenseGlyph() {
 function IncomeGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M17 7 7 17M15 17H7V9" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M18 6 6 18M15.5 18H6V8.5"
+        stroke="currentColor"
+        strokeWidth="2.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -103,9 +94,9 @@ function TransferGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M4 9h13m-4-4 4 4-4 4M20 15H7m4 4-4-4 4-4"
+        d="M4 8.5h15M15 4.5l4 4-4 4M20 15.5H5M9 11.5l-4 4 4 4"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -113,19 +104,36 @@ function TransferGlyph() {
   );
 }
 
+function EyeGlyph({ masked }: { masked: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M2 12S5.8 5.2 12 5.2 22 12 22 12 18.2 18.8 12 18.8 2 12 2 12Z"
+        stroke="currentColor"
+        strokeWidth="2.3"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+      {masked ? <path d="M4 4 20 20" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /> : null}
+    </svg>
+  );
+}
+
 function Action({
   tone,
   label,
+  withLabel,
   children,
 }: {
   tone: string;
   label: string;
+  withLabel: boolean;
   children: ReactNode;
 }) {
   return (
     <span className="skw-action" data-tone={tone}>
       <span className="skw-action-icon">{children}</span>
-      <span className="skw-action-label">{label}</span>
+      {withLabel ? <span className="skw-action-label">{label}</span> : null}
     </span>
   );
 }
@@ -135,8 +143,8 @@ function mask(value: string, masked: boolean): string {
 }
 
 /**
- * The home-screen widget, drawn in HTML so the setup dialog previews exactly
- * what the native RemoteViews layouts render.
+ * The home-screen widget, drawn in HTML so the setup dialog previews the same
+ * structure as the native RemoteViews layouts in each size.
  */
 export default function WidgetPreview({
   size,
@@ -152,53 +160,52 @@ export default function WidgetPreview({
 }: Props) {
   const labels = widgetLabels(language);
   const ProviderIcon = iconFor(providerIcon);
+  const balance = mask(providerBalance, masked);
+  const totalValue = mask(total, masked);
+  const withLabels = size === '4x2';
+  const totalLabel = size === '4x2' ? labels.totalAll : labels.total;
 
   return (
     <div className="skw-stage" data-size={size}>
       <div className="skw-widget" data-size={size}>
         <div className="skw-main">
-          <div className="skw-brand-row">
-            <span className="skw-mark">
-              <WalletGlyph />
-            </span>
-            <span className="skw-brand">Sekeping</span>
-            <span className="skw-eye" title={labels.hide} aria-hidden="true">
-              <EyeGlyph />
-            </span>
-          </div>
-
-          <div className="skw-provider">
+          <div className="skw-head">
             <span className="skw-provider-icon">
               <ProviderIcon />
             </span>
             <span className="skw-provider-name">{providerName || labels.empty}</span>
+            {withLabels ? <span className="skw-balance">{balance}</span> : null}
+            <span className="skw-eye" title={masked ? labels.show : labels.hide} aria-hidden="true">
+              <EyeGlyph masked={masked} />
+            </span>
           </div>
 
           <div className="skw-amounts">
-            <span>
-              <small>{labels.balance}</small>
-              <b>{mask(providerBalance, masked)}</b>
-            </span>
-            <span>
-              <small>{labels.total}</small>
-              <b>{mask(total, masked)}</b>
+            {withLabels ? null : (
+              <span className="skw-amount-row">
+                <b className="skw-balance">{balance}</b>
+              </span>
+            )}
+            <span className="skw-amount-row skw-total">
+              <small>{totalLabel}</small>
+              <b>{totalValue}</b>
             </span>
           </div>
         </div>
 
         <div className="skw-actions">
           {showExpense ? (
-            <Action tone="expense" label={labels.expense}>
+            <Action tone="expense" label={labels.expense} withLabel={withLabels}>
               <ExpenseGlyph />
             </Action>
           ) : null}
           {showIncome ? (
-            <Action tone="income" label={labels.income}>
+            <Action tone="income" label={labels.income} withLabel={withLabels}>
               <IncomeGlyph />
             </Action>
           ) : null}
           {showTransfer ? (
-            <Action tone="transfer" label={labels.transfer}>
+            <Action tone="transfer" label={labels.transfer} withLabel={withLabels}>
               <TransferGlyph />
             </Action>
           ) : null}

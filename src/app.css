@@ -2148,11 +2148,13 @@ input.sk-input:focus-visible {
   font-weight: 600;
 }
 
-/* ---------- preview stage ---------- */
+/* ---------- widget preview ----------
+   Sized in launcher dp: --dp converts one dp to CSS pixels, so the preview keeps
+   the proportions of the native RemoteViews layouts in each size. */
 .skw-stage {
   display: grid;
   place-items: center;
-  min-height: 184px;
+  min-height: 12rem;
   padding: 1.1rem 0.8rem;
   border-radius: 18px;
   background:
@@ -2162,14 +2164,13 @@ input.sk-input:focus-visible {
 }
 
 .skw-widget {
-  width: 100%;
-  max-width: 336px;
+  --dp: 1.12px;
+  box-sizing: border-box;
+  max-width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.7rem;
-  padding: 0.9rem 1rem;
-  border-radius: 20px;
+  flex-direction: column;
+  border-radius: calc(22 * var(--dp));
+  padding: calc(12 * var(--dp));
   color: #f6f2e9;
   background:
     radial-gradient(120% 140% at 100% 0%, rgba(226, 177, 90, 0.16), transparent 52%),
@@ -2177,215 +2178,314 @@ input.sk-input:focus-visible {
   box-shadow:
     0 18px 34px -18px rgba(20, 40, 32, 0.68),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-family: var(--font-family-body);
+  overflow: hidden;
 }
 
 .skw-widget[data-size='4x1'] {
-  aspect-ratio: 4 / 1.02;
-  padding: 0.7rem 0.9rem;
+  width: calc(290 * var(--dp));
+  height: calc(74 * var(--dp));
+  flex-direction: row;
+  align-items: center;
+  gap: calc(8 * var(--dp));
+  padding: calc(10 * var(--dp));
 }
 
-/* Match the compact native 4×1 layout: no room for action labels. */
-.skw-widget[data-size='4x1'] .skw-action-label {
-  display: none;
-}
-
-.skw-widget[data-size='4x1'] .skw-action {
-  min-width: 2.1rem;
-  padding: 0.25rem;
-}
-
-.skw-widget[data-size='4x1'] .skw-amounts {
-  gap: 0.6rem;
-}
-
-.skw-widget[data-size='4x1'] .skw-amounts b {
-  font-size: 0.68rem;
-}
-
-/* 4×2 mirrors the native layout: amounts above, labelled actions below. */
 .skw-widget[data-size='4x2'] {
-  aspect-ratio: 2 / 1;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: space-between;
+  width: calc(290 * var(--dp));
+  height: calc(156 * var(--dp));
 }
 
 .skw-widget[data-size='2x2'] {
-  width: 168px;
-  aspect-ratio: 1;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: space-between;
-  padding: 0.8rem 0.85rem;
+  width: calc(150 * var(--dp));
+  height: calc(150 * var(--dp));
 }
 
+/* The left column in 4×1; in the taller sizes its rows sit straight in the card. */
 .skw-main {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.15rem;
-  min-width: 0;
   flex: 1;
+  min-width: 0;
+  gap: calc(2 * var(--dp));
 }
 
-.skw-brand-row {
+.skw-widget[data-size='4x2'] .skw-main,
+.skw-widget[data-size='2x2'] .skw-main {
+  display: contents;
+}
+
+.skw-head {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: calc(5 * var(--dp));
   min-width: 0;
 }
 
-.skw-mark {
-  width: 1.15rem;
-  height: 1.15rem;
+.skw-provider-icon {
+  width: calc(14 * var(--dp));
+  height: calc(14 * var(--dp));
   display: grid;
   place-items: center;
   flex: none;
 }
 
-.skw-mark svg {
+.skw-provider-icon svg {
   width: 100%;
   height: 100%;
 }
 
-.skw-brand {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+.skw-provider-name {
+  min-width: 0;
+  flex: 1;
+  font-size: calc(11 * var(--dp));
+  font-weight: 700;
   white-space: nowrap;
-}
-
-.skw-sub {
-  margin-inline-start: auto;
-  color: rgba(246, 242, 233, 0.62);
-  font-size: 0.58rem;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .skw-balance {
+  font-size: calc(10 * var(--dp));
+  font-weight: 500;
+  color: #c2dcd1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.skw-eye {
+  width: calc(26 * var(--dp));
+  height: calc(26 * var(--dp));
+  display: grid;
+  place-items: center;
+  border-radius: calc(10 * var(--dp));
+  background: rgba(246, 242, 233, 0.14);
+  color: #f6f2e9;
+  flex: none;
+}
+
+.skw-eye svg {
+  width: calc(17 * var(--dp));
+  height: calc(17 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-head {
+  gap: calc(6 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-provider-icon {
+  width: calc(18 * var(--dp));
+  height: calc(18 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-provider-name {
+  font-size: calc(14 * var(--dp));
+  flex: 0 1 auto;
+}
+
+.skw-widget[data-size='4x2'] .skw-balance {
+  font-size: calc(12 * var(--dp));
+  margin-inline-start: calc(4 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-eye {
+  width: calc(30 * var(--dp));
+  height: calc(30 * var(--dp));
+  margin-inline-start: auto;
+}
+
+.skw-widget[data-size='4x2'] .skw-eye svg {
+  width: calc(19 * var(--dp));
+  height: calc(19 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-eye,
+.skw-widget[data-size='4x1'] .skw-eye {
+  margin-inline-start: auto;
+}
+
+/* Amounts: 4×1 stacks balance then total; 2×2 pushes the total to the bottom. */
+.skw-amounts {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  margin-top: 0.18rem;
   min-width: 0;
 }
 
-.skw-label {
-  font-size: 0.53rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #b9d6ca;
+.skw-amount-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.skw-amount {
+.skw-amount-row .skw-balance {
+  font-size: calc(10 * var(--dp));
+}
+
+.skw-total b {
   font-family: var(--font-family-heading);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  font-size: calc(12 * var(--dp));
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 1.3rem;
 }
 
-.skw-widget[data-size='4x2'] .skw-amount {
-  font-size: 1.72rem;
-}
-
-.skw-widget[data-size='2x2'] .skw-amount {
-  font-size: 1.08rem;
-}
-
-.skw-widget[data-size='2x2'] .skw-sub {
-  display: none;
-}
-
-.skw-stats {
-  display: flex;
-  gap: 1.15rem;
-  margin-top: 0.45rem;
-}
-
-.skw-stats span {
-  display: flex;
-  flex-direction: column;
-  gap: 0.05rem;
-}
-
-.skw-stats small {
-  font-size: 0.52rem;
-  letter-spacing: 0.08em;
+.skw-total small {
+  font-size: calc(7 * var(--dp));
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #b9d6ca;
+  color: #c2dcd1;
+  white-space: nowrap;
 }
 
-.skw-stats b {
-  font-size: 0.72rem;
+.skw-widget[data-size='4x1'] .skw-total {
+  flex-direction: row;
+  align-items: baseline;
+  gap: calc(4 * var(--dp));
+  margin-top: calc(1 * var(--dp));
+}
+
+.skw-widget[data-size='4x1'] .skw-total small {
+  font-size: calc(9 * var(--dp));
+  letter-spacing: 0;
+  text-transform: none;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
 }
 
-.skw-stats b[data-tone='income'] {
-  color: #cdeedf;
+.skw-widget[data-size='4x1'] .skw-total b {
+  font-size: calc(13 * var(--dp));
 }
 
-.skw-stats b[data-tone='expense'] {
-  color: #f3c7b4;
+.skw-widget[data-size='2x2'] .skw-total {
+  margin-top: auto;
 }
 
+.skw-widget[data-size='2x2'] .skw-total small {
+  margin-bottom: calc(2 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-total b {
+  font-size: calc(16 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-balance {
+  margin-top: calc(1 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-total {
+  margin-top: calc(6 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-total small {
+  font-size: calc(8 * var(--dp));
+  margin-bottom: calc(2 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-total b {
+  font-size: calc(28 * var(--dp));
+  line-height: 1.05;
+}
+
+/* Action tiles: solid, rounded, scaled up; the glyph fills most of the tile. */
 .skw-actions {
   display: flex;
   align-items: center;
-  gap: 0.38rem;
+  gap: calc(5 * var(--dp));
   flex: none;
 }
 
+.skw-widget[data-size='4x1'] .skw-actions {
+  margin-inline-start: auto;
+}
+
+.skw-widget[data-size='4x2'] .skw-actions,
+.skw-widget[data-size='2x2'] .skw-actions {
+  margin-top: auto;
+}
+
 .skw-widget[data-size='4x2'] .skw-actions {
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.4rem;
+  height: calc(46 * var(--dp));
+  gap: calc(6 * var(--dp));
+  margin-top: calc(8 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-actions {
+  height: calc(40 * var(--dp));
+  margin-top: calc(8 * var(--dp));
 }
 
 .skw-action {
-  width: 2.05rem;
-  height: 2.05rem;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  border: 1px solid transparent;
+  width: calc(42 * var(--dp));
+  height: calc(42 * var(--dp));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--dp));
+  border-radius: calc(14 * var(--dp));
   flex: none;
 }
 
 .skw-widget[data-size='4x2'] .skw-action {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 13px;
+  width: auto;
+  height: 100%;
+  flex: 1;
 }
 
-.skw-action svg {
-  width: 56%;
-  height: 56%;
+.skw-widget[data-size='2x2'] .skw-action {
+  width: auto;
+  height: 100%;
+  flex: 1;
+}
+
+.skw-action-icon {
+  display: grid;
+  place-items: center;
+  width: calc(22 * var(--dp));
+  height: calc(22 * var(--dp));
+}
+
+.skw-widget[data-size='4x2'] .skw-action-icon {
+  width: calc(20 * var(--dp));
+  height: calc(20 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-action-icon {
+  width: calc(22 * var(--dp));
+  height: calc(22 * var(--dp));
+}
+
+.skw-action-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.skw-action-label {
+  font-size: calc(10 * var(--dp));
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .skw-action[data-tone='expense'] {
-  background: rgba(201, 138, 75, 0.24);
-  border-color: rgba(232, 190, 140, 0.38);
-  color: #ffe1bc;
+  background: rgba(240, 162, 100, 0.24);
+  color: #ffc48f;
 }
 
 .skw-action[data-tone='income'] {
-  background: rgba(143, 216, 192, 0.2);
-  border-color: rgba(180, 238, 216, 0.36);
-  color: #d8f6ea;
+  background: rgba(111, 227, 181, 0.24);
+  color: #8ff2c9;
 }
 
 .skw-action[data-tone='transfer'] {
-  background: rgba(157, 187, 212, 0.2);
-  border-color: rgba(190, 215, 236, 0.34);
-  color: #dcebf7;
+  background: rgba(141, 184, 240, 0.24);
+  color: #b7d7ff;
 }
 
 /* ---------- accounts + toggles ---------- */
@@ -2424,24 +2524,36 @@ input.sk-input:focus-visible {
   color: var(--color-text-secondary);
 }
 
-.skw-toggle .skw-action {
+.skw-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border: 1px solid transparent;
+}
+
+.skw-tile svg {
+  width: 56%;
+  height: 56%;
+}
+
+.skw-toggle .skw-tile {
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 12px;
   border-color: transparent;
 }
 
-.skw-toggle .skw-action[data-tone='expense'] {
+.skw-toggle .skw-tile[data-tone='expense'] {
   background: rgba(201, 138, 75, 0.14);
   color: #a9602c;
 }
 
-.skw-toggle .skw-action[data-tone='income'] {
+.skw-toggle .skw-tile[data-tone='income'] {
   background: rgba(46, 125, 79, 0.12);
   color: #2e7d4f;
 }
 
-.skw-toggle .skw-action[data-tone='transfer'] {
+.skw-toggle .skw-tile[data-tone='transfer'] {
   background: rgba(91, 124, 153, 0.14);
   color: #4d6b84;
 }
@@ -2580,17 +2692,17 @@ html[data-native] .sk-lock-card {
     box-shadow: inset 0 0 0 1px rgba(241, 235, 225, 0.06);
   }
 
-  .skw-toggle .skw-action[data-tone='expense'] {
+  .skw-toggle .skw-tile[data-tone='expense'] {
     background: rgba(201, 138, 75, 0.2);
     color: #f0b48b;
   }
 
-  .skw-toggle .skw-action[data-tone='income'] {
+  .skw-toggle .skw-tile[data-tone='income'] {
     background: rgba(143, 216, 192, 0.16);
     color: #9fe0c8;
   }
 
-  .skw-toggle .skw-action[data-tone='transfer'] {
+  .skw-toggle .skw-tile[data-tone='transfer'] {
     background: rgba(157, 187, 212, 0.16);
     color: #b8d2e6;
   }
@@ -2794,144 +2906,4 @@ html[data-native] .sk-lock-card {
 .sk-reminder-list {
   margin: 0;
   padding: 0;
-}
-
-/* ---------- widget preview: provider, two amounts, labelled actions ---------- */
-.skw-widget[data-size='4x1'] {
-  aspect-ratio: 4 / 1.45;
-}
-
-.skw-eye {
-  margin-inline-start: auto;
-  width: 0.95rem;
-  height: 0.95rem;
-  color: rgba(246, 242, 233, 0.72);
-  flex: none;
-}
-
-.skw-eye svg {
-  width: 100%;
-  height: 100%;
-}
-
-.skw-provider {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.15rem;
-  min-width: 0;
-}
-
-.skw-provider-icon {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 0.3rem;
-  display: grid;
-  place-items: center;
-  background: rgba(246, 242, 233, 0.14);
-  color: #f6f2e9;
-  flex: none;
-}
-
-.skw-provider-icon svg {
-  width: 0.7rem;
-  height: 0.7rem;
-}
-
-.skw-provider-name {
-  font-size: 0.62rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #f6f2e9;
-}
-
-.skw-amounts {
-  display: flex;
-  gap: 0.9rem;
-  margin-top: 0.2rem;
-  min-width: 0;
-}
-
-.skw-amounts span {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.skw-amounts small {
-  font-size: 0.5rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #b9d6ca;
-  white-space: nowrap;
-}
-
-.skw-amounts b {
-  font-family: var(--font-family-heading);
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.skw-widget[data-size='4x2'] .skw-amounts b {
-  font-size: 1.2rem;
-}
-
-.skw-widget[data-size='2x2'] .skw-amounts {
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.skw-widget[data-size='2x2'] .skw-amounts b {
-  font-size: 0.88rem;
-}
-
-.skw-action {
-  width: auto;
-  height: auto;
-  min-width: 2.5rem;
-  padding: 0.3rem 0.32rem;
-  border-radius: 9px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.16rem;
-}
-
-.skw-action-icon {
-  display: grid;
-  place-items: center;
-  width: 1rem;
-  height: 1rem;
-}
-
-.skw-action-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.skw-action-label {
-  font-size: 0.46rem;
-  line-height: 1;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-
-.skw-widget[data-size='4x2'] .skw-action {
-  min-width: 2.8rem;
-  padding: 0.36rem 0.36rem;
-}
-
-.skw-widget[data-size='4x2'] .skw-action-label {
-  font-size: 0.5rem;
-}
-
-.skw-widget[data-size='4x2'] .skw-actions {
-  flex-direction: row;
 }

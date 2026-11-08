@@ -50,7 +50,7 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | --- | --- |
 | **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories, and a seven-day reminder for bills and subscriptions with one-tap **Selesai** |
 | **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals and ordered by date + time, detail view with edit and delete |
-| **Entry** | Expense, income or transfer; amount keypad (keyboard input too), account and category pickers, date, optional time (defaults to now), note, transfer fee |
+| **Entry** | Expense, income or transfer; amount pad (keyboard too) with cents-first entry and **Clear all**, account picker with icons, category picker, date, optional time, note, transfer fee |
 | **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, quick ranges (**Hari ini, Kemarin, 7 hari, Bulan ini, Bulan lalu, 3 bulan, Tahun ini, 1 tahun, Semua**) and a custom **from/to date range** |
 | **Recurring** | Weekly, monthly or yearly schedules for bills, salary and subscriptions; catch-up posting on open; monthly subscription cost |
 | **Budgets** | Monthly limit per expense category, optional rollover of unused money, month-by-month progress and over-budget warnings |
@@ -90,7 +90,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.7.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.7/sekeping-1.1.7.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.8.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.8/sekeping-1.1.8.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -105,9 +105,9 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 4. The widget shows the **provider** you picked (icon and name) with its own balance, and
    the **total** of every active account. Tap the **eye** to mask both amounts with `***`;
    tap it again to show them. Each entry keeps its size:
-   - **4×1** — compact: provider, total and three icon actions.
-   - **4×2** — roomier: larger amounts and labelled buttons.
-   - **2×2** — square: provider, total and compact actions.
+   - **4×1** — provider, its balance, the total, and three large icon buttons.
+   - **4×2** — the total as the hero figure, with three labelled buttons across the bottom.
+   - **2×2** — provider, total and three square icon buttons.
 5. **Pengeluaran**, **Pendapatan** and **Transfer** do not open the dashboard. They show
    the same add-transaction sheet as the app, floating over the home screen, with the
    chosen account already selected. Save or cancel returns straight to the home screen;
@@ -138,7 +138,9 @@ to move data between the two.
 
 1. Press **Tambah transaksi** in the sidebar, or **Tambah** in the top bar on a phone.
 2. Choose **Pengeluaran**, **Pendapatan** or **Transfer**.
-3. Type the amount with the keypad, or just type the digits on your keyboard.
+3. Type the amount with the pad, or just type the digits on your keyboard. For currencies
+   with cents it starts at `0,00` and every digit shifts in from the right (`1`, `2`, `5`
+   → `1,25`); **AC** clears everything. The account picker shows each account's icon.
 4. Pick an account and a category. The date defaults to today and the time to now;
    clear the time to record the entry without one.
 5. Then **Simpan**.

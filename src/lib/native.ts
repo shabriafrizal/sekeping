@@ -27,6 +27,8 @@ export interface NativeWidgetConfig {
   showExpense: boolean;
   showIncome: boolean;
   showTransfer: boolean;
+  /** The widget's eye is closed: amounts show as *** on the launcher. */
+  amountsHidden?: boolean;
   /** Fixed size chosen from the launcher's widget picker. */
   size?: '4x1' | '4x2' | '2x2';
 }
@@ -105,6 +107,7 @@ export function readWidgetConfig(fallbackId: number): NativeWidgetConfig {
     showExpense: true,
     showIncome: true,
     showTransfer: true,
+    amountsHidden: false,
   };
   try {
     const raw = window.SekepingWidget?.getWidgetConfig?.();
@@ -116,6 +119,7 @@ export function readWidgetConfig(fallbackId: number): NativeWidgetConfig {
       showExpense: parsed.showExpense !== false,
       showIncome: parsed.showIncome !== false,
       showTransfer: parsed.showTransfer !== false,
+      amountsHidden: parsed.amountsHidden === true,
       size:
         parsed.size === '4x1' || parsed.size === '4x2' || parsed.size === '2x2'
           ? parsed.size

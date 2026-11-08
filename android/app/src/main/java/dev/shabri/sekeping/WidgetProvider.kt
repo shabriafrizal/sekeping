@@ -7,8 +7,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 
 /**
  * One home-screen widget. It shows the selected provider (account) with its
@@ -95,10 +101,23 @@ open class WidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_provider, provider?.name ?: t(language, "Belum ada rekening", "No account yet"))
             views.setImageViewResource(R.id.widget_provider_icon, providerIcon(context, provider?.icon))
             views.setTextViewText(R.id.widget_provider_balance, mask(provider?.balance ?: "—", hidden))
-            views.setTextViewText(
-                R.id.widget_total,
-                "${t(language, "Total", "Total")}  ${mask(summary.total, hidden)}",
-            )
+            val total = heroAmount(mask(summary.total, hidden))
+            if (layout == R.layout.widget_sekeping_small) {
+                views.setTextViewText(
+                    R.id.widget_total,
+                    labelled(context, t(language, "Total", "Total"), total),
+                )
+            } else {
+                views.setTextViewText(R.id.widget_total, total)
+                views.setTextViewText(
+                    R.id.widget_total_label,
+                    if (layout == R.layout.widget_sekeping_medium) {
+                        t(language, "Total semua rekening", "All accounts total")
+                    } else {
+                        t(language, "Total", "Total")
+                    },
+                )
+            }
 
             views.setImageViewResource(
                 R.id.widget_eye,
@@ -168,6 +187,28 @@ open class WidgetProvider : AppWidgetProvider() {
         /** "Rp 43.425.500" -> "Rp ***" when the eye is closed. */
         private fun mask(value: String, hidden: Boolean): String =
             if (!hidden) value else value.replace(Regex("[0-9][0-9.,]*"), "***")
+
+        /** Sets the currency code smaller than the figure, the way the app's totals read. */
+        private fun heroAmount(value: String): CharSequence {
+            val start = value.indexOf("Rp")
+            if (start < 0) return value
+            return SpannableString(value).apply {
+                setSpan(RelativeSizeSpan(0.6f), start, start + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+
+        /** "Total  Rp 43.425.500" with the word in the muted colour and smaller. */
+        private fun labelled(context: Context, label: String, value: CharSequence): CharSequence {
+            val text = SpannableStringBuilder(label).append("  ").append(value)
+            text.setSpan(
+                ForegroundColorSpan(ContextCompat.getColor(context, R.color.widget_muted)),
+                0,
+                label.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+            text.setSpan(RelativeSizeSpan(0.8f), 0, label.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            return text
+        }
 
         private fun providerIcon(context: Context, key: String?): Int {
             val id = when (key) {

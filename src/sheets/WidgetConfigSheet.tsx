@@ -56,7 +56,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
           sizes: { '4x1': 'Ringkas', '4x2': 'Lengkap', '2x2': 'Kotak' },
           sizeHint: 'Ukuran ini yang kamu pilih dari layar utama.',
           account: t("Rekening"),
-          noAccounts: '{L.noAccounts}',
+          noAccounts: 'Buka Sekeping sekali agar daftar rekening muncul di sini.',
           openApp: 'Buka aplikasi',
           accountHint:
             'Rekening ini menjadi pilihan awal saat mencatat dari widget. Nominal kedua adalah total semua rekening aktif.',
@@ -150,7 +150,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
               providerIcon={provider?.icon ?? 'wallet'}
               providerBalance={money(balanceOf(provider?.id ?? ''), state.settings.currency)}
               total={money(netWorth, state.settings.currency)}
-              masked={locked}
+              masked={locked || initial.amountsHidden === true}
               language={language}
               showExpense={showExpense}
               showIncome={showIncome}
@@ -205,7 +205,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
             </p>
             <div className="skw-toggles">
               <div className="skw-toggle">
-                <span className="skw-action" data-tone="expense" aria-hidden="true">
+                <span className="skw-tile" data-tone="expense" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
                     <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -223,7 +223,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
               </div>
 
               <div className="skw-toggle">
-                <span className="skw-action" data-tone="income" aria-hidden="true">
+                <span className="skw-tile" data-tone="income" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
                     <path d="M17 7 7 17M15 17H7V9" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -241,7 +241,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
               </div>
 
               <div className="skw-toggle">
-                <span className="skw-action" data-tone="transfer" aria-hidden="true">
+                <span className="skw-tile" data-tone="transfer" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
                     <path
                       d="M4 9h13m-4-4 4 4-4 4M20 15H7m4 4-4-4 4-4"

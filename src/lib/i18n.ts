@@ -388,6 +388,9 @@ Object.assign(EN, {"Angka; simbol mata uang dan pemisah ribuan diabaikan": "Numb
 
 Object.assign(EN, {"Nasi padang": "Padang rice", "Kopi susu": "Milk coffee", "Belanja bulanan": "Monthly groceries", "Makan malam keluarga": "Family dinner", "Gojek ke kantor": "Ride to the office", "Isi bensin": "Fuel", "Parkir": "Parking", "Listrik & air": "Electricity & water", "Internet fiber": "Fibre internet", "Pulsa & paket data": "Phone credit & data", "Baju kerja": "Work clothes", "Perlengkapan rumah": "Home supplies", "Perbaikan keran": "Faucet repair", "Vitamin & obat": "Vitamins & medicine", "Olahraga": "Sport", "Nonton bioskop": "Cinema", "Langganan musik": "Music subscription", "Kelas online": "Online course", "Kado ulang tahun": "Birthday gift", "Cicilan 12 bulan, tenor ke-4": "12 instalments, 4th payment", "Buat biaya kos": "For rent"});
 
+
+Object.assign(EN, {"Hapus semua angka": "Clear all", "Ketik angka; dua digit terakhir adalah sen": "Type digits; the last two are the cents"});
+
 export function t(key: string, vars?: Record<string, string | number>): string {
   const source = current === 'en' ? (TEMPLATES[key] ?? EN[key] ?? key) : key;
   if (!vars) return source;

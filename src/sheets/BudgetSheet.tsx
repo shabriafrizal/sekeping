@@ -6,6 +6,7 @@ import { Selector } from '@astryxdesign/core/Selector';
 import { useStore } from '../lib/store';
 import type { Budget } from '../lib/types';
 import { currentMonthKey } from '../lib/budgets';
+import { parseAmountInput } from '../lib/format';
 import { t } from '../lib/i18n';
 
 export function BudgetSheet({
@@ -93,7 +94,8 @@ export function BudgetSheet({
           label={t("Batas per bulan")}
           value={amount ? String(amount) : ''}
           placeholder="0"
-          onChange={(v) => setAmount(Number(v.replace(/\D/g, '')) || 0)}
+          inputMode="decimal"
+          onChange={(v) => setAmount(parseAmountInput(v, state.settings.currency))}
         />
         <label className="sk-field">
           <span className="sk-eyebrow">{t("Mulai bulan")}</span>

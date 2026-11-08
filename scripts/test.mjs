@@ -309,6 +309,53 @@ check(
   JSON.stringify(reloaded.settings),
 );
 
+/* ---------- cents in non-IDR currencies ---------- */
+await page.evaluate(() => {
+  const key = 'sekeping.state.v1';
+  const state = JSON.parse(localStorage.getItem(key));
+  state.settings.currency = 'USD';
+  state.settings.language = 'id';
+  localStorage.setItem(key, JSON.stringify(state));
+});
+await page.reload({ waitUntil: 'networkidle0' });
+await wait(500);
+await page.evaluate(() => document.querySelector('.sk-tour-skip')?.click());
+await page.evaluate(() => document.querySelector('[data-tour="add"] button')?.click());
+await wait(400);
+const usdKeys = await page.evaluate(() => [...document.querySelectorAll('.sk-key')].map((b) => b.textContent?.trim()));
+check(
+  'USD keypad has Clear all and no 000',
+  usdKeys.includes('AC') && !usdKeys.includes('000'),
+  usdKeys.join(' '),
+);
+const tapKey = (value) =>
+  page.evaluate(
+    (key) => [...document.querySelectorAll('.sk-key')].find((b) => b.textContent?.trim() === key)?.click(),
+    value,
+  );
+for (const key of ['1', '2', '5', '0']) {
+  await tapKey(key);
+  await wait(40);
+}
+const centsAmount = await page.evaluate(() => document.querySelector('.sk-amount-value')?.textContent ?? '');
+check('USD digits shift from the last two decimals', centsAmount.includes('12,50'), centsAmount);
+await tapKey('AC');
+await wait(200);
+const cleared = await page.evaluate(() => document.querySelector('.sk-amount-value')?.textContent ?? '');
+check('Clear all resets the amount', cleared.includes('0,00'), cleared);
+for (const key of ['1', '2', '5', '0']) {
+  await tapKey(key);
+  await wait(40);
+}
+await page.evaluate(() =>
+  [...document.querySelectorAll('.astryx-dialog button')].find((b) => b.textContent?.trim() === 'Simpan')?.click(),
+);
+await wait(600);
+check(
+  'cents are stored with the transaction',
+  await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).txs[0].amount === 12.5),
+);
+
 console.log(results.join('\n'));
 console.log('\nPAGE ERRORS:', errors.length ? errors.join('\n') : 'none');
 const failed = results.filter((r) => r.startsWith('FAIL')).length;
