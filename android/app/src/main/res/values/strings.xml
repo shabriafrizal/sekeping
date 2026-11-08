@@ -30,4 +30,5 @@
     <string name="widget_open">Buka Sekeping</string>
     <string name="widget_toggle_amounts">Sembunyikan atau tampilkan nominal</string>
     <string name="widget_provider">Rekening</string>
+    <string name="widget_total">Total</string>
 </resources>

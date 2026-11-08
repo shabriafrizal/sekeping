@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  4×2. Provider and its balance on one line, the total as the hero figure, and
-  three full-width buttons with the label under each icon.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -18,6 +14,36 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/app_name"
+            android:textColor="@color/widget_cream"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/widget_eye"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@string/widget_toggle_amounts"
+            android:padding="3dp"
+            android:src="@drawable/ic_eye"
+            android:tint="@color/widget_muted" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
         <ImageView
             android:id="@+id/widget_provider_icon"
             android:layout_width="18dp"
@@ -29,46 +55,36 @@
             android:id="@+id/widget_provider"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="7dp"
+            android:layout_marginStart="6dp"
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/widget_provider"
             android:textColor="@color/widget_cream"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/widget_provider_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
+            android:layout_marginStart="8dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Rp 0"
             android:textColor="@color/widget_muted"
-            android:textSize="12sp" />
-
-        <ImageView
-            android:id="@+id/widget_eye"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/widget_chip"
-            android:contentDescription="@string/widget_toggle_amounts"
-            android:padding="6dp"
-            android:src="@drawable/ic_eye"
-            android:tint="@color/widget_cream" />
+            android:textSize="11sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/widget_total_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="3dp"
         android:ellipsize="end"
-        android:letterSpacing="0.14"
+        android:letterSpacing="0.12"
         android:maxLines="1"
+        android:text="@string/widget_total"
         android:textAllCaps="true"
         android:textColor="@color/widget_muted"
         android:textSize="8sp"
@@ -79,14 +95,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
+        android:fontFamily="serif"
         android:maxLines="1"
         android:text="Rp 0"
         android:textColor="@color/widget_cream"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        style="@style/WidgetBalance" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <View
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
@@ -100,6 +116,7 @@
             android:id="@+id/widget_expense"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_expense"
             android:clickable="true"
@@ -109,8 +126,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:contentDescription="@string/widget_expense"
                 android:src="@drawable/ic_widget_expense"
                 android:tint="@color/widget_icon_expense" />
@@ -119,19 +136,18 @@
                 android:id="@+id/widget_expense_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="2dp"
                 android:maxLines="1"
                 android:text="@string/widget_expense"
                 android:textColor="@color/widget_cream"
-                android:textSize="10sp"
-                android:textStyle="bold" />
+                android:textSize="8sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/widget_income"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="6dp"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_income"
             android:clickable="true"
@@ -141,8 +157,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:contentDescription="@string/widget_income"
                 android:src="@drawable/ic_widget_income"
                 android:tint="@color/widget_icon_income" />
@@ -151,19 +167,17 @@
                 android:id="@+id/widget_income_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="2dp"
                 android:maxLines="1"
                 android:text="@string/widget_income"
                 android:textColor="@color/widget_cream"
-                android:textSize="10sp"
-                android:textStyle="bold" />
+                android:textSize="8sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/widget_transfer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="6dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_transfer"
             android:clickable="true"
@@ -173,8 +187,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:contentDescription="@string/widget_transfer"
                 android:src="@drawable/ic_widget_transfer"
                 android:tint="@color/widget_icon_transfer" />
@@ -183,12 +197,11 @@
                 android:id="@+id/widget_transfer_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="2dp"
                 android:maxLines="1"
                 android:text="@string/widget_transfer"
                 android:textColor="@color/widget_cream"
-                android:textSize="10sp"
-                android:textStyle="bold" />
+                android:textSize="8sp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

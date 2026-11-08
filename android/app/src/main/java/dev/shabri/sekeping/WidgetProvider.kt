@@ -102,22 +102,8 @@ open class WidgetProvider : AppWidgetProvider() {
             views.setImageViewResource(R.id.widget_provider_icon, providerIcon(context, provider?.icon))
             views.setTextViewText(R.id.widget_provider_balance, mask(provider?.balance ?: "—", hidden))
             val total = heroAmount(mask(summary.total, hidden))
-            if (layout == R.layout.widget_sekeping_small) {
-                views.setTextViewText(
-                    R.id.widget_total,
-                    labelled(context, t(language, "Total", "Total"), total),
-                )
-            } else {
-                views.setTextViewText(R.id.widget_total, total)
-                views.setTextViewText(
-                    R.id.widget_total_label,
-                    if (layout == R.layout.widget_sekeping_medium) {
-                        t(language, "Total semua rekening", "All accounts total")
-                    } else {
-                        t(language, "Total", "Total")
-                    },
-                )
-            }
+            views.setTextViewText(R.id.widget_total_label, t(language, "Total", "Total"))
+            views.setTextViewText(R.id.widget_total, total)
 
             views.setImageViewResource(
                 R.id.widget_eye,
