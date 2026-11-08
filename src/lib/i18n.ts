@@ -387,6 +387,9 @@ Object.assign(TEMPLATES, {"Jatuh tempo dalam {n} hari": "Due in {n} days", "{n} 
 
 Object.assign(EN, {"Angka; simbol mata uang dan pemisah ribuan diabaikan": "Number; currency symbols and thousands separators are ignored", "Pengeluaran, Pendapatan atau Transfer": "Expense, Income or Transfer", "Nama kategori; dibuat otomatis bila diizinkan": "Category name; created automatically when allowed", "Nama rekening sumber": "Source account name", "Keterangan transaksi": "Transaction description", "YYYY-MM-DD, DD/MM/YYYY atau MM/DD/YYYY": "YYYY-MM-DD, DD/MM/YYYY or MM/DD/YYYY"});
 
+
+Object.assign(EN, {"Nasi padang": "Padang rice", "Kopi susu": "Milk coffee", "Belanja bulanan": "Monthly groceries", "Makan malam keluarga": "Family dinner", "Gojek ke kantor": "Ride to the office", "Isi bensin": "Fuel", "Parkir": "Parking", "Listrik & air": "Electricity & water", "Internet fiber": "Fibre internet", "Pulsa & paket data": "Phone credit & data", "Baju kerja": "Work clothes", "Perlengkapan rumah": "Home supplies", "Perbaikan keran": "Faucet repair", "Vitamin & obat": "Vitamins & medicine", "Olahraga": "Sport", "Nonton bioskop": "Cinema", "Langganan musik": "Music subscription", "Kelas online": "Online course", "Kado ulang tahun": "Birthday gift", "Cicilan 12 bulan, tenor ke-4": "12 instalments, 4th payment", "Buat biaya kos": "For rent"});
+
 export function t(key: string, vars?: Record<string, string | number>): string {
   const source = current === 'en' ? (TEMPLATES[key] ?? EN[key] ?? key) : key;
   if (!vars) return source;

@@ -90,7 +90,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.5.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.5/sekeping-1.1.5.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.6.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.6/sekeping-1.1.6.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 

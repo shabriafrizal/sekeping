@@ -94,7 +94,7 @@ export function createDemoState(): AppState {
         categoryId: pick.cat,
         date: day,
         time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-        note: pick.note,
+        note: t(pick.note),
         createdAt: Date.now() - i * 86_400_000 - j * 1000,
       });
     }
@@ -283,7 +283,7 @@ export function createDemoState(): AppState {
       id: 'debt_1',
       kind: 'debt',
       name: t('Pinjaman motor'),
-      note: 'Cicilan 12 bulan, tenor ke-4',
+      note: t('Cicilan 12 bulan, tenor ke-4'),
       total: 9_600_000,
       accountId: 'acc_bank',
       startDate: daysAgo(120),
@@ -294,7 +294,7 @@ export function createDemoState(): AppState {
       id: 'debt_2',
       kind: 'loan',
       name: t('Dipinjam Rani'),
-      note: 'Buat biaya kos',
+      note: t('Buat biaya kos'),
       total: 1_800_000,
       accountId: 'acc_bank',
       startDate: daysAgo(40),
@@ -304,9 +304,9 @@ export function createDemoState(): AppState {
   ];
 
   const payments = [
-    { id: uid('pay'), debtId: 'debt_1', amount: 800_000, accountId: 'acc_bank', date: daysAgo(30), note: 'Cicilan ke-3' },
-    { id: uid('pay'), debtId: 'debt_1', amount: 800_000, accountId: 'acc_bank', date: daysAgo(60), note: 'Cicilan ke-2' },
-    { id: uid('pay'), debtId: 'debt_2', amount: 600_000, accountId: 'acc_bank', date: daysAgo(15), note: 'Cicilan pertama' },
+    { id: uid('pay'), debtId: 'debt_1', amount: 800_000, accountId: 'acc_bank', date: daysAgo(30), note: t('Cicilan ke-3') },
+    { id: uid('pay'), debtId: 'debt_1', amount: 800_000, accountId: 'acc_bank', date: daysAgo(60), note: t('Cicilan ke-2') },
+    { id: uid('pay'), debtId: 'debt_2', amount: 600_000, accountId: 'acc_bank', date: daysAgo(15), note: t('Cicilan pertama') },
   ];
 
   return {
