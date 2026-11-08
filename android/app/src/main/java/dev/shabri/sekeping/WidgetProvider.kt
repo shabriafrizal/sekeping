@@ -102,6 +102,7 @@ open class WidgetProvider : AppWidgetProvider() {
             views.setImageViewResource(R.id.widget_provider_icon, providerIcon(context, provider?.icon))
             views.setTextViewText(R.id.widget_provider_balance, mask(provider?.balance ?: "—", hidden))
             val total = heroAmount(mask(summary.total, hidden))
+            views.setTextViewText(R.id.widget_balance_label, t(language, "Saldo", "Balance"))
             views.setTextViewText(R.id.widget_total_label, t(language, "Total", "Total"))
             views.setTextViewText(R.id.widget_total, total)
 

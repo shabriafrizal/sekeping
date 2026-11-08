@@ -14,10 +14,17 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_wallet" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/albert_semibold"
             android:text="@string/app_name"
             android:textColor="@color/widget_cream"
             android:textSize="10sp" />
@@ -58,49 +65,62 @@
             android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:ellipsize="end"
+            android:fontFamily="@font/albert_semibold"
             android:maxLines="1"
             android:text="@string/widget_provider"
             android:textColor="@color/widget_cream"
-            android:textSize="10sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/widget_provider_balance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Rp 0"
-            android:textColor="@color/widget_muted"
-            android:textSize="8sp" />
+            android:textSize="10sp" />
     </LinearLayout>
 
     <TextView
-        android:id="@+id/widget_total_label"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/widget_balance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/albert_semibold"
+        android:letterSpacing="0.1"
+        android:text="@string/widget_balance"
+        android:textAllCaps="true"
+        android:textColor="@color/widget_muted"
+        android:textSize="6sp" />
+
+    <TextView
+        android:id="@+id/widget_provider_balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
         android:ellipsize="end"
-        android:letterSpacing="0.12"
+        android:fontFamily="@font/fraunces_semibold"
         android:maxLines="1"
+        android:text="Rp 0"
+        android:textColor="@color/widget_cream"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/widget_total_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/albert_semibold"
+        android:letterSpacing="0.1"
         android:text="@string/widget_total"
         android:textAllCaps="true"
         android:textColor="@color/widget_muted"
-        android:textSize="7sp"
-        android:textStyle="bold" />
+        android:textSize="6sp" />
 
     <TextView
         android:id="@+id/widget_total"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:fontFamily="serif"
+        android:fontFamily="@font/fraunces_semibold"
         android:maxLines="1"
         android:text="Rp 0"
         android:textColor="@color/widget_cream"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="10sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -136,10 +156,11 @@
                 android:id="@+id/widget_expense_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/albert_medium"
                 android:maxLines="1"
                 android:text="@string/widget_expense"
                 android:textColor="@color/widget_cream"
-                android:textSize="7sp" />
+                android:textSize="6sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -166,10 +187,11 @@
                 android:id="@+id/widget_income_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/albert_medium"
                 android:maxLines="1"
                 android:text="@string/widget_income"
                 android:textColor="@color/widget_cream"
-                android:textSize="7sp" />
+                android:textSize="6sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -195,10 +217,11 @@
                 android:id="@+id/widget_transfer_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/albert_medium"
                 android:maxLines="1"
                 android:text="@string/widget_transfer"
                 android:textColor="@color/widget_cream"
-                android:textSize="7sp" />
+                android:textSize="6sp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
