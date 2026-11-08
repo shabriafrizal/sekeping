@@ -35,6 +35,7 @@ export default function Settings({
     useStore();
   const [catTab, setCatTab] = useState<CategoryType>('expense');
   const [pinOpen, setPinOpen] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [pin, setPin] = useState('');
   const [pin2, setPin2] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
@@ -372,12 +373,7 @@ export default function Settings({
             label="Hapus semua"
             variant="destructive"
             size="sm"
-            onClick={() => {
-              if (confirm('Hapus semua transaksi dan catatan? Tindakan ini tidak bisa dibatalkan.')) {
-                clearAll();
-                notify('Semua data dihapus', 'info');
-              }
-            }}
+            onClick={() => setConfirmClear(true)}
           />
         </div>
         <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.55rem' }}>
@@ -503,6 +499,30 @@ export default function Settings({
           <Button label="Aktifkan" variant="primary" onClick={savePin} />
         </div>
       </Dialog>
+      <Dialog isOpen={confirmClear} onOpenChange={setConfirmClear} purpose="form" width={380}>
+        <DialogHeader
+          title="Hapus semua data?"
+          subtitle="Tindakan ini tidak bisa dibatalkan"
+          onOpenChange={setConfirmClear}
+        />
+        <p className="sk-sub" style={{ margin: '1rem 0' }}>
+          Semua transaksi, rekening, kategori, anggaran, jadwal rutin dan utang di perangkat ini
+          akan dihapus. Cadangkan JSON dulu bila ragu.
+        </p>
+        <div className="sk-sheet-actions">
+          <Button label="Batal" variant="ghost" onClick={() => setConfirmClear(false)} />
+          <Button
+            label="Hapus semua"
+            variant="destructive"
+            onClick={() => {
+              clearAll();
+              setConfirmClear(false);
+              notify('Semua data dihapus', 'info');
+            }}
+          />
+        </div>
+      </Dialog>
+
     </div>
   );
 }

@@ -153,6 +153,28 @@ await wait(400);
 check('payment dialog opens', (await page.$('.astryx-dialog')) !== null);
 await page.keyboard.press('Escape');
 
+/* ---------- clearing all data uses an in-app dialog, not window.confirm ---------- */
+await nav('Pengaturan');
+await page.evaluate(() =>
+  [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Hapus semua')?.click(),
+);
+await wait(400);
+check(
+  'clear-data asks with an in-app dialog',
+  await page.evaluate(() => document.body.innerText.includes('Hapus semua data?')),
+);
+await page.evaluate(() => {
+  const dialog = document.querySelector('.astryx-dialog[open]');
+  [...(dialog?.querySelectorAll('button') ?? [])]
+    .find((b) => b.textContent?.trim() === 'Hapus semua')
+    ?.click();
+});
+await wait(700);
+check(
+  'clear-data empties the ledger',
+  await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).txs.length === 0),
+);
+
 console.log(results.join('\n'));
 console.log('\nPAGE ERRORS:', errors.length ? errors.join('\n') : 'none');
 const failed = results.filter((r) => r.startsWith('FAIL')).length;

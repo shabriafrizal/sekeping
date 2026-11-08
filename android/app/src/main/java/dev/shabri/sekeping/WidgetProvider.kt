@@ -38,6 +38,17 @@ class WidgetProvider : AppWidgetProvider() {
     companion object {
 
         fun update(context: Context, manager: AppWidgetManager, widgetId: Int) {
+            try {
+                render(context, manager, widgetId)
+            } catch (_: Throwable) {
+                /* Never leave "Problem loading widget" on the launcher. */
+                val fallback = RemoteViews(context.packageName, R.layout.widget_sekeping_fallback)
+                fallback.setOnClickPendingIntent(R.id.widget_root, openApp(context, widgetId))
+                manager.updateAppWidget(widgetId, fallback)
+            }
+        }
+
+        private fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
             val config = WidgetPrefs.config(context, widgetId)
             val summary = WidgetPrefs.summary(context)
             val layout = layoutFor(manager, widgetId)

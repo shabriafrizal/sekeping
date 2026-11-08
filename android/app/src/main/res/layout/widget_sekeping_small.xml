@@ -69,7 +69,8 @@
             android:text="Rp 0"
             android:textColor="@color/widget_cream"
             android:textSize="19sp"
-            style="@style/WidgetBalance" />
+            android:fontFamily="serif"
+        android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout

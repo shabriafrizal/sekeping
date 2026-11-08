@@ -35,9 +35,9 @@ function loadState(): AppState {
        ledger the full app has not created yet. */
     if (!HAD_STORAGE && NATIVE) return createEmptyState();
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return createDemoState();
+    if (!raw) return createEmptyState();
     const parsed = JSON.parse(raw) as Partial<AppState>;
-    if (!parsed || !Array.isArray(parsed.accounts)) return createDemoState();
+    if (!parsed || !Array.isArray(parsed.accounts)) return createEmptyState();
     return {
       ...parsed,
       version: 2,
@@ -50,7 +50,7 @@ function loadState(): AppState {
       settings: { ...createEmptyState().settings, ...parsed.settings },
     } as AppState;
   } catch {
-    return createDemoState();
+    return createEmptyState();
   }
 }
 

@@ -73,8 +73,8 @@ npm install
 npm run dev
 ```
 
-Open the printed URL (usually <http://localhost:5173>). On first visit you can load a
-demo dataset or start from an empty ledger.
+Open the printed URL (usually <http://localhost:5173>). The ledger starts **empty**; the
+start screen offers a demo dataset if you want to explore first.
 
 **Requirements:** Node.js 20 or newer, npm 10 or newer, and any modern browser.
 
@@ -89,7 +89,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.0/sekeping-1.1.0.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.1.1.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.1/sekeping-1.1.1.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 

@@ -113,7 +113,7 @@ const TOUR_STEPS: TourStep[] = [
 
 export default function App() {
   const store = useStore();
-  const { state, toasts, dismissToast, updateSettings, clearAll, runRecurring, notify } = store;
+  const { state, toasts, dismissToast, updateSettings, clearAll, resetDemo, runRecurring, notify } = store;
 
   const [page, setPage] = useState<Page>('home');
   const reminderCount = state.recurring.filter(
@@ -409,7 +409,10 @@ export default function App() {
   if (!state.settings.onboarded) {
     return (
       <Start
-        onDemo={() => updateSettings({ onboarded: true })}
+        onDemo={() => {
+          resetDemo();
+          updateSettings({ onboarded: true });
+        }}
         onEmpty={() => {
           clearAll();
           updateSettings({ onboarded: true });
@@ -680,13 +683,13 @@ function Start({ onDemo, onEmpty }: { onDemo: () => void; onEmpty: () => void })
         <h1 className="sk-start-name">Sekeping</h1>
         <p className="sk-start-line">Catatan keuangan yang tenang.</p>
         <span className="sk-start-rule" aria-hidden="true" />
-        <button type="button" className="sk-start-primary" data-start="demo" onClick={onDemo}>
-          Mulai
-        </button>
-        <button type="button" className="sk-start-secondary" data-start="empty" onClick={onEmpty}>
+        <button type="button" className="sk-start-primary" data-start="empty" onClick={onEmpty}>
           Mulai dari kosong
         </button>
-        <p className="sk-start-note">Dimulai dengan data contoh yang bisa dihapus kapan saja.</p>
+        <button type="button" className="sk-start-secondary" data-start="demo" onClick={onDemo}>
+          Lihat data contoh
+        </button>
+        <p className="sk-start-note">Mulai tanpa data. Data contoh hanya dimuat jika kamu memilihnya.</p>
       </div>
     </div>
   );

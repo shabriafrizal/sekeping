@@ -37,8 +37,21 @@ class WidgetConfigActivity : AppCompatActivity() {
             return
         }
 
+        /* Accept the widget before the web surface loads. If the dialog cannot
+           render, the launcher still gets a working widget with the defaults;
+           opening it again lets the user change the account and actions. */
+        setResult(
+            RESULT_OK,
+            Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId),
+        )
+
         applyBars()
-        webView = WebAppHost.create(this, Bridge(), transparent = true)
+        webView = try {
+            WebAppHost.create(this, Bridge(), transparent = true)
+        } catch (_: Throwable) {
+            finish()
+            return
+        }
         setContentView(webView)
         webView.loadUrl(WebAppHost.url("widget_config=$widgetId"))
 
