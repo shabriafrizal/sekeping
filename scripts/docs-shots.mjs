@@ -33,6 +33,8 @@ await page.click('.sk-sidebar [data-nav="debts"]');
 await wait(600);
 await page.screenshot({ path: 'docs/debts.png' });
 
+await page.click('.sk-sidebar [data-nav="home"]');
+await wait(600);
 await page.click('.sk-sidebar [data-add]');
 await wait(700);
 await page.evaluate(() => {
