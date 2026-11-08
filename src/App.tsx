@@ -11,6 +11,7 @@ import TransactionSheet from './sheets/TransactionSheet';
 import TxDetail from './sheets/TxDetail';
 import { AccountSheet, CategorySheet, DebtSheet, PaymentSheet } from './sheets/EntitySheets';
 import { iconFor } from './lib/icons';
+import { signalReady, syncWidgetAccounts } from './lib/native';
 
 type Page = 'home' | 'transactions' | 'reports' | 'debts' | 'settings';
 
@@ -30,11 +31,17 @@ export default function App() {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
 
-  const [txSheet, setTxSheet] = useState<{ open: boolean; tx: Tx | null; type: TxType }>({
+  const [txSheet, setTxSheet] = useState<{
+    open: boolean;
+    tx: Tx | null;
+    type: TxType;
+    accountId?: string;
+  }>({
     open: false,
     tx: null,
     type: 'expense',
   });
+  const [queuedAdd, setQueuedAdd] = useState<{ type: TxType; accountId?: string } | null>(null);
   const [detail, setDetail] = useState<Tx | null>(null);
   const [accountSheet, setAccountSheet] = useState<{ open: boolean; account: Account | null }>({
     open: false,
@@ -69,9 +76,40 @@ export default function App() {
     }
   }, [pin, state.settings.pin]);
 
-  function openAdd(type: TxType = 'expense') {
-    setTxSheet({ open: true, tx: null, type });
+  function openAdd(type: TxType = 'expense', accountId?: string) {
+    setTxSheet({ open: true, tx: null, type, accountId });
   }
+
+  /* Widget / launcher shortcuts: ?add=expense&account=acc_x */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const add = params.get('add');
+    if (add === 'expense' || add === 'income' || add === 'transfer') {
+      setQueuedAdd({ type: add, accountId: params.get('account') || undefined });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    window.SekepingOpenAdd = (type, accountId) => {
+      if (type === 'expense' || type === 'income' || type === 'transfer') {
+        setQueuedAdd({ type, accountId: accountId || undefined });
+      }
+    };
+    signalReady();
+    return () => {
+      delete window.SekepingOpenAdd;
+    };
+  }, []);
+
+  /* Keep the Android widget's account picker in sync with the ledger. */
+  useEffect(() => {
+    syncWidgetAccounts(state.accounts);
+  }, [state.accounts]);
+
+  /* A widget tap waits for onboarding and the PIN screen to finish. */
+  useEffect(() => {
+    if (!queuedAdd || !state.settings.onboarded || locked) return;
+    openAdd(queuedAdd.type, queuedAdd.accountId);
+    setQueuedAdd(null);
+  }, [queuedAdd, state.settings.onboarded, locked]);
 
   function editTx(tx: Tx) {
     setDetail(null);
@@ -267,6 +305,7 @@ export default function App() {
         onOpenChange={(open) => setTxSheet((s) => ({ ...s, open }))}
         tx={txSheet.tx}
         initialType={txSheet.type}
+        initialAccountId={txSheet.accountId}
       />
 
       <TxDetail tx={detail} isOpen={Boolean(detail)} onOpenChange={(open) => !open && setDetail(null)} onEdit={editTx} />

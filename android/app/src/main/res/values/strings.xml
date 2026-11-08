@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sekeping</string>
+
+    <string name="widget_name">Sekeping</string>
+    <string name="widget_description">Catat pengeluaran, pendapatan, atau transfer langsung dari layar utama.</string>
+    <string name="widget_configure">Atur widget Sekeping</string>
+    <string name="widget_configure_title">Atur widget</string>
+    <string name="widget_configure_subtitle">Pilih rekening dan tombol yang ingin ditampilkan.</string>
+    <string name="widget_account">REKENING</string>
+    <string name="widget_actions">TOMBOL YANG TAMPIL</string>
+    <string name="widget_expense">Pengeluaran</string>
+    <string name="widget_income">Pendapatan</string>
+    <string name="widget_transfer">Transfer</string>
+    <string name="widget_save">Simpan</string>
+    <string name="widget_cancel">Batal</string>
+    <string name="widget_no_accounts">Buka Sekeping sekali agar daftar rekening muncul di sini.</string>
+    <string name="widget_open_app">Buka aplikasi</string>
+</resources>

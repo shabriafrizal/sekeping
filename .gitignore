@@ -2,3 +2,13 @@ node_modules
 dist
 .DS_Store
 *.local
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/www/
+android/.idea/
+*.iml
+.gradle/

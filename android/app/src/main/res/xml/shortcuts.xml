@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_wallet"
+        android:shortcutDisabledMessage="@string/widget_expense"
+        android:shortcutId="expense"
+        android:shortcutLongLabel="@string/widget_expense"
+        android:shortcutShortLabel="@string/widget_expense">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="sekeping://add/expense"
+            android:targetClass="dev.shabri.sekeping.MainActivity"
+            android:targetPackage="dev.shabri.sekeping" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_wallet"
+        android:shortcutDisabledMessage="@string/widget_income"
+        android:shortcutId="income"
+        android:shortcutLongLabel="@string/widget_income"
+        android:shortcutShortLabel="@string/widget_income">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="sekeping://add/income"
+            android:targetClass="dev.shabri.sekeping.MainActivity"
+            android:targetPackage="dev.shabri.sekeping" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_wallet"
+        android:shortcutDisabledMessage="@string/widget_transfer"
+        android:shortcutId="transfer"
+        android:shortcutLongLabel="@string/widget_transfer"
+        android:shortcutShortLabel="@string/widget_transfer">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="sekeping://add/transfer"
+            android:targetClass="dev.shabri.sekeping.MainActivity"
+            android:targetPackage="dev.shabri.sekeping" />
+    </shortcut>
+
+</shortcuts>

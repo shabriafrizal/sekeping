@@ -54,6 +54,7 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Debts & receivables** | Paid vs remaining progress, due dates, overdue state, payment entries that post to the ledger |
 | **Settings** | Profile and currency, account and category CRUD with icon picker, PIN lock, CSV export, JSON backup/restore, demo reset |
 | **Responsive** | Sidebar on desktop; bottom tab bar and floating add button on phones |
+| **Android app** | Offline APK plus a 4×1 home-screen widget with three quick actions (see [Android app](#android-app)) |
 
 ## Quick start
 
@@ -75,6 +76,40 @@ demo dataset or start from an empty ledger.
 
 A temporary build runs at **<https://4175-agq3odpinhs2pqpojgekdx5pvq.instabox.tech>**
 while its host is up. For something permanent, deploy your own copy — see [Deploy](#deploy).
+
+## Android app
+
+The same build ships as an APK with an offline WebView and a home-screen widget.
+
+### Install
+
+1. Download `sekeping-1.0.0.apk` from [Releases](https://github.com/shabriafrizal/sekeping/releases).
+2. Open it on the phone and allow installs from this source when prompted.
+3. Requires Android 8.0 (API 24) or newer. It works offline; no account needed.
+
+### Use the widget
+
+1. Long-press an empty spot on the home screen → **Widgets**.
+2. Find **Sekeping**, drag the 4×1 widget onto the home screen.
+3. The setup popup asks for the **default account** and which of the three buttons to show.
+   Long-press the widget → **Reconfigure** to change it later.
+4. **Pengeluaran**, **Pendapatan** and **Transfer** open the app straight in that entry
+   form, with the chosen account already selected.
+
+### Build the APK
+
+```bash
+ANDROID_HOME=/path/to/android-sdk ./scripts/build-apk.sh
+```
+
+Requires JDK 17+, Android SDK platform 34 and build-tools 34.0.0. The script builds the
+web app, bundles `dist/` into the APK, and writes
+`android/app/build/outputs/apk/release/app-release.apk`. Details in
+[`android/README.md`](android/README.md).
+
+The APK keeps its own ledger in the WebView's storage — separate from the hosted site —
+and it disappears when the app is uninstalled. Use **Pengaturan → Data → Cadangkan JSON**
+to move data between the two.
 
 ## Usage
 
@@ -165,6 +200,7 @@ backup first.
 | Icons | Heroicons |
 | Fonts | Fraunces + Albert Sans, self-hosted woff2 (OFL) |
 | Storage | `localStorage` — no backend |
+| Android | Kotlin shell, `WebViewAssetLoader`, App Widget, AGP 8.5 |
 
 ## Project structure
 

@@ -56,6 +56,21 @@ lives somewhere else.
   CSS when a token exists.
 - Comments explain *why*, not *what*.
 
+## Android module
+
+`android/` is a Kotlin shell around the same web build, plus the home-screen widget.
+It is not part of the npm build; the APK bundles `dist/`.
+
+```bash
+ANDROID_HOME=/path/to/android-sdk ./scripts/build-apk.sh
+```
+
+- Keep the WebView thin: business logic belongs in the web app, not in Kotlin.
+- The widget only passes `type` and `account` to the app; it never writes data.
+- If you change the bridge in `MainActivity.WidgetBridge`, update
+  `src/lib/native.ts` and document the new method.
+- Run `./gradlew lint` inside `android/` before opening a PR that touches Kotlin.
+
 ## Adding a currency
 
 1. Add the code and symbol in `src/lib/format.ts`.

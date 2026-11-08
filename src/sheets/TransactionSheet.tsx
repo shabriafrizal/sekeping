@@ -14,6 +14,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   tx?: Tx | null;
   initialType?: TxType;
+  initialAccountId?: string;
 }
 
 const TYPE_LABEL: Record<TxType, string> = {
@@ -22,7 +23,7 @@ const TYPE_LABEL: Record<TxType, string> = {
   transfer: 'Transfer',
 };
 
-export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType }: Props) {
+export default function TransactionSheet({ isOpen, onOpenChange, tx = null, initialType, initialAccountId }: Props) {
   const store = useStore();
   const { state, addTx, updateTx, removeTx, notify } = store;
 
@@ -50,7 +51,10 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       const t = initialType ?? 'expense';
       setType(t);
       setAmount(0);
-      setAccountId(state.accounts.find((a) => a.active)?.id ?? state.accounts[0]?.id ?? '');
+      const preferred = initialAccountId && state.accounts.some((a) => a.id === initialAccountId && a.active)
+        ? initialAccountId
+        : state.accounts.find((a) => a.active)?.id ?? state.accounts[0]?.id ?? '';
+      setAccountId(preferred);
       setCategoryId('');
       setToAccountId(state.accounts.find((a) => a.active && a.id !== state.accounts[0]?.id)?.id ?? '');
       setFee(0);
@@ -58,7 +62,7 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       setNote('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, tx]);
+  }, [isOpen, tx, initialAccountId]);
 
   const categories = useMemo(
     () => state.categories.filter((c) => c.active && c.type === (type === 'income' ? 'income' : 'expense')),
