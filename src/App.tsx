@@ -12,7 +12,7 @@ import { Badge } from '@astryxdesign/core/Badge';
 import { Button } from '@astryxdesign/core/Button';
 import { currentMonth, useStore } from './lib/store';
 import type { Account, Budget, Category, CategoryType, Debt, DebtKind, Recurring, Tx, TxType } from './lib/types';
-import { money } from './lib/format';
+import { money, setFormatLocale } from './lib/format';
 import Home from './pages/Home';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
@@ -305,6 +305,12 @@ export default function App() {
     syncWidgetAccounts(state.accounts);
   }, [state.accounts]);
 
+  /* Language drives grouping, month names and the widget labels. */
+  useEffect(() => {
+    setFormatLocale(state.settings.language);
+    document.documentElement.lang = state.settings.language;
+  }, [state.settings.language]);
+
   useEffect(() => {
     if (NATIVE_MODE === 'config') return;
     const { from, to } = currentMonth();
@@ -315,13 +321,29 @@ export default function App() {
       if (tx.type === 'income') income += tx.amount;
       if (tx.type === 'expense') expense += tx.amount;
     }
+    const currency = state.settings.currency;
     syncWidgetSummary({
-      balance: money(store.netWorth, state.settings.currency),
-      monthIn: `+${money(income, state.settings.currency)}`,
-      monthOut: `−${money(expense, state.settings.currency)}`,
-      accounts: state.accounts.filter((a) => a.active).length,
+      total: money(store.netWorth, currency),
+      monthIn: `+${money(income, currency)}`,
+      monthOut: `−${money(expense, currency)}`,
+      currency,
+      language: state.settings.language,
+      accounts: state.accounts
+        .filter((a) => a.active)
+        .map((a) => ({
+          id: a.id,
+          name: a.name,
+          icon: a.icon,
+          balance: money(store.balanceOf(a.id), currency),
+        })),
     });
-  }, [state.txs, state.accounts, state.settings.currency, store.netWorth]);
+  }, [
+    state.txs,
+    state.accounts,
+    state.settings.currency,
+    state.settings.language,
+    store.netWorth,
+  ]);
 
   /* A sheet opened before onboarding has no ledger to write to: hand off to
      the full app, which shows the welcome screen. */

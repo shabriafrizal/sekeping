@@ -11,10 +11,9 @@ import android.view.View
 import android.widget.RemoteViews
 
 /**
- * One resizable home-screen widget. It reflows between three layouts:
- * 4x1 (balance + icon row), 4x2 (balance, month flow, icon column) and
- * 2x2 (compact balance + icon row). Each icon button opens the quick-add
- * sheet over the home screen; tapping the card opens the full app.
+ * One resizable home-screen widget. It shows the selected provider (account) with
+ * its balance, the total of every active account, an eye toggle that masks both
+ * amounts, and three labelled quick actions.
  */
 class WidgetProvider : AppWidgetProvider() {
 
@@ -31,11 +30,21 @@ class WidgetProvider : AppWidgetProvider() {
         update(context, manager, widgetId)
     }
 
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action == ACTION_TOGGLE_HIDDEN) {
+            WidgetPrefs.setHidden(context, !WidgetPrefs.hidden(context))
+            refreshAll(context)
+        }
+    }
+
     override fun onDeleted(context: Context, ids: IntArray) {
         ids.forEach { WidgetPrefs.remove(context, it) }
     }
 
     companion object {
+
+        const val ACTION_TOGGLE_HIDDEN = "dev.shabri.sekeping.widget.TOGGLE_HIDDEN"
 
         fun update(context: Context, manager: AppWidgetManager, widgetId: Int) {
             try {
@@ -51,41 +60,38 @@ class WidgetProvider : AppWidgetProvider() {
         private fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
             val config = WidgetPrefs.config(context, widgetId)
             val summary = WidgetPrefs.summary(context)
+            val hidden = WidgetPrefs.hidden(context)
+            val language = summary.language
+            val provider = summary.accounts.firstOrNull { it.id == config.accountId }
+                ?: summary.accounts.firstOrNull()
+
             val layout = layoutFor(manager, widgetId)
             val views = RemoteViews(context.packageName, layout)
 
-            val caption = context.getString(R.string.widget_caption)
-            views.setTextViewText(R.id.widget_balance, summary.balance)
-            views.setTextViewText(R.id.widget_caption, caption)
-
-            if (layout == R.layout.widget_sekeping_medium || layout == R.layout.widget_sekeping_small) {
-                views.setTextViewText(
-                    R.id.widget_accounts,
-                    if (summary.accounts > 0) {
-                        context.getString(R.string.widget_accounts, summary.accounts)
-                    } else {
-                        context.getString(R.string.widget_accounts_none)
-                    },
-                )
-            }
-
-            if (layout == R.layout.widget_sekeping_medium) {
-                views.setTextViewText(R.id.widget_month_in, summary.monthIn)
-                views.setTextViewText(R.id.widget_month_out, summary.monthOut)
-            }
-
-            views.setViewVisibility(
-                R.id.widget_expense,
-                if (config.showExpense) View.VISIBLE else View.GONE,
+            views.setTextViewText(R.id.widget_provider, provider?.name ?: t(language, "Belum ada rekening", "No account yet"))
+            views.setImageViewResource(R.id.widget_provider_icon, providerIcon(provider?.icon))
+            views.setTextViewText(R.id.widget_provider_balance, mask(provider?.balance ?: "—", hidden))
+            views.setTextViewText(
+                R.id.widget_total,
+                "${t(language, "Total", "Total")}  ${mask(summary.total, hidden)}",
             )
-            views.setViewVisibility(
-                R.id.widget_income,
-                if (config.showIncome) View.VISIBLE else View.GONE,
+
+            views.setImageViewResource(
+                R.id.widget_eye,
+                if (hidden) R.drawable.ic_eye_off else R.drawable.ic_eye,
             )
-            views.setViewVisibility(
-                R.id.widget_transfer,
-                if (config.showTransfer) View.VISIBLE else View.GONE,
+            views.setOnClickPendingIntent(R.id.widget_eye, toggleHidden(context, widgetId))
+
+            val labels = mapOf(
+                R.id.widget_expense_label to t(language, "Pengeluaran", "Expense"),
+                R.id.widget_income_label to t(language, "Pendapatan", "Income"),
+                R.id.widget_transfer_label to t(language, "Transfer", "Transfer"),
             )
+            labels.forEach { (id, text) -> views.setTextViewText(id, text) }
+
+            views.setViewVisibility(R.id.widget_expense, if (config.showExpense) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.widget_income, if (config.showIncome) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.widget_transfer, if (config.showTransfer) View.VISIBLE else View.GONE)
 
             views.setOnClickPendingIntent(
                 R.id.widget_expense,
@@ -110,16 +116,44 @@ class WidgetProvider : AppWidgetProvider() {
             ids.forEach { update(context, manager, it) }
         }
 
+        private fun t(language: String, indonesian: String, english: String): String =
+            if (language.startsWith("en")) english else indonesian
+
+        /** "Rp 43.425.500" -> "Rp ***" when the eye is closed. */
+        private fun mask(value: String, hidden: Boolean): String =
+            if (!hidden) value else value.replace(Regex("[0-9][0-9.,]*"), "***")
+
+        private fun providerIcon(key: String?): Int = when (key) {
+            "bank" -> R.drawable.ic_provider_bank
+            "phone" -> R.drawable.ic_provider_phone
+            "cash" -> R.drawable.ic_provider_cash
+            "card" -> R.drawable.ic_provider_card
+            "store" -> R.drawable.ic_provider_store
+            else -> R.drawable.ic_wallet
+        }
+
         /** Pick the layout from the cells the widget currently occupies. */
         private fun layoutFor(manager: AppWidgetManager, widgetId: Int): Int {
             val options = manager.getAppWidgetOptions(widgetId)
             val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
             val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
             return when {
-                height in 1..99 -> R.layout.widget_sekeping_small
+                height in 1..89 -> R.layout.widget_sekeping_small
                 width in 1..219 -> R.layout.widget_sekeping_square
                 else -> R.layout.widget_sekeping_medium
             }
+        }
+
+        private fun toggleHidden(context: Context, widgetId: Int): PendingIntent {
+            val intent = Intent(context, WidgetProvider::class.java).apply {
+                action = ACTION_TOGGLE_HIDDEN
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                widgetId * 10 + 9,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /** The sheet activity floats over the launcher, without the dashboard. */

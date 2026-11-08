@@ -307,6 +307,7 @@ export function createDemoState(): AppState {
     budgets,
     settings: {
       userName: 'Kamu',
+      language: 'id',
       currency: 'IDR',
       pin: null,
       onboarded: false,
@@ -328,6 +329,7 @@ export function createEmptyState(): AppState {
     budgets: [],
     settings: {
       userName: 'Kamu',
+      language: 'id',
       currency: 'IDR',
       pin: null,
       onboarded: false,

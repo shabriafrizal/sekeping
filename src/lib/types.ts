@@ -90,6 +90,7 @@ export interface DebtPayment {
 
 export interface Settings {
   userName: string;
+  language: 'id' | 'en';
   currency: 'IDR' | 'USD' | 'EUR' | 'SGD' | 'MYR';
   pin: string | null;
   onboarded: boolean;

@@ -177,6 +177,16 @@ export default function Settings({
             onChange={(v) => updateSettings({ currency: v as typeof state.settings.currency })}
             width="100%"
           />
+          <Selector
+            label="Bahasa"
+            options={[
+              { value: 'id', label: 'Bahasa Indonesia' },
+              { value: 'en', label: 'English' },
+            ]}
+            value={state.settings.language}
+            onChange={(v) => updateSettings({ language: v as 'id' | 'en' })}
+            width="100%"
+          />
         </div>
       </section>
 

@@ -21,12 +21,62 @@ const SIZES: Array<{ id: WidgetSize; label: string; hint: string }> = [
  * layouts in 4×1, 4×2 and 2×2 before saving to the host.
  */
 export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
-  const { state, netWorth } = useStore();
+  const { state, netWorth, balanceOf } = useStore();
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const initial = useMemo(
     () => readWidgetConfig(Number(params.get('widget_config')) || 0),
     [params],
   );
+
+  const language = state.settings.language;
+  const L =
+    language === 'en'
+      ? {
+          title: 'Widget setup',
+          subtitle: 'Pick the account, buttons and size.',
+          preview: 'Preview',
+          saved: 'Saved',
+          sizes: { '4x1': 'Compact', '4x2': 'Full', '2x2': 'Square' },
+          sizeAria: 'Widget size',
+          sizeHint: 'The size follows the space you give it on the home screen.',
+          account: 'Account',
+          noAccounts: 'Open Sekeping once so the account list appears here.',
+          openApp: 'Open app',
+          accountHint:
+            'This account is preselected when you add from the widget. The second amount is the total of every active account.',
+          actions: 'Buttons shown',
+          expense: 'Expense',
+          expenseHint: 'Record money out',
+          income: 'Income',
+          incomeHint: 'Record money in',
+          transfer: 'Transfer',
+          transferHint: 'Move between accounts',
+          cancel: 'Cancel',
+          save: 'Save',
+        }
+      : {
+          title: 'Atur widget',
+          subtitle: 'Pilih rekening, tombol, dan ukuran.',
+          preview: 'Pratinjau',
+          saved: 'Tersimpan',
+          sizes: { '4x1': 'Ringkas', '4x2': 'Lengkap', '2x2': 'Kotak' },
+          sizeAria: 'Ukuran widget',
+          sizeHint: 'Ukuran mengikuti berapa banyak ruang yang kamu beri di layar utama.',
+          account: 'Rekening',
+          noAccounts: '{L.noAccounts}',
+          openApp: 'Buka aplikasi',
+          accountHint:
+            'Rekening ini menjadi pilihan awal saat mencatat dari widget. Nominal kedua adalah total semua rekening aktif.',
+          actions: 'Tombol yang tampil',
+          expense: 'Pengeluaran',
+          expenseHint: 'Catat uang keluar',
+          income: 'Pendapatan',
+          incomeHint: 'Catat uang masuk',
+          transfer: 'Transfer',
+          transferHint: 'Pindah antar rekening',
+          cancel: 'Batal',
+          save: 'Simpan',
+        };
 
   const activeAccounts = state.accounts.filter((a) => a.active);
   const [accountId, setAccountId] = useState(
@@ -34,6 +84,7 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
       ? initial.accountId
       : activeAccounts[0]?.id ?? '',
   );
+  const provider = activeAccounts.find((a) => a.id === accountId) ?? activeAccounts[0];
   const [showExpense, setShowExpense] = useState(initial.showExpense);
   const [showIncome, setShowIncome] = useState(initial.showIncome);
   const [showTransfer, setShowTransfer] = useState(initial.showTransfer);
@@ -76,8 +127,8 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
       maxHeight="94dvh"
     >
       <DialogHeader
-        title="Atur widget"
-        subtitle="Pilih rekening, tombol, dan ukuran."
+        title={L.title}
+        subtitle={L.subtitle}
         onOpenChange={() => closeSheet()}
       />
 
@@ -86,14 +137,14 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
           <section className="skw-section" aria-labelledby="skw-preview-title">
             <div className="skw-section-head">
               <p className="sk-eyebrow" id="skw-preview-title">
-                Pratinjau
+                {L.preview}
               </p>
               <span className="skw-save-note" data-visible={saved}>
-                Tersimpan
+                {L.saved}
               </span>
             </div>
 
-            <div className="skw-tabs" role="tablist" aria-label="Ukuran widget">
+            <div className="skw-tabs" role="tablist" aria-label={L.sizeAria}>
               {SIZES.map((item) => (
                 <button
                   key={item.id}
@@ -105,31 +156,33 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
                   onClick={() => setSize(item.id)}
                 >
                   <strong>{item.label}</strong>
-                  <small>{item.hint}</small>
+                  <small>{L.sizes[item.id]}</small>
                 </button>
               ))}
             </div>
 
             <WidgetPreview
               size={size}
-              balance={balance}
-              monthIn={locked ? '+Rp ••••' : `+${money(totals.income, state.settings.currency)}`}
-              monthOut={locked ? '−Rp ••••' : `−${money(totals.expense, state.settings.currency)}`}
-              accounts={activeAccounts.length}
+              providerName={provider?.name ?? ''}
+              providerIcon={provider?.icon ?? 'wallet'}
+              providerBalance={money(balanceOf(provider?.id ?? ''), state.settings.currency)}
+              total={money(netWorth, state.settings.currency)}
+              masked={locked}
+              language={language}
               showExpense={showExpense}
               showIncome={showIncome}
               showTransfer={showTransfer}
             />
-            <p className="skw-hint">Ukuran mengikuti berapa banyak ruang yang kamu beri di layar utama.</p>
+            <p className="skw-hint">{L.sizeHint}</p>
           </section>
 
           <section className="skw-section" aria-labelledby="skw-account-title">
             <p className="sk-eyebrow" id="skw-account-title">
-              Rekening
+              {L.account}
             </p>
             {activeAccounts.length > 0 ? (
               <RadioList
-                label="Rekening"
+                label={L.account}
                 isLabelHidden
                 value={accountId}
                 onChange={setAccountId}
@@ -154,18 +207,18 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
               </RadioList>
             ) : (
               <div className="skw-empty">
-                <p>Buka Sekeping sekali agar daftar rekening muncul di sini.</p>
-                <Button label="Buka aplikasi" variant="secondary" onClick={openApp} />
+                <p>{L.noAccounts}</p>
+                <Button label={L.openApp} variant="secondary" onClick={openApp} />
               </div>
             )}
             <p className="skw-hint">
-              Rekening ini menjadi pilihan awal saat mencatat dari widget. Saldo di widget adalah total semua rekening aktif.
+              {L.accountHint}
             </p>
           </section>
 
           <section className="skw-section" aria-labelledby="skw-actions-title">
             <p className="sk-eyebrow" id="skw-actions-title">
-              Tombol yang tampil
+              {L.actions}
             </p>
             <div className="skw-toggles">
               <div className="skw-toggle">
@@ -175,11 +228,11 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
                   </svg>
                 </span>
                 <span className="skw-toggle-copy">
-                  <strong>Pengeluaran</strong>
-                  <small>Catat uang keluar</small>
+                  <strong>{L.expense}</strong>
+                  <small>{L.expenseHint}</small>
                 </span>
                 <Switch
-                  label="Pengeluaran"
+                  label={L.expense}
                   isLabelHidden
                   value={showExpense}
                   onChange={setShowExpense}
@@ -193,11 +246,11 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
                   </svg>
                 </span>
                 <span className="skw-toggle-copy">
-                  <strong>Pendapatan</strong>
-                  <small>Catat uang masuk</small>
+                  <strong>{L.income}</strong>
+                  <small>{L.incomeHint}</small>
                 </span>
                 <Switch
-                  label="Pendapatan"
+                  label={L.income}
                   isLabelHidden
                   value={showIncome}
                   onChange={setShowIncome}
@@ -217,11 +270,11 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
                   </svg>
                 </span>
                 <span className="skw-toggle-copy">
-                  <strong>Transfer</strong>
-                  <small>Pindah antar rekening</small>
+                  <strong>{L.transfer}</strong>
+                  <small>{L.transferHint}</small>
                 </span>
                 <Switch
-                  label="Transfer"
+                  label={L.transfer}
                   isLabelHidden
                   value={showTransfer}
                   onChange={setShowTransfer}
@@ -233,8 +286,8 @@ export default function WidgetConfigSheet({ locked }: { locked: boolean }) {
       </div>
 
       <div className="sk-sheet-actions sk-widget-footer">
-        <Button label="Batal" variant="ghost" onClick={closeSheet} />
-        <Button label="Simpan" variant="primary" onClick={save} isDisabled={!canSave} />
+        <Button label={L.cancel} variant="ghost" onClick={closeSheet} />
+        <Button label={L.save} variant="primary" onClick={save} isDisabled={!canSave} />
       </div>
     </Dialog>
   );

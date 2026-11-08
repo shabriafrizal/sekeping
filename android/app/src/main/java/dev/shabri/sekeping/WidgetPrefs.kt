@@ -12,22 +12,31 @@ data class WidgetConfig(
     val hasAny: Boolean get() = showExpense || showIncome || showTransfer
 }
 
+data class WidgetAccount(
+    val id: String,
+    val name: String,
+    val icon: String,
+    val balance: String,
+)
+
 /** The numbers the web app pushes so the widget can render without the app open. */
 data class WidgetSummary(
-    val balance: String,
+    val total: String,
     val monthIn: String,
     val monthOut: String,
-    val accounts: Int,
+    val currency: String,
+    val language: String,
+    val accounts: List<WidgetAccount>,
 ) {
     companion object {
-        val EMPTY = WidgetSummary("Rp 0", "+Rp 0", "−Rp 0", 0)
+        val EMPTY = WidgetSummary("Rp 0", "+Rp 0", "−Rp 0", "IDR", "id", emptyList())
     }
 }
 
 /**
  * Small shared-preferences store for the home screen widget: the account list pushed
- * from the web app, the summary numbers, plus the per-widget choices made in the setup
- * dialog.
+ * from the web app, the summary numbers, the privacy toggle, plus the per-widget
+ * choices made in the setup dialog.
  */
 object WidgetPrefs {
 
@@ -35,6 +44,7 @@ object WidgetPrefs {
     private const val KEY_ACCOUNTS = "accounts_json"
     private const val KEY_SUMMARY = "summary_json"
     private const val KEY_IDS = "widget_ids"
+    private const val KEY_HIDDEN = "amounts_hidden"
 
     private fun prefs(context: Context) = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
@@ -67,15 +77,41 @@ object WidgetPrefs {
         val raw = prefs(context).getString(KEY_SUMMARY, null) ?: return WidgetSummary.EMPTY
         return try {
             val json = JSONObject(raw)
+            val list = mutableListOf<WidgetAccount>()
+            val array = json.optJSONArray("accounts")
+            if (array != null) {
+                for (i in 0 until array.length()) {
+                    val item = array.optJSONObject(i) ?: continue
+                    val id = item.optString("id")
+                    if (id.isEmpty()) continue
+                    list.add(
+                        WidgetAccount(
+                            id = id,
+                            name = item.optString("name"),
+                            icon = item.optString("icon", "wallet"),
+                            balance = item.optString("balance", "Rp 0"),
+                        ),
+                    )
+                }
+            }
             WidgetSummary(
-                balance = json.optString("balance", WidgetSummary.EMPTY.balance),
+                total = json.optString("total", WidgetSummary.EMPTY.total),
                 monthIn = json.optString("monthIn", WidgetSummary.EMPTY.monthIn),
                 monthOut = json.optString("monthOut", WidgetSummary.EMPTY.monthOut),
-                accounts = json.optInt("accounts", WidgetSummary.EMPTY.accounts),
+                currency = json.optString("currency", WidgetSummary.EMPTY.currency),
+                language = json.optString("language", WidgetSummary.EMPTY.language),
+                accounts = list,
             )
         } catch (_: Exception) {
             WidgetSummary.EMPTY
         }
+    }
+
+    /** Masked balances are a device preference: the eye toggles every widget. */
+    fun hidden(context: Context): Boolean = prefs(context).getBoolean(KEY_HIDDEN, false)
+
+    fun setHidden(context: Context, hidden: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HIDDEN, hidden).apply()
     }
 
     fun save(context: Context, widgetId: Int, config: WidgetConfig) {

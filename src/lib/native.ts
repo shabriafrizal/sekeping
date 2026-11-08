@@ -29,15 +29,27 @@ export interface NativeWidgetConfig {
   showTransfer: boolean;
 }
 
+export interface NativeWidgetAccount {
+  id: string;
+  name: string;
+  icon: string;
+  /** Formatted balance of this account. */
+  balance: string;
+}
+
 export interface NativeWidgetSummary {
   /** Formatted net worth, e.g. "Rp 43.479.500". */
-  balance: string;
+  total: string;
   /** Formatted money in this month, e.g. "+Rp 3.200.000". */
   monthIn: string;
   /** Formatted money out this month, e.g. "−Rp 1.651.000". */
   monthOut: string;
-  /** Number of active accounts. */
-  accounts: number;
+  /** ISO code of the display currency. */
+  currency: string;
+  /** "id" or "en" — the widget reuses the app language. */
+  language: string;
+  /** Active accounts with their own balances, in display order. */
+  accounts: NativeWidgetAccount[];
 }
 
 export interface NativeWidgetBridge {

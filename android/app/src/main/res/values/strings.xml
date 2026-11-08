@@ -24,4 +24,6 @@
     <string name="widget_month_out">Keluar</string>
     <string name="widget_saved">Widget diperbarui</string>
     <string name="widget_open">Buka Sekeping</string>
+    <string name="widget_toggle_amounts">Sembunyikan atau tampilkan nominal</string>
+    <string name="widget_provider">Rekening</string>
 </resources>

@@ -2736,3 +2736,143 @@ html[data-native] .sk-lock-card {
   margin: 0;
   padding: 0;
 }
+
+/* ---------- widget preview: provider, two amounts, labelled actions ---------- */
+.skw-widget[data-size='4x1'] {
+  aspect-ratio: 4 / 1.45;
+}
+
+.skw-eye {
+  margin-inline-start: auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  color: rgba(246, 242, 233, 0.72);
+  flex: none;
+}
+
+.skw-eye svg {
+  width: 100%;
+  height: 100%;
+}
+
+.skw-provider {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  min-width: 0;
+}
+
+.skw-provider-icon {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.3rem;
+  display: grid;
+  place-items: center;
+  background: rgba(246, 242, 233, 0.14);
+  color: #f6f2e9;
+  flex: none;
+}
+
+.skw-provider-icon svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.skw-provider-name {
+  font-size: 0.62rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #f6f2e9;
+}
+
+.skw-amounts {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 0.2rem;
+  min-width: 0;
+}
+
+.skw-amounts span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.skw-amounts small {
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b9d6ca;
+  white-space: nowrap;
+}
+
+.skw-amounts b {
+  font-family: var(--font-family-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skw-widget[data-size='4x2'] .skw-amounts b {
+  font-size: 1.2rem;
+}
+
+.skw-widget[data-size='2x2'] .skw-amounts {
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.skw-widget[data-size='2x2'] .skw-amounts b {
+  font-size: 0.88rem;
+}
+
+.skw-action {
+  width: auto;
+  height: auto;
+  min-width: 2.5rem;
+  padding: 0.3rem 0.32rem;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+}
+
+.skw-action-icon {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+}
+
+.skw-action-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.skw-action-label {
+  font-size: 0.46rem;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.skw-widget[data-size='4x2'] .skw-action {
+  min-width: 2.8rem;
+  padding: 0.36rem 0.36rem;
+}
+
+.skw-widget[data-size='4x2'] .skw-action-label {
+  font-size: 0.5rem;
+}
+
+.skw-widget[data-size='4x2'] .skw-actions {
+  flex-direction: row;
+}

@@ -5,172 +5,186 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
     android:contentDescription="@string/widget_open"
-    android:orientation="horizontal"
-    android:padding="14dp">
+    android:orientation="vertical"
+    android:padding="13dp">
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:contentDescription="@string/app_name"
-                android:src="@drawable/ic_wallet" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/app_name"
-                android:textColor="@color/widget_cream"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/widget_accounts"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:gravity="end"
-                android:maxLines="1"
-                android:textColor="@color/widget_muted"
-                android:textSize="9sp" />
-        </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/widget_caption"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
-            android:letterSpacing="0.14"
-            android:text="@string/widget_caption"
-            android:textAllCaps="true"
-            android:textColor="@color/widget_muted"
-            android:textSize="9sp" />
-
-        <TextView
-            android:id="@+id/widget_balance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="serif"
-        android:textStyle="bold"
-            android:maxLines="1"
-            android:text="Rp 0"
-            android:textColor="@color/widget_cream"
-            android:textSize="26sp" />
-
-        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal">
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/app_name"
+            android:textColor="@color/widget_cream"
+            android:textSize="12sp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.08"
-                    android:text="@string/widget_month_in"
-                    android:textAllCaps="true"
-                    android:textColor="@color/widget_muted"
-                    android:textSize="8sp" />
-
-                <TextView
-                    android:id="@+id/widget_month_in"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="+Rp 0"
-                    android:textColor="@color/widget_icon_income"
-                    android:textSize="11sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.08"
-                    android:text="@string/widget_month_out"
-                    android:textAllCaps="true"
-                    android:textColor="@color/widget_muted"
-                    android:textSize="8sp" />
-
-                <TextView
-                    android:id="@+id/widget_month_out"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="−Rp 0"
-                    android:textColor="@color/widget_icon_expense"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/widget_eye"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@string/widget_toggle_amounts"
+            android:padding="3dp"
+            android:src="@drawable/ic_eye"
+            android:tint="@color/widget_muted" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="36dp"
-        android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/widget_provider_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/widget_provider"
+            android:src="@drawable/ic_wallet" />
+
+        <TextView
+            android:id="@+id/widget_provider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/widget_provider"
+            android:textColor="@color/widget_cream"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_provider_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Rp 0"
+            android:textColor="@color/widget_muted"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:fontFamily="serif"
+        android:maxLines="1"
+        android:text="Total  Rp 0"
+        android:textColor="@color/widget_cream"
+        android:textSize="21sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
             android:id="@+id/widget_expense"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
             android:background="@drawable/widget_btn_expense"
             android:clickable="true"
             android:contentDescription="@string/widget_expense"
             android:focusable="true"
-            android:padding="9dp"
-            android:src="@drawable/ic_widget_expense"
-            android:tint="@color/widget_icon_expense" />
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <ImageView
+            <ImageView
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:contentDescription="@string/widget_expense"
+                android:src="@drawable/ic_widget_expense"
+                android:tint="@color/widget_icon_expense" />
+
+            <TextView
+                android:id="@+id/widget_expense_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="@string/widget_expense"
+                android:textColor="@color/widget_cream"
+                android:textSize="8sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/widget_income"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="6dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
             android:background="@drawable/widget_btn_income"
             android:clickable="true"
             android:contentDescription="@string/widget_income"
             android:focusable="true"
-            android:padding="9dp"
-            android:src="@drawable/ic_widget_income"
-            android:tint="@color/widget_icon_income" />
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <ImageView
+            <ImageView
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:contentDescription="@string/widget_income"
+                android:src="@drawable/ic_widget_income"
+                android:tint="@color/widget_icon_income" />
+
+            <TextView
+                android:id="@+id/widget_income_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="@string/widget_income"
+                android:textColor="@color/widget_cream"
+                android:textSize="8sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/widget_transfer"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="6dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:background="@drawable/widget_btn_transfer"
             android:clickable="true"
             android:contentDescription="@string/widget_transfer"
             android:focusable="true"
-            android:padding="9dp"
-            android:src="@drawable/ic_widget_transfer"
-            android:tint="@color/widget_icon_transfer" />
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:contentDescription="@string/widget_transfer"
+                android:src="@drawable/ic_widget_transfer"
+                android:tint="@color/widget_icon_transfer" />
+
+            <TextView
+                android:id="@+id/widget_transfer_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:text="@string/widget_transfer"
+                android:textColor="@color/widget_cream"
+                android:textSize="8sp" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

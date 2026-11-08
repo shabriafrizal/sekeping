@@ -66,7 +66,9 @@ async function seededPage(context) {
     '4x1 preview shows balance and three actions',
     await page.evaluate(() => {
       const widget = document.querySelector('.skw-widget[data-size="4x1"]');
-      return Boolean(widget && widget.querySelector('.skw-amount') && widget.querySelectorAll('.skw-action').length === 3);
+      const amounts = widget?.querySelectorAll('.skw-amounts b').length ?? 0;
+      const labels = widget?.querySelectorAll('.skw-action-label').length ?? 0;
+      return Boolean(widget && amounts === 2 && labels === 3);
     }),
   );
 
@@ -161,7 +163,7 @@ async function seededPage(context) {
   );
   check(
     'the widget summary is refreshed',
-    await page.evaluate(() => JSON.parse(window.__summary || '{}').balance?.startsWith('Rp ')),
+    await page.evaluate(() => (() => { const s = JSON.parse(window.__summary || '{}'); return s.total?.startsWith('Rp ') && Array.isArray(s.accounts) && s.accounts.length > 0; })()),
   );
   check('sheet leaves no page errors', errors.length === 0, errors.join('; '));
 

@@ -1,4 +1,9 @@
-const LOCALE = 'id-ID';
+let LOCALE = 'id-ID';
+
+/** Follow the app language setting for grouping and month names. */
+export function setFormatLocale(language: string): void {
+  LOCALE = language === 'en' ? 'en-US' : 'id-ID';
+}
 
 const currencySymbols: Record<string, string> = {
   IDR: 'Rp',
