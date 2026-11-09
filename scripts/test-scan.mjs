@@ -60,7 +60,7 @@ async function newPage(state, bridge = null) {
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('request', (request) => {
     const url = request.url();
-    if (/cdn\.jsdelivr|unpkg\.com|tessdata\.projectnaptha/.test(url)) cdnRequests.push(url);
+    if (/cdn\.jsdelivr|unpkg\.com|huggingface\.co/.test(url)) cdnRequests.push(url);
     if (/opencode\.ai/.test(url)) opencodeRequests.push(url);
   });
   await page.goto(BASE, { waitUntil: 'networkidle0' });

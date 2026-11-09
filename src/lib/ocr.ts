@@ -1,30 +1,20 @@
-import type { Worker } from 'tesseract.js';
+import { OcrEngine } from '@ocr-web/core';
 
 export interface OcrProgress {
-  status: string;
+  /** loading = model/WASM download, detecting = text boxes, recognizing = characters */
+  status: 'loading' | 'detecting' | 'recognizing';
   progress: number;
 }
 
 const MAX_EDGE = 2200;
 
-let workerPromise: Promise<Worker> | null = null;
-
-/** SIMD is available in every current browser; keep a non-SIMD file for old WebViews. */
-function hasSimd(): boolean {
-  try {
-    return WebAssembly.validate(
-      new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]),
-    );
-  } catch {
-    return false;
-  }
-}
+let enginePromise: Promise<OcrEngine> | null = null;
 
 function assets(path: string): string {
   return new URL(path, document.baseURI).href;
 }
 
-/** Resize and flatten the photo so Tesseract sees a clean, upright page. */
+/** Resize and flatten the photo before PP-OCR looks for text boxes. */
 async function prepareImage(file: Blob): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
@@ -40,67 +30,71 @@ async function prepareImage(file: Blob): Promise<Blob> {
   }
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, width, height);
-  // Receipts are mostly black on white; flattening colour helps phone photos.
-  context.filter = 'grayscale(1) contrast(1.12)';
+  // Receipts are mostly dark text on a light background; flatten colour noise.
+  context.filter = 'grayscale(1) contrast(1.1)';
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   return blob ?? file;
 }
 
-async function getWorker(onProgress: (progress: OcrProgress) => void): Promise<Worker> {
-  if (workerPromise) return workerPromise;
+async function getEngine(onProgress: (progress: OcrProgress) => void): Promise<OcrEngine> {
+  if (enginePromise) return enginePromise;
 
-  workerPromise = (async () => {
-    const { createWorker, OEM } = await import('tesseract.js');
-    const core = hasSimd()
-      ? 'ocr/core/tesseract-core-simd-lstm.wasm.js'
-      : 'ocr/core/tesseract-core-lstm.wasm.js';
-
-    return createWorker('ind+eng', OEM.LSTM_ONLY, {
-      workerPath: assets('ocr/worker.min.js'),
-      corePath: assets(core),
-      langPath: assets('ocr/lang'),
-      // Android's asset packager expands .gz assets; ship plain traineddata.
-      gzip: false,
-      logger: (message) => {
-        onProgress({
-          status: message.status,
-          progress: Number(message.progress) || 0,
-        });
-      },
-      errorHandler: (error) => {
-        console.error('OCR worker error', error);
-      },
-    });
-  })().catch((error) => {
-    // A failed load must be retried on the next scan, not cached forever.
-    workerPromise = null;
+  onProgress({ status: 'loading', progress: 0.04 });
+  enginePromise = OcrEngine.create({
+    models: {
+      detection: assets('paddle-ocr/det.onnx'),
+      recognition: assets('paddle-ocr/rec.onnx'),
+    },
+    dictionary: assets('paddle-ocr/dict.txt'),
+    runtime: 'wasm',
+    wasmPaths: assets('paddle-ocr/ort/'),
+    // Android WebView has no SharedArrayBuffer without COOP/COEP headers.
+    numThreads: 1,
+    onProgress: (update) => {
+      const ratio = update.total > 0 ? update.loaded / update.total : 0;
+      onProgress({ status: 'loading', progress: Math.min(0.62, 0.05 + ratio * 0.57) });
+    },
+  }).catch((error) => {
+    // A failed download must be retried on the next scan.
+    enginePromise = null;
     throw error;
   });
 
-  return workerPromise;
+  return enginePromise;
 }
 
 /**
- * Turn a photo into plain text. Everything runs locally in a Web Worker;
- * the image never leaves the device.
+ * Run PaddleOCR's PP-OCRv5 mobile detection + Latin recognition pipeline
+ * locally. The .onnx models and ONNX Runtime WASM ship with the app, so no
+ * image or text leaves the device during OCR.
  */
 export async function recogniseReceipt(file: Blob, onProgress: (progress: OcrProgress) => void): Promise<string> {
-  const worker = await getWorker(onProgress);
+  const engine = await getEngine(onProgress);
+  onProgress({ status: 'detecting', progress: 0.7 });
+
   const image = await prepareImage(file);
-  const result = await worker.recognize(image);
-  return result.data.text.replace(/\r/g, '\n').trim();
+  const result = await engine.recognize(image, {
+    maxSideLen: MAX_EDGE,
+    detThreshold: 0.25,
+    detBoxThreshold: 0.5,
+    unclipRatio: 1.8,
+    minBoxSize: 3,
+  });
+
+  onProgress({ status: 'recognizing', progress: 1 });
+  return result.fullText.replace(/\r/g, '\n').trim();
 }
 
-/** Stop the cached worker (used when the page is unloaded). */
+/** Release the ONNX sessions and their WASM memory. */
 export async function disposeOcr(): Promise<void> {
-  const pending = workerPromise;
-  workerPromise = null;
+  const pending = enginePromise;
+  enginePromise = null;
   if (!pending) return;
   try {
-    const worker = await pending;
-    await worker.terminate();
+    const engine = await pending;
+    await engine.dispose();
   } catch {
     /* already gone */
   }

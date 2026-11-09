@@ -36,11 +36,9 @@ const TYPE_LABEL: Record<TxType, string> = {
 };
 
 function friendlyStatus(status: string): string {
-  if (/loading tesseract core/i.test(status)) return t('Menyiapkan mesin OCR…');
-  if (/initializing tesseract/i.test(status)) return t('Menyalakan mesin OCR…');
-  if (/loading language/i.test(status)) return t('Memuat bahasa Indonesia & Inggris…');
-  if (/recognizing text/i.test(status)) return t('Membaca teks struk…');
-  if (/loading script/i.test(status)) return t('Menyiapkan…');
+  if (status === 'loading') return t('Memuat model PaddleOCR…');
+  if (status === 'detecting') return t('Mendeteksi teks struk…');
+  if (status === 'recognizing') return t('Membaca teks struk…');
   return t('Menyiapkan…');
 }
 
@@ -301,7 +299,7 @@ export default function ScanSheet({
                   <CameraGlyph />
                 </span>
                 <strong>{t('Pilih foto struk atau transfer')}</strong>
-                <span>{t('JPG, PNG, atau HEIC. Foto diproses di perangkat ini.')}</span>
+                <span>{t('JPG, PNG, atau HEIC. Foto diproses di perangkat ini dengan PaddleOCR.')}</span>
                 <span className="sk-scan-drop-hint">{t('Ketuk untuk memilih dari galeri atau kamera')}</span>
               </div>
 
@@ -349,7 +347,7 @@ export default function ScanSheet({
               </div>
 
               <p className="sk-scan-note">
-                {t('OCR berjalan lokal dengan Tesseract.js. Tidak ada gambar yang diunggah.')}
+                {t('OCR berjalan lokal dengan PaddleOCR (PP-OCRv5). Tidak ada gambar yang diunggah.')}
                 {ai.enabled
                   ? ` ${t('Teks saja dikirim ke JEV untuk memeriksa jenis dan tujuan transaksi.')}`
                   : ` ${t('JEV nonaktif; pemeriksaan memakai aturan lokal.')}`}

@@ -56,10 +56,10 @@ semibold TTF for API 26+; API 24–25 fall back to the platform serif through
 
 ## Receipt scan
 
-The scanner works in the APK exactly as it does on the web: Tesseract.js, its
-WebAssembly core and the Indonesian + English `tessdata_fast` models are copied into
-`assets/www/ocr/` by `scripts/build-apk.sh`. OCR runs inside the WebView with no network
-connection. `FileChooserHost` wires `WebChromeClient.onShowFileChooser` to a chooser with
+The scanner works in the APK exactly as it does on the web: PaddleOCR PP-OCRv5 detection
++ Latin recognition, ONNX Runtime Web and the two `.onnx` models are copied into
+`assets/www/paddle-ocr/` by `scripts/build-apk.sh`. OCR runs inside the WebView with no
+network connection. `FileChooserHost` wires `WebChromeClient.onShowFileChooser` to a chooser with
 both the gallery/Photo Picker and a camera intent, so the scan button works in the APK.
 
 The optional JEV check also runs natively. `JevBridge` performs the POST from an app

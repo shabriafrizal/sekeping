@@ -23,11 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private val fileChooser = FileChooserHost(this)
 
-    private val assetLoader: WebViewAssetLoader by lazy {
-        WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
-            .build()
-    }
+    private val assetLoader: WebViewAssetLoader by lazy { AssetHost.loader(this) }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {

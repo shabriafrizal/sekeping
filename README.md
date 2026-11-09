@@ -53,7 +53,7 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories, and a seven-day reminder for bills and subscriptions with one-tap **Selesai** |
 | **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals and ordered by date + time, detail view with edit and delete |
 | **Entry** | Expense, income, transfer or **Scan**; amount pad (keyboard too) with cents-first entry and **Clear all**, account picker with icons, category picker, date, optional time, note, transfer fee |
-| **Receipt scan** | Photo → on-device OCR (Tesseract.js, Indonesian + English) → editable confirmation with amount, type, source/destination account, category, date, time and note; optional free **JEV** check on OpenCode Zen to verify the direction; nothing is saved until you press **Gunakan data** and then **Simpan** |
+| **Receipt scan** | Photo → on-device OCR (PaddleOCR PP-OCRv5, Latin) → editable confirmation with amount, type, source/destination account, category, date, time and note; optional free **JEV** check on OpenCode Zen to verify the direction; nothing is saved until you press **Gunakan data** and then **Simpan** |
 | **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, quick ranges (**Hari ini, Kemarin, 7 hari, Bulan ini, Bulan lalu, 3 bulan, Tahun ini, 1 tahun, Semua**) and a custom **from/to date range** |
 | **Recurring** | Weekly, monthly or yearly schedules for bills, salary and subscriptions; catch-up posting on open; monthly subscription cost |
 | **Budgets** | Monthly limit per expense category, optional rollover of unused money, month-by-month progress and over-budget warnings |
@@ -65,10 +65,10 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three large icon-only quick actions (see [Android app](#android-app)) |
 | **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
 
-## What's new in 1.2
+## What's new in 1.3
 
 - **Receipt scanner in the entry pad.** The type row is now **Pengeluaran · Pendapatan ·
-  Transfer · Scan**. Pick a photo and Tesseract.js reads it on the device.
+  Transfer · Scan**. Pick a photo and PaddleOCR reads it on the device.
 - **A confirmation screen before anything is saved.** Type, amount, source account,
   destination account, category, date, time and note are all editable; the OCR text and a
   confidence score sit beside them. **Gunakan data** fills the normal form, then **Simpan**
@@ -77,14 +77,18 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
   OpenCode Zen reviews the OCR text and says where the money went (expense / income /
   internal transfer), plus the likely source, destination and category. Amount and date
   remain local. A CORS proxy path is included for static hosting.
-- **Bundled OCR runtime.** The worker, LSTM WebAssembly cores and Indonesian + English
-  models ship with the app; no CDN request, and the APK keeps the same offline scanner.
+- **Bundled PaddleOCR runtime.** The PP-OCRv5 detection + Latin recognition models and ONNX
+  Runtime WASM ship with the app; no CDN request, and the APK keeps the same offline scanner.
 - **1.2.1 — Android gallery and camera.** The Scan button now opens the system chooser in
   the APK: the gallery/Photo Picker and a camera entry backed by `FileProvider`.
 - **1.2.2 — JEV works in the APK without CORS.** Android performs the JEV POST natively
   through a `JavascriptInterface` and returns the typed answers to the WebView. The web
   build keeps its optional proxy setting because OpenCode Zen does not answer browser
   preflights on its public endpoint.
+- **1.3.0 — PaddleOCR replaces Tesseract.** PP-OCRv5 mobile detection and Latin recognition
+  run on ONNX Runtime Web. The Tesseract worker, cores and `tessdata_fast` files are gone;
+  the scanner loads a 7 MB model pair and reuses it. The ONNX Runtime WASM is 13 MB,
+  replacing Tesseract’s 19 MB of worker/cores/traineddata.
 
 ## Quick start
 
@@ -114,7 +118,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.2.2.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.2/sekeping-1.2.2.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.3.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.3.0/sekeping-1.3.0.apk)** (13 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -180,7 +184,7 @@ so two expenses on the same day keep the order you recorded them in.
 
 1. Open **Tambah transaksi** and press **Scan**, the button to the right of **Transfer**.
 2. Pick a photo from the gallery or camera, or drop it on the panel. OCR runs locally with
-   Tesseract.js and its Indonesian + English models, so the image never leaves the device.
+   PaddleOCR and its bundled PP-OCRv5 mobile models, so the image never leaves the device.
 3. When the text is read, the **Scan struk** dialog becomes a confirmation screen. Check the
    amount, **Pengeluaran / Pendapatan / Transfer**, source account, destination account,
    category, date, time and note. Every field is editable — OCR rarely gets a receipt perfect
@@ -409,7 +413,7 @@ backup first.
 | Build | Vite 6 |
 | Design system | [Astryx](https://astryx.design) 0.7 — `AppShell`, `SideNav`, `Card`, `Section`, `Dialog`, `SegmentedControl` — on a Chocolate-based custom theme |
 | Charts | Recharts |
-| OCR | [Tesseract.js](https://github.com/naptha/tesseract.js) 7 with bundled `tessdata_fast` Indonesian + English models — no CDN |
+| OCR | [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv5 mobile detection + Latin recognition on ONNX Runtime Web — bundled, no CDN |
 | AI check | Free `jev-1.13-free` on OpenCode Zen (typed decisions, optional CORS proxy) |
 | Icons | Heroicons |
 | Fonts | Fraunces + Albert Sans, self-hosted woff2 (OFL) |
@@ -432,13 +436,13 @@ src/
     budgets.ts         monthly limits and rollover
     csv.ts             CSV parser, column mapping and value detection
     crypto.ts          password-encrypted backup envelope
-    ocr.ts             lazy Tesseract.js worker, image prep and local OCR
+    ocr.ts             lazy PaddleOCR engine, image prep and local OCR
     receipt.ts         amount/date/account/category parser and editable draft
     jev.ts             free JEV questions, merge rules and CORS-aware client
   components/          amount keypad, icon picker, transaction row, empty state, tour, widget preview
   pages/               Home, Transactions, Recurring, Budgets, Import, Reports, Debts, Settings
   sheets/              transaction, scan, account, category, debt, payment, recurring, budget and widget-setup dialogs
-public/ocr/            bundled worker, LSTM cores and Indonesian/English traineddata
+public/paddle-ocr/     bundled PP-OCRv5 det/rec models and ONNX Runtime WASM
 worker/                one-file Cloudflare Worker CORS proxy for JEV
 scripts/
   test.mjs             browser smoke tests
@@ -461,7 +465,7 @@ npm run typecheck      # tsc --noEmit
 npm test               # browser smoke tests
 npm run test:features  # new-feature end-to-end tests
 npm run test:widget    # widget setup and quick-add surfaces
-npm run test:scan      # OCR → confirmation → manual correction → save, plus JEV mock
+npm run test:scan      # PaddleOCR → confirmation → manual correction → save, plus JEV mock
 npm run proxy          # optional standalone JEV proxy on :4178
 npm run docs:scan      # regenerate the scan screenshot
 npm run docs:widget    # regenerate the widget screenshots
@@ -476,7 +480,7 @@ and the payment dialog. A second suite covers recurring catch-up, the Ringkasan 
 the keyboard shortcuts. A third suite stubs the Android bridge to cover the **Atur
 widget** dialog (size from the launcher, account picker, switches, save payload) and the
 quick-add sheet (no dashboard, bottom anchoring, PIN gate, persistence before closing).
-A fourth suite generates real receipt images in Chromium, runs the bundled OCR, asserts that
+A fourth suite generates real receipt images in Chromium, runs PaddleOCR, asserts that
 the transfer amount beats the admin total and that a coffee receipt is not mistaken for a
 transfer, edits a field on the confirmation screen, saves it, and repeats the flow through
 a mock JEV proxy to check the AI badge and account mapping.

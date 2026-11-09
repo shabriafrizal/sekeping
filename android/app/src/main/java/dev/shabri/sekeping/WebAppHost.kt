@@ -9,7 +9,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
 
 /**
@@ -24,9 +23,7 @@ object WebAppHost {
 
     @SuppressLint("SetJavaScriptEnabled")
     fun create(activity: AppCompatActivity, bridge: Any, transparent: Boolean): WebView {
-        val loader = WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(activity))
-            .build()
+        val loader = AssetHost.loader(activity)
         val fileChooser = FileChooserHost(activity)
 
         return WebView(activity).apply {

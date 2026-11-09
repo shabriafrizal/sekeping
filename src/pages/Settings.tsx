@@ -224,7 +224,7 @@ export default function Settings({
         </div>
         <div className="sk-kv">
           <span>{t("OCR struk")}</span>
-          <b>{t("Tesseract.js · lokal")}</b>
+          <b>{t("PaddleOCR · lokal")}</b>
         </div>
         <div style={{ marginTop: '0.65rem' }}>
           <Switch
@@ -467,7 +467,7 @@ export default function Settings({
         <p className="sk-sub" style={{ fontSize: '0.82rem', marginTop: 0 }}>
           {t("Sekeping adalah aplikasi pencatat keuangan pribadi untuk web. Semua perhitungan berjalan di browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.")}
         </p>
-        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.2.2 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
+        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.3 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
           <Button label={t("Tur antarmuka")} variant="ghost" size="sm" onClick={onTour} />
           <Button label={t("Pintasan keyboard (?)")} variant="ghost" size="sm" onClick={onShortcuts} />

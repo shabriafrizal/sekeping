@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: './',
+  resolve: {
+    // Use the WASM-only ORT build and load its .wasm from public/paddle-ocr/ort.
+    alias: { 'onnxruntime-web': 'onnxruntime-web/wasm' },
+    conditions: ['onnxruntime-web-use-extern-wasm', 'module', 'browser', 'default'],
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
