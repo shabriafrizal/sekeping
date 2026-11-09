@@ -27,6 +27,7 @@ object WebAppHost {
         val loader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(activity))
             .build()
+        val fileChooser = FileChooserHost(activity)
 
         return WebView(activity).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -43,12 +44,14 @@ object WebAppHost {
                 domStorageEnabled = true
                 databaseEnabled = true
                 allowFileAccess = false
-                allowContentAccess = false
+                allowContentAccess = true
                 setSupportZoom(false)
                 builtInZoomControls = false
                 displayZoomControls = false
                 mediaPlaybackRequiresUserGesture = true
             }
+
+            webChromeClient = fileChooser.client
 
             webViewClient = object : WebViewClientCompat() {
                 override fun shouldInterceptRequest(

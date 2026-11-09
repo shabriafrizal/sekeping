@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sekeping</string>
+    <string name="scan_choose_photo">Pilih foto struk</string>
 
     <string name="widget_name">Sekeping 4×2</string>
     <string name="widget_name_wide">Sekeping 4×1</string>

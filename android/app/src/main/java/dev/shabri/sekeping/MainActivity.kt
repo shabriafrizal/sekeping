@@ -21,6 +21,7 @@ import androidx.webkit.WebViewClientCompat
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private val fileChooser = FileChooserHost(this)
 
     private val assetLoader: WebViewAssetLoader by lazy {
         WebViewAssetLoader.Builder()
@@ -44,12 +45,14 @@ class MainActivity : AppCompatActivity() {
                 domStorageEnabled = true
                 databaseEnabled = true
                 allowFileAccess = false
-                allowContentAccess = false
+                allowContentAccess = true
                 setSupportZoom(false)
                 builtInZoomControls = false
                 displayZoomControls = false
                 mediaPlaybackRequiresUserGesture = true
             }
+
+            webChromeClient = fileChooser.client
 
             webViewClient = object : WebViewClientCompat() {
                 override fun shouldInterceptRequest(

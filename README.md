@@ -79,6 +79,8 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
   remain local. A CORS proxy path is included for static hosting.
 - **Bundled OCR runtime.** The worker, LSTM WebAssembly cores and Indonesian + English
   models ship with the app; no CDN request, and the APK keeps the same offline scanner.
+- **1.2.1 — Android gallery and camera.** The Scan button now opens the system chooser in
+  the APK: the gallery/Photo Picker and a camera entry backed by `FileProvider`.
 
 ## Quick start
 
@@ -108,7 +110,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.2.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.0/sekeping-1.2.0.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.2.1.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.1/sekeping-1.2.1.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 

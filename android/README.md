@@ -59,7 +59,8 @@ semibold TTF for API 26+; API 24–25 fall back to the platform serif through
 The scanner works in the APK exactly as it does on the web: Tesseract.js, its
 WebAssembly core and the Indonesian + English `tessdata_fast` models are copied into
 `assets/www/ocr/` by `scripts/build-apk.sh`. OCR runs inside the WebView with no network
-connection. The optional JEV check still needs the CORS proxy described in the main
+connection. `FileChooserHost` wires `WebChromeClient.onShowFileChooser` to a chooser with
+both the gallery/Photo Picker and a camera intent, so the scan button works in the APK. The optional JEV check still needs the CORS proxy described in the main
 README, because the WebView enforces the same browser CORS rules.
 
 ## Data
