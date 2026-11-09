@@ -213,66 +213,93 @@ await expensePage.close();
 // ---------------------------------------------------------------------------
 // 2. JEV check through a proxy → AI badge and mapped answers
 // ---------------------------------------------------------------------------
-const mock = {
-  model: 'jev-mock',
-  answers: {
-    jenis: { type: 'choice', choice: 'transfer', confidence: 0.96 },
-    sumber: { type: 'choice', choice: 'acc_bank', confidence: 0.95 },
-    tujuan: { type: 'choice', choice: 'acc_ewallet', confidence: 0.94 },
-    kategori: { type: 'choice', choice: 'tidak_tahu', confidence: 0.95 },
-    yakin: { type: 'noul', noul: 0.96 },
-  },
-  cost: '0',
-};
-const proxy = spawn(process.execPath, ['scripts/jev-proxy.mjs'], {
-  cwd: process.cwd(),
-  env: {
-    ...process.env,
-    JEV_PROXY_PORT: '4199',
-    JEV_MOCK: JSON.stringify(mock),
-  },
-  stdio: ['ignore', 'pipe', 'pipe'],
-});
-await wait(700);
+const hosted = BASE.startsWith('https://');
+if (!hosted) {
+  const mock = {
+    model: 'jev-mock',
+    answers: {
+      jenis: { type: 'choice', choice: 'transfer', confidence: 0.96 },
+      sumber: { type: 'choice', choice: 'acc_bank', confidence: 0.95 },
+      tujuan: { type: 'choice', choice: 'acc_ewallet', confidence: 0.94 },
+      kategori: { type: 'choice', choice: 'tidak_tahu', confidence: 0.95 },
+      yakin: { type: 'noul', noul: 0.96 },
+    },
+    cost: '0',
+  };
+  const proxy = spawn(process.execPath, ['scripts/jev-proxy.mjs'], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      JEV_PROXY_PORT: '4199',
+      JEV_MOCK: JSON.stringify(mock),
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  await wait(700);
 
-try {
+  try {
+    const aiState = {
+      ...STATE,
+      settings: {
+        ...STATE.settings,
+        ai: { enabled: true, baseUrl: 'http://127.0.0.1:4199', model: 'jev-1.13-free' },
+      },
+    };
+    const aiPage = await newPage(aiState);
+    await openScanner(aiPage);
+    await uploadAndWait(aiPage, file);
+    await aiPage.waitForFunction(
+      () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]') !== null,
+      { timeout: 60000 },
+    );
+    const badge = await aiPage.evaluate(
+      () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]')?.textContent ?? '',
+    );
+    check('JEV badge names the model', /JEV/.test(badge) && /jev-mock/.test(badge), badge);
+    const reason = await aiPage.evaluate(
+      () => document.querySelector('[data-testid="scan-review"] .sk-scan-ai[data-tone="ok"]')?.textContent?.trim() ?? '',
+    );
+    check('JEV reason explains the destination', /BCA/.test(reason) && /GoPay/.test(reason), reason);
+    const aiAmount = await inputValue(aiPage, '[data-testid="scan-review"] input[inputmode="decimal"]');
+    check('JEV check keeps the locally read amount', aiAmount === '250000', aiAmount);
+
+    // A user can still change the AI result before applying.
+    await setInput(aiPage, '[data-testid="scan-review"] input[inputmode="decimal"]', '251000');
+    await wait(200);
+    await aiPage.evaluate(() =>
+      [...document.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Gunakan data')?.click(),
+    );
+    await wait(500);
+    const aiSheetAmount = await aiPage.evaluate(() => document.querySelector('.sk-amount-value')?.textContent ?? '');
+    check('AI result is editable before applying', aiSheetAmount.replace(/\s/g, '').includes('251.000'), aiSheetAmount);
+    await aiPage.close();
+  } finally {
+    proxy.kill();
+  }
+} else {
+  // A static host has no same-origin JEV proxy. The app must keep the local
+  // result and explain why the AI check did not run.
   const aiState = {
     ...STATE,
     settings: {
       ...STATE.settings,
-      ai: { enabled: true, baseUrl: 'http://127.0.0.1:4199', model: 'jev-1.13-free' },
+      ai: { enabled: true, baseUrl: '', model: 'jev-1.13-free' },
     },
   };
   const aiPage = await newPage(aiState);
   await openScanner(aiPage);
   await uploadAndWait(aiPage, file);
   await aiPage.waitForFunction(
-    () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]') !== null,
+    () => document.querySelector('[data-testid="scan-review"] .sk-scan-ai[data-tone="warn"]') !== null,
     { timeout: 60000 },
   );
-  const badge = await aiPage.evaluate(
-    () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]')?.textContent ?? '',
+  const warning = await aiPage.evaluate(
+    () => document.querySelector('[data-testid="scan-review"] .sk-scan-ai[data-tone="warn"]')?.textContent?.trim() ?? '',
   );
-  check('JEV badge names the model', /JEV/.test(badge) && /jev-mock/.test(badge), badge);
-  const reason = await aiPage.evaluate(
-    () => document.querySelector('[data-testid="scan-review"] .sk-scan-ai[data-tone="ok"]')?.textContent?.trim() ?? '',
-  );
-  check('JEV reason explains the destination', /BCA/.test(reason) && /GoPay/.test(reason), reason);
-  const aiAmount = await inputValue(aiPage, '[data-testid="scan-review"] input[inputmode="decimal"]');
-  check('JEV check keeps the locally read amount', aiAmount === '250000', aiAmount);
-
-  // A user can still change the AI result before applying.
-  await setInput(aiPage, '[data-testid="scan-review"] input[inputmode="decimal"]', '251000');
-  await wait(200);
-  await aiPage.evaluate(() =>
-    [...document.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Gunakan data')?.click(),
-  );
-  await wait(500);
-  const aiSheetAmount = await aiPage.evaluate(() => document.querySelector('.sk-amount-value')?.textContent ?? '');
-  check('AI result is editable before applying', aiSheetAmount.replace(/\s/g, '').includes('251.000'), aiSheetAmount);
+  check('hosted build explains a blocked JEV check', /JEV/i.test(warning), warning);
+  const fallbackAmount = await inputValue(aiPage, '[data-testid="scan-review"] input[inputmode="decimal"]');
+  check('blocked JEV keeps the local scan usable', fallbackAmount === '250000', fallbackAmount);
   await aiPage.close();
-} finally {
-  proxy.kill();
 }
 
 check('no uncaught page errors', errors.length === 0, errors.join(' | '));
