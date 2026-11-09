@@ -7,7 +7,7 @@ import type { Account, AiSettings, Category, TxType } from '../lib/types';
 import type { ReceiptDraft } from '../lib/receipt';
 import { parseReceiptText } from '../lib/receipt';
 import { applyJev, checkWithJev, type JevAttempt, type JevFailure } from '../lib/jev';
-import { recogniseReceipt, type OcrProgress } from '../lib/ocr';
+import { recogniseReceipt, warmOcr, type OcrProgress } from '../lib/ocr';
 import { parseAmountInput } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import { t } from '../lib/i18n';
@@ -78,6 +78,16 @@ export default function ScanSheet({
       abortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // Hide the model download behind the file picker.
+    warmOcr((update: OcrProgress) => {
+      if (!aliveRef.current) return;
+      setProgress(Math.max(0, Math.min(1, update.progress)));
+      setStatus(friendlyStatus(update.status));
+    });
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) return;

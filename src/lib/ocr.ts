@@ -41,6 +41,12 @@ async function prepareImage(file: Blob): Promise<Blob> {
 async function getEngine(onProgress: (progress: OcrProgress) => void): Promise<OcrEngine> {
   if (enginePromise) return enginePromise;
 
+  const threads =
+    typeof SharedArrayBuffer !== 'undefined' &&
+    (globalThis as { crossOriginIsolated?: boolean }).crossOriginIsolated
+      ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 2))
+      : 1;
+
   onProgress({ status: 'loading', progress: 0.04 });
   enginePromise = OcrEngine.create({
     models: {
@@ -50,8 +56,9 @@ async function getEngine(onProgress: (progress: OcrProgress) => void): Promise<O
     dictionary: assets('paddle-ocr/dict.txt'),
     runtime: 'wasm',
     wasmPaths: assets('paddle-ocr/ort/'),
-    // Android WebView has no SharedArrayBuffer without COOP/COEP headers.
-    numThreads: 1,
+    // Android WebView and GitHub Pages are not cross-origin isolated, so this
+    // stays at 1 there; a local preview with COOP/COEP can use more threads.
+    numThreads: threads,
     onProgress: (update) => {
       const ratio = update.total > 0 ? update.loaded / update.total : 0;
       onProgress({ status: 'loading', progress: Math.min(0.62, 0.05 + ratio * 0.57) });
@@ -85,6 +92,13 @@ export async function recogniseReceipt(file: Blob, onProgress: (progress: OcrPro
 
   onProgress({ status: 'recognizing', progress: 1 });
   return result.fullText.replace(/\r/g, '\n').trim();
+}
+
+/** Start loading the models as soon as the scan picker opens. */
+export function warmOcr(onProgress: (progress: OcrProgress) => void = () => {}): void {
+  void getEngine(onProgress).catch(() => {
+    /* the actual scan retries and shows the error */
+  });
 }
 
 /** Release the ONNX sessions and their WASM memory. */
