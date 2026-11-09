@@ -212,6 +212,8 @@ handles that in two ways:
   holds no key; the free model is keyless. `npm run proxy` starts the same proxy locally on
   `http://127.0.0.1:4178` if you prefer a separate process.
 
+  [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/shabriafrizal/sekeping/tree/main/worker)
+
 If the free tier returns 429, the confirmation screen keeps the local result and explains
 the limit. Turn the switch off to keep everything on-device.
 

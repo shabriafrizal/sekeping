@@ -1,0 +1,13 @@
+{
+  "name": "sekeping-jev-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CORS proxy for the free JEV model on OpenCode Zen",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
