@@ -1,7 +1,7 @@
 {
   "name": "sekeping",
-  "version": "1.1.11",
-  "description": "A calm, local-first personal finance web app: accounts, transactions, recurring bills and subscriptions, budgets, reports, CSV import, encrypted backups, debts and receivables in the browser.",
+  "version": "1.2.0",
+  "description": "A calm, local-first personal finance web app: accounts, transactions, receipt OCR with confirmation, optional JEV checks, recurring bills, budgets, reports, CSV import, encrypted backups, debts and receivables in the browser.",
   "scripts": {
     "test": "node scripts/test.mjs",
     "dev": "vite",
@@ -12,7 +12,10 @@
     "docs": "node scripts/docs-shots.mjs",
     "docs:widget": "node scripts/widget-shots.mjs",
     "test:features": "node scripts/test-features.mjs",
-    "test:widget": "node scripts/test-widget.mjs"
+    "test:widget": "node scripts/test-widget.mjs",
+    "proxy": "node scripts/jev-proxy.mjs",
+    "test:scan": "node scripts/test-scan.mjs",
+    "docs:scan": "node scripts/scan-shot.mjs"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +35,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "recharts": "^3.10.1",
+    "tesseract.js": "^7.0.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.5"
   },

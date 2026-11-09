@@ -40,6 +40,7 @@ function loadState(): AppState {
     if (!raw) return createEmptyState();
     const parsed = JSON.parse(raw) as Partial<AppState>;
     if (!parsed || !Array.isArray(parsed.accounts)) return createEmptyState();
+    const defaults = createEmptyState();
     return {
       ...parsed,
       version: 2,
@@ -49,7 +50,11 @@ function loadState(): AppState {
       // Added in v2; older backups simply have no schedules or budgets yet.
       recurring: Array.isArray(parsed.recurring) ? parsed.recurring : [],
       budgets: Array.isArray(parsed.budgets) ? parsed.budgets : [],
-      settings: { ...createEmptyState().settings, ...parsed.settings },
+      settings: {
+        ...defaults.settings,
+        ...parsed.settings,
+        ai: { ...defaults.settings.ai, ...(parsed.settings?.ai ?? {}) },
+      },
     } as AppState;
   } catch {
     return createEmptyState();

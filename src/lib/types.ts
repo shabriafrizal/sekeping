@@ -89,6 +89,18 @@ export interface DebtPayment {
   note: string;
 }
 
+/**
+ * Optional receipt checker. The free JEV model runs on OpenCode Zen and needs
+ * no key; a proxy URL can be supplied because the Zen endpoint does not answer
+ * browser CORS preflights. Nothing is sent while `enabled` is false.
+ */
+export interface AiSettings {
+  enabled: boolean;
+  /** Empty means "auto": the Vite proxy in development, Zen directly in a build. */
+  baseUrl: string;
+  model: string;
+}
+
 export interface Settings {
   userName: string;
   language: 'id' | 'en';
@@ -97,6 +109,7 @@ export interface Settings {
   onboarded: boolean;
   tourSeen: boolean;
   createdAt: number;
+  ai: AiSettings;
 }
 
 export interface AppState {

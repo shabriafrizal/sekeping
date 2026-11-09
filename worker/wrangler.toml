@@ -1,0 +1,7 @@
+name = "sekeping-jev"
+main = "jev-proxy.js"
+compatibility_date = "2026-11-01"
+
+# Optional: limit the proxy to your own deployment.
+# [vars]
+# ALLOWED_ORIGIN = "https://shabriafrizal.github.io"

@@ -54,6 +54,14 @@ uses the same currency and separators as the ledger. Fraunces is bundled as a st
 semibold TTF for API 26+; API 24–25 fall back to the platform serif through
 `values/styles.xml`.
 
+## Receipt scan
+
+The scanner works in the APK exactly as it does on the web: Tesseract.js, its
+WebAssembly core and the Indonesian + English `tessdata_fast` models are copied into
+`assets/www/ocr/` by `scripts/build-apk.sh`. OCR runs inside the WebView with no network
+connection. The optional JEV check still needs the CORS proxy described in the main
+README, because the WebView enforces the same browser CORS rules.
+
 ## Data
 
 Data lives in the WebView's own storage. It is not shared with the hosted site and is

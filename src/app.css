@@ -706,11 +706,18 @@ body {
 
 .sk-type-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.35rem;
   padding: 0.25rem;
   border-radius: 14px;
   background: var(--color-background-muted);
+}
+
+.sk-type-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .sk-type-btn {
@@ -740,6 +747,39 @@ body {
 }
 .sk-type-btn[data-tone='transfer'][data-active='true'] {
   color: var(--color-warning);
+}
+
+.sk-type-scan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.55rem 0.7rem;
+  border-radius: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+}
+
+.sk-type-scan svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+}
+
+.sk-type-scan:hover {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+.sk-type-scan:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .sk-keypad {
@@ -2883,4 +2923,367 @@ html[data-native] .sk-lock-card {
 .sk-reminder-list {
   margin: 0;
   padding: 0;
+}
+
+/* ==========================================================================
+   Receipt scan (OCR + JEV confirmation)
+   ========================================================================== */
+
+.sk-scan-sheet {
+  gap: 0.8rem;
+}
+
+.sk-scan-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.35rem 1rem;
+  border: 1px dashed var(--color-border-emphasized);
+  border-radius: 16px;
+  background: var(--color-background-muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.sk-scan-drop:hover,
+.sk-scan-drop[data-dragging='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+}
+
+.sk-scan-drop:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.sk-scan-drop strong {
+  font-size: 0.9rem;
+}
+
+.sk-scan-drop > span:not(.sk-scan-drop-icon):not(.sk-scan-drop-hint) {
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  max-width: 28rem;
+}
+
+.sk-scan-drop-hint {
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.sk-scan-drop-icon {
+  display: grid;
+  place-items: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 14px;
+  background: var(--color-background-card);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
+}
+
+.sk-scan-drop-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.sk-scan-preview {
+  display: block;
+  width: 100%;
+  max-height: 190px;
+  object-fit: contain;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-background-muted);
+}
+
+.sk-scan-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sk-scan-textarea {
+  height: auto;
+  min-height: 6.5rem;
+  padding: 0.6rem 0.7rem;
+  resize: vertical;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.sk-scan-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.sk-scan-reading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: stretch;
+}
+
+.sk-scan-progress-track,
+.sk-scan-confidence-track {
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--color-background-muted);
+  overflow: hidden;
+}
+
+.sk-scan-progress-track span,
+.sk-scan-confidence-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transition: width 0.2s ease;
+}
+
+.sk-scan-confidence-track {
+  height: 0.3rem;
+}
+
+.sk-scan-status {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.sk-scan-pct {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sk-scan-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 28%, transparent);
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}
+
+.sk-scan-error-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+}
+
+.sk-scan-error-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.sk-scan-error p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.sk-scan-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.sk-scan-head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.sk-scan-thumb {
+  width: 4.6rem;
+  height: 4.6rem;
+  flex: none;
+  object-fit: cover;
+  border-radius: 11px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-muted);
+}
+
+.sk-scan-head-copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.sk-scan-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.sk-scan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-background-card);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sk-scan-badge[data-tone='local'] {
+  color: var(--color-text-primary);
+}
+
+.sk-scan-badge[data-tone='ai'] {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  background: var(--color-accent-muted);
+}
+
+.sk-scan-confidence {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+}
+
+.sk-scan-confidence b {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sk-scan-ai {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  background: var(--color-background-muted);
+  color: var(--color-text-secondary);
+}
+
+.sk-scan-ai svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  margin-top: 0.06rem;
+}
+
+.sk-scan-ai[data-tone='ok'] {
+  color: var(--color-text-primary);
+  background: var(--color-accent-muted);
+}
+
+.sk-scan-ai[data-tone='warn'] {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}
+
+.sk-scan-ai[data-tone='busy'] svg {
+  animation: sk-spin 1.4s linear infinite;
+}
+
+@keyframes sk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sk-scan-types {
+  background: var(--color-background-muted);
+}
+
+.sk-scan-signals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.sk-scan-signals li {
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+  background: var(--color-background-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+}
+
+.sk-scan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.sk-scan-raw {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-background-muted);
+  padding: 0.5rem 0.65rem;
+}
+
+.sk-scan-raw summary {
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.sk-scan-raw pre {
+  margin: 0.5rem 0 0;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+
+.sk-scan-confirm-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 460px) {
+  .sk-type-btn {
+    font-size: 0.76rem;
+    padding: 0.52rem 0.35rem;
+  }
+  .sk-type-scan {
+    font-size: 0.75rem;
+    padding: 0.52rem 0.55rem;
+  }
+  .sk-type-scan span {
+    display: none;
+  }
+  .sk-scan-head {
+    align-items: flex-start;
+  }
 }

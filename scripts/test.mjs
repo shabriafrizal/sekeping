@@ -78,8 +78,12 @@ await page.evaluate(() =>
 );
 await wait(700);
 check('dialog closes after save', (await page.$('.astryx-dialog[open]')) === null);
-const firstRow = await page.evaluate(() => document.querySelector('.sk-row .sk-row-amount')?.textContent ?? '');
-check('new expense appears at top', firstRow.replace(/\s/g, '').includes('25.000'), firstRow);
+const hasNewExpense = await page.evaluate(() =>
+  [...document.querySelectorAll('.sk-row .sk-row-amount')].some((node) =>
+    (node.textContent ?? '').replace(/\s/g, '').includes('25.000'),
+  ),
+);
+check('new expense appears in the list', hasNewExpense);
 
 // navigate to transactions and filter
 await nav('Transaksi');

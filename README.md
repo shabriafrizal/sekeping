@@ -31,7 +31,8 @@ Track accounts, spending, transfers, reports, debts and receivables — in the b
 Sekeping (*a coin*, in Indonesian) is a local-first notebook for your money. Most
 finance apps ask you to create an account, sync to a cloud, and hand over your spending
 history. Sekeping does the opposite: it is a static site, the data lives in your
-browser's `localStorage`, and nothing is uploaded anywhere.
+browser's `localStorage`, and nothing is uploaded anywhere. Receipt OCR runs on the
+device; the optional JEV check sends only the OCR text, and only after you turn it on.
 
 It is built for people who want a fast, quiet ledger — a few accounts, daily expenses,
 the occasional transfer, a monthly report, and a reminder of who owes whom.
@@ -39,10 +40,11 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 **What makes it different**
 
 - **Zero backend.** Clone it, build it, host it on any static host. No database, no auth service.
-- **Instant.** One small bundle, self-hosted fonts, no network calls after load.
+- **Instant.** One small bundle, self-hosted fonts and OCR data, no third-party calls after load.
 - **Yours.** Export everything to CSV or a JSON backup at any time; restore it on another device.
 - **Complete enough.** Accounts, categories, transfers with fees, recurring bills and subscriptions,
-  rolling budgets, reports, CSV import, password-encrypted backups, debts, loans and a PIN lock.
+  rolling budgets, reports, CSV import, password-encrypted backups, debts, loans, a PIN lock —
+  and a receipt scanner that reads a photo, checks where the money goes, then asks you to confirm.
 
 ## Features
 
@@ -50,7 +52,8 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | --- | --- |
 | **Dashboard** | Total balance across active accounts, monthly in/out, saving rate, 7-day spend chart, recent activity, top categories, and a seven-day reminder for bills and subscriptions with one-tap **Selesai** |
 | **Transactions** | Search, filter by type / account / category / period, grouped by day with daily totals and ordered by date + time, detail view with edit and delete |
-| **Entry** | Expense, income or transfer; amount pad (keyboard too) with cents-first entry and **Clear all**, account picker with icons, category picker, date, optional time, note, transfer fee |
+| **Entry** | Expense, income, transfer or **Scan**; amount pad (keyboard too) with cents-first entry and **Clear all**, account picker with icons, category picker, date, optional time, note, transfer fee |
+| **Receipt scan** | Photo → on-device OCR (Tesseract.js, Indonesian + English) → editable confirmation with amount, type, source/destination account, category, date, time and note; optional free **JEV** check on OpenCode Zen to verify the direction; nothing is saved until you press **Gunakan data** and then **Simpan** |
 | **Reports** | Category donut, ranked category bars, six-month trend, expense/income toggle, quick ranges (**Hari ini, Kemarin, 7 hari, Bulan ini, Bulan lalu, 3 bulan, Tahun ini, 1 tahun, Semua**) and a custom **from/to date range** |
 | **Recurring** | Weekly, monthly or yearly schedules for bills, salary and subscriptions; catch-up posting on open; monthly subscription cost |
 | **Budgets** | Monthly limit per expense category, optional rollover of unused money, month-by-month progress and over-budget warnings |
@@ -61,6 +64,21 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Responsive** | Sidebar and top bar on desktop; drawer navigation and a top action bar on phones |
 | **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three large icon-only quick actions (see [Android app](#android-app)) |
 | **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
+
+## What's new in 1.2
+
+- **Receipt scanner in the entry pad.** The type row is now **Pengeluaran · Pendapatan ·
+  Transfer · Scan**. Pick a photo and Tesseract.js reads it on the device.
+- **A confirmation screen before anything is saved.** Type, amount, source account,
+  destination account, category, date, time and note are all editable; the OCR text and a
+  confidence score sit beside them. **Gunakan data** fills the normal form, then **Simpan**
+  writes the transaction.
+- **Optional free JEV check.** When enabled, the free `jev-1.13-free` decision model on
+  OpenCode Zen reviews the OCR text and says where the money went (expense / income /
+  internal transfer), plus the likely source, destination and category. Amount and date
+  remain local. A CORS proxy path is included for static hosting.
+- **Bundled OCR runtime.** The worker, LSTM WebAssembly cores and Indonesian + English
+  models ship with the app; no CDN request, and the APK keeps the same offline scanner.
 
 ## Quick start
 
@@ -90,7 +108,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.1.11.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.1.11/sekeping-1.1.11.apk)** (3.2 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.2.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.0/sekeping-1.2.0.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -151,6 +169,51 @@ to move data between the two.
 
 Every entry has a date and an optional time. Lists sort by that moment (newest first),
 so two expenses on the same day keep the order you recorded them in.
+
+### Scan a receipt
+
+1. Open **Tambah transaksi** and press **Scan**, the button to the right of **Transfer**.
+2. Pick a photo from the gallery or camera, or drop it on the panel. OCR runs locally with
+   Tesseract.js and its Indonesian + English models, so the image never leaves the device.
+3. When the text is read, the **Scan struk** dialog becomes a confirmation screen. Check the
+   amount, **Pengeluaran / Pendapatan / Transfer**, source account, destination account,
+   category, date, time and note. Every field is editable — OCR rarely gets a receipt perfect
+   the first time.
+4. Press **Gunakan data**. The values move into the normal transaction form, where you can
+   change them again, then press **Simpan**. Nothing is written to the ledger before that.
+
+If the photo is unreadable, **Tempel teks manual** accepts copied receipt text. The OCR
+raw text is always available under **Lihat teks OCR**. A confidence bar and short signals
+show which parts were found (amount, date, account, category).
+
+The scanner is deliberately conservative about the amount: it prefers **Nominal Transfer**
+over **Total** when a transfer receipt also lists an admin fee, and it ignores balances,
+cash paid and change. If it guesses wrong, correct it before saving.
+
+#### Optional JEV check
+
+The free **jev-1.13-free** model on [OpenCode Zen](https://opencode.ai/docs/zen/) is a
+decision model, not a chat model: it answers typed questions about the OCR text, such as
+“is this expense, income or an internal transfer?”, “which account did it leave?”, “which
+account did it go to?” and “which category fits?”. The amount, date and time still come
+from the local parser, so JEV cannot invent a number.
+
+Enable it in **Pengaturan → Pemindaian & AI**. Only the OCR text and your account/category
+names are sent; the photo is not. If JEV is unavailable, the scan still works with local
+rules and says so on the confirmation screen.
+
+OpenCode Zen does not answer browser CORS preflights on its public endpoint. The app
+handles that in two ways:
+
+- **Local development** — `npm run dev` already proxies `/api/jev` to OpenCode. The field
+  can stay at `/api/jev`.
+- **Static hosting** — deploy the small Worker in [`worker/jev-proxy.js`](worker/jev-proxy.js)
+  (`cd worker && npx wrangler deploy`) and paste its URL into **URL JEV / proxy**. The Worker
+  holds no key; the free model is keyless. `npm run proxy` starts the same proxy locally on
+  `http://127.0.0.1:4178` if you prefer a separate process.
+
+If the free tier returns 429, the confirmation screen keeps the local result and explains
+the limit. Turn the switch off to keep everything on-device.
 
 ### Move money between accounts
 
@@ -255,9 +318,13 @@ amount, and they carry over into the new ledger.
 | --- | --- |
 | ![Monthly limits with rollover and progress](docs/budgets.png) | ![Recurring bills and subscriptions](docs/recurring.png) |
 
-| New transaction | Mobile |
+| New transaction | Scan and confirm |
 | --- | --- |
-| ![Amount keypad, account and category pickers](docs/add-transaction.png) | ![Mobile dashboard with drawer navigation](docs/mobile.png) |
+| ![Amount keypad, account and category pickers, with the Scan button beside Transfer](docs/add-transaction.png) | ![Receipt scan confirmation with editable amount, accounts, category and OCR text](docs/scan.png) |
+
+| Mobile |
+| --- |
+| ![Mobile dashboard with drawer navigation](docs/mobile.png) |
 
 ## Design
 
@@ -293,7 +360,7 @@ type AppState = {
   payments: DebtPayment[];  // payments against a debt, each mirrored into txs
   recurring: Recurring[];   // schedule template plus the next unposted date
   budgets: Budget[];        // monthly limit per category, optional rollover
-  settings: Settings;       // name, currency, PIN, onboarding flag
+  settings: Settings;       // name, currency, PIN, onboarding, optional JEV settings
 };
 ```
 
@@ -310,6 +377,10 @@ Recurring items write ordinary transactions with a `recurringId`; deleting the s
 leaves the transactions that were already posted. Budget progress is computed from those
 transactions, so importing or editing spending changes the bar immediately.
 
+A receipt scan is a draft, not a transaction: OCR and the optional JEV answer only fill the
+confirmation form. `addTx` is called after **Gunakan data** and **Simpan**, so a cancelled
+scan, a bad OCR read or an unavailable AI check cannot change the ledger.
+
 There is no sync layer by design. Clearing site data clears the app — take a JSON
 backup first.
 
@@ -321,6 +392,8 @@ backup first.
 | Build | Vite 6 |
 | Design system | [Astryx](https://astryx.design) 0.7 — `AppShell`, `SideNav`, `Card`, `Section`, `Dialog`, `SegmentedControl` — on a Chocolate-based custom theme |
 | Charts | Recharts |
+| OCR | [Tesseract.js](https://github.com/naptha/tesseract.js) 7 with bundled `tessdata_fast` Indonesian + English models — no CDN |
+| AI check | Free `jev-1.13-free` on OpenCode Zen (typed decisions, optional CORS proxy) |
 | Icons | Heroicons |
 | Fonts | Fraunces + Albert Sans, self-hosted woff2 (OFL) |
 | Storage | `localStorage` — no backend |
@@ -342,13 +415,21 @@ src/
     budgets.ts         monthly limits and rollover
     csv.ts             CSV parser, column mapping and value detection
     crypto.ts          password-encrypted backup envelope
+    ocr.ts             lazy Tesseract.js worker, image prep and local OCR
+    receipt.ts         amount/date/account/category parser and editable draft
+    jev.ts             free JEV questions, merge rules and CORS-aware client
   components/          amount keypad, icon picker, transaction row, empty state, tour, widget preview
   pages/               Home, Transactions, Recurring, Budgets, Import, Reports, Debts, Settings
-  sheets/              transaction, account, category, debt, payment, recurring, budget and widget-setup dialogs
+  sheets/              transaction, scan, account, category, debt, payment, recurring, budget and widget-setup dialogs
+public/ocr/            bundled worker, LSTM cores and Indonesian/English traineddata
+worker/                one-file Cloudflare Worker CORS proxy for JEV
 scripts/
   test.mjs             browser smoke tests
   test-features.mjs    recurring, budgets, CSV import, encryption and keyboard audit
   test-widget.mjs      widget setup and quick-add surfaces (stubbed Android bridge)
+  test-scan.mjs        real OCR image → confirmation → manual edit → save, plus a JEV mock
+  jev-proxy.mjs        local JEV proxy (with a mock mode for tests)
+  scan-shot.mjs        docs/scan.png screenshot
   shots.mjs            screenshot set for the docs
   widget-shots.mjs     widget setup and size screenshots for the docs
 ```
@@ -363,6 +444,9 @@ npm run typecheck      # tsc --noEmit
 npm test               # browser smoke tests
 npm run test:features  # new-feature end-to-end tests
 npm run test:widget    # widget setup and quick-add surfaces
+npm run test:scan      # OCR → confirmation → manual correction → save, plus JEV mock
+npm run proxy          # optional standalone JEV proxy on :4178
+npm run docs:scan      # regenerate the scan screenshot
 npm run docs:widget    # regenerate the widget screenshots
 ```
 
@@ -375,6 +459,10 @@ and the payment dialog. A second suite covers recurring catch-up, the Ringkasan 
 the keyboard shortcuts. A third suite stubs the Android bridge to cover the **Atur
 widget** dialog (size from the launcher, account picker, switches, save payload) and the
 quick-add sheet (no dashboard, bottom anchoring, PIN gate, persistence before closing).
+A fourth suite generates real receipt images in Chromium, runs the bundled OCR, asserts that
+the transfer amount beats the admin total and that a coffee receipt is not mistaken for a
+transfer, edits a field on the confirmation screen, saves it, and repeats the flow through
+a mock JEV proxy to check the AI badge and account mapping.
 
 ```bash
 npm run build
@@ -382,6 +470,7 @@ npm run preview -- --port 4180 &
 npm test
 npm run test:features
 npm run test:widget
+npm run test:scan
 ```
 
 `scripts/test.mjs` uses `puppeteer-core` and the system Chromium (`/usr/bin/chromium`).

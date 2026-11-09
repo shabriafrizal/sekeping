@@ -9,6 +9,8 @@ import { nowTime, parseAmountInput, todayISO } from '../lib/format';
 import { iconFor } from '../lib/icons';
 import AmountPad from '../components/AmountPad';
 import { t } from '../lib/i18n';
+import type { ReceiptDraft } from '../lib/receipt';
+import ScanSheet from './ScanSheet';
 
 interface Props {
   isOpen: boolean;
@@ -39,9 +41,11 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
   const [date, setDate] = useState(todayISO());
   const [time, setTime] = useState(nowTime());
   const [note, setNote] = useState('');
+  const [scanOpen, setScanOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    setScanOpen(false);
     if (tx) {
       setType(tx.type);
       setAmount(tx.amount);
@@ -130,7 +134,34 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
     onOpenChange(false);
   }
 
+  /** Put the reviewed scan into the normal form; nothing is saved yet. */
+  function applyScan(draft: ReceiptDraft) {
+    setType(draft.type);
+    setAmount(draft.amount);
+    if (draft.accountId) setAccountId(draft.accountId);
+    if (draft.type === 'transfer') {
+      const destination =
+        draft.toAccountId && draft.toAccountId !== draft.accountId
+          ? draft.toAccountId
+          : state.accounts.find((account) => account.active && account.id !== draft.accountId)?.id ?? '';
+      setToAccountId(destination);
+      setCategoryId('');
+      setFee(0);
+    } else {
+      const category = state.categories.find(
+        (item) => item.id === draft.categoryId && item.type === draft.type && item.active,
+      );
+      setCategoryId(category?.id ?? state.categories.find((item) => item.active && item.type === draft.type)?.id ?? '');
+      setToAccountId('');
+    }
+    if (draft.date) setDate(draft.date);
+    setTime(draft.time);
+    setNote(draft.note);
+    notify(t('Hasil scan siap diperiksa. Cek lalu simpan.'), 'info');
+  }
+
   return (
+    <>
     <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460} maxHeight="92dvh">
       <DialogHeader
         title={tx ? 'Ubah transaksi' : t("Tambah transaksi")}
@@ -139,21 +170,33 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
       />
       <div className="sk-dialog-body">
       <div className="sk-sheet">
-        <div className="sk-type-row" role="radiogroup" aria-label={t("Jenis transaksi")}>
-          {(['expense', 'income', 'transfer'] as TxType[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="radio"
-              aria-checked={type === t}
-              className="sk-type-btn"
-              data-tone={t}
-              data-active={type === t}
-              onClick={() => setType(t)}
-            >
-              {TYPE_LABEL[t]}
-            </button>
-          ))}
+        <div className="sk-type-row">
+          <div className="sk-type-group" role="radiogroup" aria-label={t("Jenis transaksi")}>
+            {(['expense', 'income', 'transfer'] as TxType[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="radio"
+                aria-checked={type === t}
+                className="sk-type-btn"
+                data-tone={t}
+                data-active={type === t}
+                onClick={() => setType(t)}
+              >
+                {TYPE_LABEL[t]}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="sk-type-scan"
+            aria-label={t("Scan struk")}
+            data-testid="scan-open"
+            onClick={() => setScanOpen(true)}
+          >
+            <CameraGlyph />
+            <span>{t("Scan")}</span>
+          </button>
         </div>
 
         <AmountPad value={amount} onChange={setAmount} currency={state.settings.currency} tone={type} isActive={isOpen} />
@@ -238,5 +281,26 @@ export default function TransactionSheet({ isOpen, onOpenChange, tx = null, init
         <Button label={tx ? 'Simpan perubahan' : t("Simpan")} variant="primary" onClick={submit} isDisabled={!canSave} />
       </div>
     </Dialog>
+
+    <ScanSheet
+      isOpen={scanOpen}
+      onOpenChange={setScanOpen}
+      currency={state.settings.currency}
+      accounts={state.accounts}
+      categories={state.categories}
+      ai={state.settings.ai}
+      defaultAccountId={accountId}
+      onApply={applyScan}
+    />
+    </>
+  );
+}
+
+function CameraGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} aria-hidden="true">
+      <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.1-1.4A1.5 1.5 0 0 1 9.9 4h4.2a1.5 1.5 0 0 1 1.1.6L16.3 6h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" strokeLinejoin="round" />
+      <circle cx="12" cy="12.4" r="3.1" />
+    </svg>
   );
 }

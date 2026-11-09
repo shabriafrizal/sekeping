@@ -11,8 +11,8 @@ android {
         applicationId = "dev.shabri.sekeping"
         minSdk = 24
         targetSdk = 34
-        versionCode = 13
-        versionName = "1.1.11"
+        versionCode = 14
+        versionName = "1.2.0"
         resourceConfigurations += listOf("en", "id")
     }
 

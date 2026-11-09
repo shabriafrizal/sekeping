@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@astryxdesign/core/Button';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { Selector } from '@astryxdesign/core/Selector';
+import { Switch } from '@astryxdesign/core/Switch';
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
 import { useStore } from '../lib/store';
 import type { Account, AppState, Category, CategoryType } from '../lib/types';
@@ -9,6 +10,7 @@ import { money } from '../lib/format';
 import { CURRENCY_OPTIONS, LANGUAGE_OPTIONS } from '../lib/settings-options';
 import { iconFor } from '../lib/icons';
 import { decryptJson, encryptJson, isEncryptedExport } from '../lib/crypto';
+import { checkWithJev } from '../lib/jev';
 import { t } from '../lib/i18n';
 
 const RepeatIcon = iconFor('repeat');
@@ -47,6 +49,7 @@ export default function Settings({
   const [unlock, setUnlock] = useState<{ text: string; name: string } | null>(null);
   const [unlockPassword, setUnlockPassword] = useState('');
   const [unlockBusy, setUnlockBusy] = useState(false);
+  const [aiTestBusy, setAiTestBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const categories = state.categories.filter((c) => c.type === catTab);
@@ -60,6 +63,39 @@ export default function Settings({
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     notify(`Berkas ${name} diunduh`);
+  }
+
+  function setAi(patch: Partial<typeof state.settings.ai>) {
+    updateSettings({ ai: { ...state.settings.ai, ...patch } });
+  }
+
+  async function testJev() {
+    setAiTestBusy(true);
+    try {
+      const attempt = await checkWithJev(
+        'BUKTI TRANSFER\nTanggal: 08/11/2026 14:35\nDari: BCA\nKe: GoPay\nNominal Transfer: Rp 250.000\nTransfer berhasil',
+        {
+          accounts: state.accounts,
+          categories: state.categories,
+          currency: state.settings.currency,
+          today: new Date().toISOString().slice(0, 10),
+          baseUrl: state.settings.ai.baseUrl,
+          model: state.settings.ai.model,
+        },
+      );
+      if (attempt.result) {
+        notify(
+          t('JEV tersambung ({model}): {reason}', {
+            model: attempt.result.model,
+            reason: attempt.result.reason || t('jawaban diterima'),
+          }),
+        );
+      } else {
+        notify(attempt.failure?.message ?? t('JEV tidak tersambung.'), 'error');
+      }
+    } finally {
+      setAiTestBusy(false);
+    }
   }
 
   function savePin() {
@@ -180,6 +216,44 @@ export default function Settings({
             width="100%"
           />
         </div>
+      </section>
+
+      <section className="sk-card">
+        <div className="sk-card-head">
+          <h2 className="sk-card-title">{t("Pemindaian & AI")}</h2>
+        </div>
+        <div className="sk-kv">
+          <span>{t("OCR struk")}</span>
+          <b>{t("Tesseract.js · lokal")}</b>
+        </div>
+        <div style={{ marginTop: '0.65rem' }}>
+          <Switch
+            label={t("Periksa arah transaksi dengan JEV")}
+            description={t("Kirim teks OCR (bukan foto) ke model gratis jev-1.13-free untuk menebak jenis, rekening asal, rekening tujuan, dan kategori.")}
+            value={state.settings.ai.enabled}
+            onChange={(enabled) => setAi({ enabled })}
+          />
+        </div>
+        <div className="sk-two" style={{ marginTop: '0.7rem' }}>
+          <TextInput
+            label={t("URL JEV / proxy")}
+            value={state.settings.ai.baseUrl}
+            placeholder="/api/jev"
+            onChange={(value) => setAi({ baseUrl: value })}
+          />
+          <TextInput
+            label={t("Model JEV")}
+            value={state.settings.ai.model}
+            placeholder="jev-1.13-free"
+            onChange={(value) => setAi({ model: value })}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.7rem' }}>
+          <Button label={t("Uji JEV")} variant="secondary" size="sm" onClick={testJev} isLoading={aiTestBusy} />
+        </div>
+        <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.55rem', lineHeight: 1.55 }}>
+          {t("JEV gratis dari OpenCode Zen tidak menjawab preflight CORS browser pada endpoint publiknya. Saat `npm run dev`, alamat /api/jev sudah diproksikan. Untuk situs statis, pasang contoh worker di `worker/jev-proxy.js` lalu isi URL-nya di atas. Tanpa koneksi, scan tetap memakai aturan lokal dan hasilnya bisa kamu koreksi.")}
+        </p>
       </section>
 
       <section className="sk-card">
@@ -393,7 +467,7 @@ export default function Settings({
         <p className="sk-sub" style={{ fontSize: '0.82rem', marginTop: 0 }}>
           {t("Sekeping adalah aplikasi pencatat keuangan pribadi untuk web. Semua perhitungan berjalan di browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.")}
         </p>
-        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.1 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
+        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.2 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
           <Button label={t("Tur antarmuka")} variant="ghost" size="sm" onClick={onTour} />
           <Button label={t("Pintasan keyboard (?)")} variant="ghost" size="sm" onClick={onShortcuts} />

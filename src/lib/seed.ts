@@ -1,5 +1,5 @@
 import { t } from './i18n';
-import type { AppState, Category, Account, Tx, Debt, Recurring, Budget } from './types';
+import type { AiSettings, AppState, Category, Account, Tx, Debt, Recurring, Budget } from './types';
 import { uid } from './types';
 import { monthKey, toISO, todayISO } from './format';
 import { initialNextDate } from './recurring';
@@ -20,6 +20,12 @@ function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+export const DEFAULT_AI_SETTINGS: AiSettings = {
+  enabled: false,
+  baseUrl: '',
+  model: 'jev-1.13-free',
+};
 
 export const DEFAULT_ACCOUNTS: Account[] = [
   { id: 'acc_cash', name: 'Dompet', icon: 'cash', initial: 6_800_000, active: true },
@@ -326,6 +332,7 @@ export function createDemoState(): AppState {
       onboarded: false,
       tourSeen: false,
       createdAt: Date.now(),
+      ai: { ...DEFAULT_AI_SETTINGS },
     },
   };
 }
@@ -348,6 +355,7 @@ export function createEmptyState(): AppState {
       onboarded: false,
       tourSeen: false,
       createdAt: Date.now(),
+      ai: { ...DEFAULT_AI_SETTINGS },
     },
   };
 }
