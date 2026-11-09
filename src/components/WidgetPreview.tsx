@@ -6,7 +6,6 @@ export type WidgetSize = '4x1' | '4x2' | '2x2';
 
 export interface WidgetLabels {
   total: string;
-  totalAll: string;
   balance: string;
   provider: string;
   expense: string;
@@ -21,12 +20,11 @@ export function widgetLabels(language: string): WidgetLabels {
   if (language === 'en') {
     return {
       total: 'Total',
-      totalAll: 'All accounts total',
       balance: 'Balance',
       provider: 'Account',
       expense: 'Expense',
       income: 'Income',
-      transfer: t("Transfer"),
+      transfer: 'Transfer',
       empty: 'No account yet',
       hide: 'Hide amounts',
       show: 'Show amounts',
@@ -34,7 +32,6 @@ export function widgetLabels(language: string): WidgetLabels {
   }
   return {
     total: t("Total"),
-    totalAll: t("Total semua rekening"),
     balance: 'Saldo',
     provider: t("Rekening"),
     expense: t("Pengeluaran"),
@@ -60,7 +57,7 @@ interface Props {
 }
 
 /* Glyph geometry matches the vector drawables in android/app/src/main/res/drawable,
-   with the same stroke weights, so the preview and the launcher read the same. */
+   with the same (bold) stroke weights, so the preview and the launcher read the same. */
 
 function ExpenseGlyph() {
   return (
@@ -68,7 +65,7 @@ function ExpenseGlyph() {
       <path
         d="M6 18 18 6M8.5 6H18v9.5"
         stroke="currentColor"
-        strokeWidth="2.9"
+        strokeWidth="3.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -82,7 +79,7 @@ function IncomeGlyph() {
       <path
         d="M18 6 6 18M15.5 18H6V8.5"
         stroke="currentColor"
-        strokeWidth="2.9"
+        strokeWidth="3.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -96,7 +93,7 @@ function TransferGlyph() {
       <path
         d="M4 8.5h15M15 4.5l4 4-4 4M20 15.5H5M9 11.5l-4 4 4 4"
         stroke="currentColor"
-        strokeWidth="2.6"
+        strokeWidth="3.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -110,30 +107,19 @@ function EyeGlyph({ masked }: { masked: boolean }) {
       <path
         d="M2 12S5.8 5.2 12 5.2 22 12 22 12 18.2 18.8 12 18.8 2 12 2 12Z"
         stroke="currentColor"
-        strokeWidth="2.3"
+        strokeWidth="2.8"
         strokeLinejoin="round"
       />
-      <circle cx="12" cy="12" r="3.2" fill="currentColor" />
-      {masked ? <path d="M4 4 20 20" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /> : null}
+      <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+      {masked ? <path d="M4 4 20 20" stroke="currentColor" strokeWidth="2.9" strokeLinecap="round" /> : null}
     </svg>
   );
 }
 
-function Action({
-  tone,
-  label,
-  withLabel,
-  children,
-}: {
-  tone: string;
-  label: string;
-  withLabel: boolean;
-  children: ReactNode;
-}) {
+function Action({ tone, label, children }: { tone: string; label: string; children: ReactNode }) {
   return (
-    <span className="skw-action" data-tone={tone}>
+    <span className="skw-action" data-tone={tone} title={label} role="img" aria-label={label}>
       <span className="skw-action-icon">{children}</span>
-      {withLabel ? <span className="skw-action-label">{label}</span> : null}
     </span>
   );
 }
@@ -162,8 +148,6 @@ export default function WidgetPreview({
   const ProviderIcon = iconFor(providerIcon);
   const balance = mask(providerBalance, masked);
   const totalValue = mask(total, masked);
-  const withLabels = size === '4x2';
-  const totalLabel = size === '4x2' ? labels.totalAll : labels.total;
 
   return (
     <div className="skw-stage" data-size={size}>
@@ -174,20 +158,18 @@ export default function WidgetPreview({
               <ProviderIcon />
             </span>
             <span className="skw-provider-name">{providerName || labels.empty}</span>
-            {withLabels ? <span className="skw-balance">{balance}</span> : null}
             <span className="skw-eye" title={masked ? labels.show : labels.hide} aria-hidden="true">
               <EyeGlyph masked={masked} />
             </span>
           </div>
 
           <div className="skw-amounts">
-            {withLabels ? null : (
-              <span className="skw-amount-row">
-                <b className="skw-balance">{balance}</b>
-              </span>
-            )}
+            <span className="skw-amount-row">
+              <small>{labels.balance}</small>
+              <b className="skw-balance">{balance}</b>
+            </span>
             <span className="skw-amount-row skw-total">
-              <small>{totalLabel}</small>
+              <small>{labels.total}</small>
               <b>{totalValue}</b>
             </span>
           </div>
@@ -195,17 +177,17 @@ export default function WidgetPreview({
 
         <div className="skw-actions">
           {showExpense ? (
-            <Action tone="expense" label={labels.expense} withLabel={withLabels}>
+            <Action tone="expense" label={labels.expense}>
               <ExpenseGlyph />
             </Action>
           ) : null}
           {showIncome ? (
-            <Action tone="income" label={labels.income} withLabel={withLabels}>
+            <Action tone="income" label={labels.income}>
               <IncomeGlyph />
             </Action>
           ) : null}
           {showTransfer ? (
-            <Action tone="transfer" label={labels.transfer} withLabel={withLabels}>
+            <Action tone="transfer" label={labels.transfer}>
               <TransferGlyph />
             </Action>
           ) : null}

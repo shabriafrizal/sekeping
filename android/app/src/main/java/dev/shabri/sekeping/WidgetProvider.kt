@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat
 /**
  * One home-screen widget. It shows the selected provider (account) with its
  * balance, the total of every active account, an eye toggle that masks both
- * amounts, and three labelled quick actions.
+ * amounts, and three icon-only quick actions.
  *
  * [WidgetProvider] itself is the resizable 4×2 entry. The two subclasses below
  * are fixed-size entries so the launcher's widget picker can offer 4×1 and 2×2
@@ -111,13 +111,6 @@ open class WidgetProvider : AppWidgetProvider() {
                 if (hidden) R.drawable.ic_eye_off else R.drawable.ic_eye,
             )
             views.setOnClickPendingIntent(R.id.widget_eye, toggleHidden(context, widgetId))
-
-            val labels = mapOf(
-                R.id.widget_expense_label to t(language, "Pengeluaran", "Expense"),
-                R.id.widget_income_label to t(language, "Pendapatan", "Income"),
-                R.id.widget_transfer_label to t(language, "Transfer", "Transfer"),
-            )
-            labels.forEach { (id, text) -> views.setTextViewText(id, text) }
 
             views.setViewVisibility(R.id.widget_expense, if (config.showExpense) View.VISIBLE else View.GONE)
             views.setViewVisibility(R.id.widget_income, if (config.showIncome) View.VISIBLE else View.GONE)

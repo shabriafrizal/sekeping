@@ -2150,7 +2150,8 @@ input.sk-input:focus-visible {
 
 /* ---------- widget preview ----------
    Sized in launcher dp: --dp converts one dp to CSS pixels, so the preview keeps
-   the proportions of the native RemoteViews layouts in each size. */
+   the proportions of the native RemoteViews layouts in each size. The font is the
+   Android default (Roboto), bold for names and amounts. */
 .skw-stage {
   display: grid;
   place-items: center;
@@ -2169,16 +2170,16 @@ input.sk-input:focus-visible {
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: calc(22 * var(--dp));
-  padding: calc(12 * var(--dp));
+  border-radius: calc(26 * var(--dp));
+  padding: calc(10 * var(--dp));
   color: #f6f2e9;
   background:
     radial-gradient(120% 140% at 100% 0%, rgba(226, 177, 90, 0.16), transparent 52%),
-    linear-gradient(150deg, #33745f 0%, #2f6b57 42%, #204a3a 100%);
+    linear-gradient(135deg, #3a7d66 0%, #2f6b57 42%, #24503f 100%);
   box-shadow:
     0 18px 34px -18px rgba(20, 40, 32, 0.68),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  font-family: var(--font-family-body);
+  font-family: Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif;
   overflow: hidden;
 }
 
@@ -2187,38 +2188,37 @@ input.sk-input:focus-visible {
   height: calc(74 * var(--dp));
   flex-direction: row;
   align-items: center;
-  gap: calc(8 * var(--dp));
-  padding: calc(10 * var(--dp));
+  gap: calc(6 * var(--dp));
+  padding: calc(8 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] {
   width: calc(290 * var(--dp));
-  height: calc(156 * var(--dp));
+  height: calc(166 * var(--dp));
 }
 
 .skw-widget[data-size='2x2'] {
   width: calc(150 * var(--dp));
   height: calc(150 * var(--dp));
+  padding: calc(9 * var(--dp));
 }
 
-/* The left column in 4×1; in the taller sizes its rows sit straight in the card. */
+/* The text column: beside the buttons in 4×1, above them in the taller sizes. */
 .skw-main {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  gap: calc(2 * var(--dp));
 }
 
-.skw-widget[data-size='4x2'] .skw-main,
-.skw-widget[data-size='2x2'] .skw-main {
-  display: contents;
+.skw-widget[data-size='4x1'] .skw-main {
+  gap: calc(4 * var(--dp));
 }
 
 .skw-head {
   display: flex;
   align-items: center;
-  gap: calc(5 * var(--dp));
+  gap: calc(4 * var(--dp));
   min-width: 0;
 }
 
@@ -2238,21 +2238,11 @@ input.sk-input:focus-visible {
 .skw-provider-name {
   min-width: 0;
   flex: 1;
-  font-size: calc(11 * var(--dp));
+  font-size: calc(12 * var(--dp));
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.skw-balance {
-  font-size: calc(10 * var(--dp));
-  font-weight: 500;
-  color: #c2dcd1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
 }
 
 .skw-eye {
@@ -2260,15 +2250,15 @@ input.sk-input:focus-visible {
   height: calc(26 * var(--dp));
   display: grid;
   place-items: center;
-  border-radius: calc(10 * var(--dp));
-  background: rgba(246, 242, 233, 0.14);
+  border-radius: 50%;
+  background: rgba(246, 242, 233, 0.18);
   color: #f6f2e9;
   flex: none;
 }
 
 .skw-eye svg {
-  width: calc(17 * var(--dp));
-  height: calc(17 * var(--dp));
+  width: calc(16 * var(--dp));
+  height: calc(16 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-head {
@@ -2281,179 +2271,173 @@ input.sk-input:focus-visible {
 }
 
 .skw-widget[data-size='4x2'] .skw-provider-name {
-  font-size: calc(14 * var(--dp));
-  flex: 0 1 auto;
-}
-
-.skw-widget[data-size='4x2'] .skw-balance {
-  font-size: calc(12 * var(--dp));
-  margin-inline-start: calc(4 * var(--dp));
+  font-size: calc(15 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-eye {
-  width: calc(30 * var(--dp));
-  height: calc(30 * var(--dp));
-  margin-inline-start: auto;
+  width: calc(32 * var(--dp));
+  height: calc(32 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-eye svg {
-  width: calc(19 * var(--dp));
-  height: calc(19 * var(--dp));
+  width: calc(20 * var(--dp));
+  height: calc(20 * var(--dp));
 }
 
-.skw-widget[data-size='2x2'] .skw-eye,
-.skw-widget[data-size='4x1'] .skw-eye {
-  margin-inline-start: auto;
+.skw-widget[data-size='2x2'] .skw-provider-name {
+  font-size: calc(12 * var(--dp));
 }
 
-/* Amounts: 4×1 stacks balance then total; 2×2 pushes the total to the bottom. */
+.skw-widget[data-size='2x2'] .skw-eye {
+  width: calc(24 * var(--dp));
+  height: calc(24 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-eye svg {
+  width: calc(14 * var(--dp));
+  height: calc(14 * var(--dp));
+}
+
+/* Amount rows: label and value share a line in 4×1 and 4×2; 2×2 stacks them. */
 .skw-amounts {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
+.skw-widget[data-size='4x2'] .skw-amounts {
+  flex: 1;
+  justify-content: center;
+  gap: calc(2 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-amounts {
+  flex: 1;
+  justify-content: center;
+  gap: calc(4 * var(--dp));
+}
+
 .skw-amount-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--dp));
   min-width: 0;
 }
 
-.skw-amount-row .skw-balance {
-  font-size: calc(10 * var(--dp));
+.skw-amount-row small {
+  flex: none;
+  font-size: calc(8 * var(--dp));
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c2dcd1;
+  white-space: nowrap;
 }
 
-.skw-total b {
-  font-family: var(--font-family-heading);
-  font-size: calc(12 * var(--dp));
+.skw-amount-row b {
+  min-width: 0;
+  flex: 1;
+  font-size: calc(16 * var(--dp));
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.skw-total small {
-  font-size: calc(7 * var(--dp));
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #c2dcd1;
-  white-space: nowrap;
+.skw-amount-row .skw-balance {
+  font-size: calc(12 * var(--dp));
 }
 
-.skw-widget[data-size='4x1'] .skw-total {
-  flex-direction: row;
-  align-items: baseline;
-  gap: calc(4 * var(--dp));
-  margin-top: calc(1 * var(--dp));
-}
-
-.skw-widget[data-size='4x1'] .skw-total small {
+.skw-widget[data-size='4x2'] .skw-amount-row small {
   font-size: calc(9 * var(--dp));
-  letter-spacing: 0;
-  text-transform: none;
-  font-weight: 600;
 }
 
-.skw-widget[data-size='4x1'] .skw-total b {
-  font-size: calc(13 * var(--dp));
-}
-
-.skw-widget[data-size='2x2'] .skw-total {
-  margin-top: auto;
-}
-
-.skw-widget[data-size='2x2'] .skw-total small {
-  margin-bottom: calc(2 * var(--dp));
-}
-
-.skw-widget[data-size='2x2'] .skw-total b {
-  font-size: calc(16 * var(--dp));
-}
-
-.skw-widget[data-size='2x2'] .skw-balance {
-  margin-top: calc(1 * var(--dp));
-}
-
-.skw-widget[data-size='4x2'] .skw-total {
-  margin-top: calc(6 * var(--dp));
-}
-
-.skw-widget[data-size='4x2'] .skw-total small {
-  font-size: calc(8 * var(--dp));
-  margin-bottom: calc(2 * var(--dp));
+.skw-widget[data-size='4x2'] .skw-amount-row .skw-balance {
+  font-size: calc(18 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-total b {
-  font-size: calc(28 * var(--dp));
-  line-height: 1.05;
+  font-size: calc(24 * var(--dp));
 }
 
-/* Action tiles: solid, rounded, scaled up; the glyph fills most of the tile. */
+.skw-widget[data-size='4x1'] .skw-total b {
+  font-size: calc(11 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-amount-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(1 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-amount-row small {
+  font-size: calc(8 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-amount-row b {
+  flex: none;
+  max-width: 100%;
+  font-size: calc(14 * var(--dp));
+}
+
+.skw-widget[data-size='2x2'] .skw-total b {
+  font-size: calc(18 * var(--dp));
+}
+
+/* Action buttons: solid, rounded and large; the bold glyph is the only content. */
 .skw-actions {
   display: flex;
-  align-items: center;
-  gap: calc(5 * var(--dp));
+  align-items: stretch;
   flex: none;
 }
 
 .skw-widget[data-size='4x1'] .skw-actions {
-  margin-inline-start: auto;
-}
-
-.skw-widget[data-size='4x2'] .skw-actions,
-.skw-widget[data-size='2x2'] .skw-actions {
-  margin-top: auto;
+  gap: calc(5 * var(--dp));
+  height: calc(58 * var(--dp));
+  margin-inline-start: calc(2 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-actions {
-  height: calc(46 * var(--dp));
+  height: calc(56 * var(--dp));
   gap: calc(6 * var(--dp));
   margin-top: calc(8 * var(--dp));
 }
 
 .skw-widget[data-size='2x2'] .skw-actions {
   height: calc(40 * var(--dp));
-  margin-top: calc(8 * var(--dp));
+  gap: calc(5 * var(--dp));
+  margin-top: calc(6 * var(--dp));
 }
 
 .skw-action {
-  width: calc(42 * var(--dp));
-  height: calc(42 * var(--dp));
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(2 * var(--dp));
-  border-radius: calc(14 * var(--dp));
+  border-radius: calc(18 * var(--dp));
   flex: none;
 }
 
-.skw-widget[data-size='4x2'] .skw-action {
-  width: auto;
-  height: 100%;
-  flex: 1;
+.skw-widget[data-size='4x1'] .skw-action {
+  width: calc(46 * var(--dp));
 }
 
+.skw-widget[data-size='4x2'] .skw-action,
 .skw-widget[data-size='2x2'] .skw-action {
-  width: auto;
-  height: 100%;
   flex: 1;
 }
 
 .skw-action-icon {
   display: grid;
   place-items: center;
-  width: calc(22 * var(--dp));
-  height: calc(22 * var(--dp));
+  width: calc(26 * var(--dp));
+  height: calc(26 * var(--dp));
 }
 
 .skw-widget[data-size='4x2'] .skw-action-icon {
-  width: calc(20 * var(--dp));
-  height: calc(20 * var(--dp));
+  width: calc(30 * var(--dp));
+  height: calc(30 * var(--dp));
 }
 
 .skw-widget[data-size='2x2'] .skw-action-icon {
@@ -2466,25 +2450,18 @@ input.sk-input:focus-visible {
   height: 100%;
 }
 
-.skw-action-label {
-  font-size: calc(10 * var(--dp));
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-}
-
 .skw-action[data-tone='expense'] {
-  background: rgba(240, 162, 100, 0.24);
+  background: rgba(240, 162, 100, 0.3);
   color: #ffc48f;
 }
 
 .skw-action[data-tone='income'] {
-  background: rgba(111, 227, 181, 0.24);
+  background: rgba(111, 227, 181, 0.3);
   color: #8ff2c9;
 }
 
 .skw-action[data-tone='transfer'] {
-  background: rgba(141, 184, 240, 0.24);
+  background: rgba(141, 184, 240, 0.3);
   color: #b7d7ff;
 }
 

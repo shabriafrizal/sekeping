@@ -59,7 +59,7 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Settings** | Profile and currency, account and category CRUD with icon picker, PIN lock, CSV export, CSV import, JSON backup, password-encrypted backup, demo reset |
 | **Keyboard** | Skip link, arrow-key menus, `Alt+1…6` page jumps, `g`-prefix jumps, `n` for a new expense, `?` for the shortcut sheet |
 | **Responsive** | Sidebar and top bar on desktop; drawer navigation and a top action bar on phones |
-| **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three quick actions (see [Android app](#android-app)) |
+| **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three large icon-only quick actions (see [Android app](#android-app)) |
 | **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
 
 ## Quick start
@@ -105,9 +105,13 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 4. The widget shows the **provider** you picked (icon and name) with its own balance, and
    the **total** of every active account. Tap the **eye** to mask both amounts with `***`;
    tap it again to show them. Each entry keeps its size:
-   - **4×1** — provider, its balance, the total, and three large icon buttons.
-   - **4×2** — the total as the hero figure, with three labelled buttons across the bottom.
-   - **2×2** — provider, total and three square icon buttons.
+   - **4×1** — provider, its balance and the total in one column, with three large icon buttons beside them.
+   - **4×2** — provider and eye on top, balance and the total as the hero figure, with three large icon buttons across the bottom.
+   - **2×2** — provider, balance and total stacked, with three icon buttons along the bottom.
+
+   The buttons carry only bold icons; their names are kept for screen readers. The widget uses
+   the phone's default system font, bold for names and amounts, and the text shrinks to fit
+   each size on Android 8.0 and newer.
 5. **Pengeluaran**, **Pendapatan** and **Transfer** do not open the dashboard. They show
    the same add-transaction sheet as the app, floating over the home screen, with the
    chosen account already selected. Save or cancel returns straight to the home screen;
