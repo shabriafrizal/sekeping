@@ -81,6 +81,10 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
   models ship with the app; no CDN request, and the APK keeps the same offline scanner.
 - **1.2.1 — Android gallery and camera.** The Scan button now opens the system chooser in
   the APK: the gallery/Photo Picker and a camera entry backed by `FileProvider`.
+- **1.2.2 — JEV works in the APK without CORS.** Android performs the JEV POST natively
+  through a `JavascriptInterface` and returns the typed answers to the WebView. The web
+  build keeps its optional proxy setting because OpenCode Zen does not answer browser
+  preflights on its public endpoint.
 
 ## Quick start
 
@@ -110,7 +114,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.2.1.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.1/sekeping-1.2.1.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.2.2.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.2.2/sekeping-1.2.2.apk)** (11 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 
@@ -204,17 +208,26 @@ Enable it in **Pengaturan → Pemindaian & AI**. Only the OCR text and your acco
 names are sent; the photo is not. If JEV is unavailable, the scan still works with local
 rules and says so on the confirmation screen.
 
-OpenCode Zen does not answer browser CORS preflights on its public endpoint. The app
-handles that in two ways:
+In the **Android APK**, the app performs the JEV request natively, so the browser CORS
+preflight never happens and the proxy field can stay empty. In a desktop/static web build,
+OpenCode Zen still needs the proxy described below.
 
-- **Local development** — `npm run dev` already proxies `/api/jev` to OpenCode. The field
-  can stay at `/api/jev`.
-- **Static hosting** — deploy the small Worker in [`worker/jev-proxy.js`](worker/jev-proxy.js)
-  (`cd worker && npx wrangler deploy`) and paste its URL into **URL JEV / proxy**. The Worker
-  holds no key; the free model is keyless. `npm run proxy` starts the same proxy locally on
-  `http://127.0.0.1:4178` if you prefer a separate process.
+OpenCode Zen does not answer browser CORS preflights on its public endpoint, and its free
+tier reads the caller's address from `X-Real-IP`. A Cloudflare Worker is not sufficient:
+Cloudflare strips that header on cross-zone Worker subrequests, so the request is rejected
+with “Client IP address is required for free usage”.
 
-  [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/shabriafrizal/sekeping/tree/main/worker)
+- **Android APK** — no proxy is needed. `JevBridge` performs the POST from the app process
+  and passes the answers back to the WebView.
+- **Local development** — `npm run dev` proxies `/api/jev` from Node, where CORS does not
+  apply. The field can stay at `/api/jev`.
+- **Static hosting** — run [`scripts/jev-proxy.mjs`](scripts/jev-proxy.mjs) on any
+  **non-Cloudflare** Node host (Railway, Render, Fly, a small VPS) and paste its URL into
+  **URL JEV / proxy**. The proxy forwards the caller's `X-Forwarded-For` as `X-Real-IP`.
+  `npm run proxy` starts it locally on `http://127.0.0.1:4178`.
+
+The Worker in [`worker/`](worker/) is kept as a generic CORS example, but it cannot satisfy
+the free JEV tier's IP check. Use the Node proxy for the free model.
 
 If the free tier returns 429, the confirmation screen keeps the local result and explains
 the limit. Turn the switch off to keep everything on-device.

@@ -51,14 +51,17 @@ const browser = await puppeteer.launch({
 
 const errors = [];
 const cdnRequests = [];
+const opencodeRequests = [];
 
-async function newPage(state) {
+async function newPage(state, bridge = null) {
   const page = await browser.newPage();
+  if (bridge) await page.evaluateOnNewDocument(bridge);
   await page.setViewport({ width: 1180, height: 940 });
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('request', (request) => {
     const url = request.url();
     if (/cdn\.jsdelivr|unpkg\.com|tessdata\.projectnaptha/.test(url)) cdnRequests.push(url);
+    if (/opencode\.ai/.test(url)) opencodeRequests.push(url);
   });
   await page.goto(BASE, { waitUntil: 'networkidle0' });
   await page.evaluate((nextState) => {
@@ -209,6 +212,74 @@ const expenseCategory = await expensePage.evaluate(() => {
 });
 check('expense receipt picks the food category', expenseCategory === 'Makan & Minum', expenseCategory);
 await expensePage.close();
+
+// ---------------------------------------------------------------------------
+// 2. Android native bridge → JEV without browser CORS
+// ---------------------------------------------------------------------------
+const nativeBridge = () => {
+  const answers = {
+    model: 'jev-native',
+    answers: {
+      jenis: { type: 'choice', choice: 'transfer', confidence: 0.97 },
+      sumber: { type: 'choice', choice: 'acc_bank', confidence: 0.95 },
+      tujuan: { type: 'choice', choice: 'acc_ewallet', confidence: 0.94 },
+      kategori: { type: 'choice', choice: 'tidak_tahu', confidence: 0.9 },
+      yakin: { type: 'noul', noul: 0.96 },
+    },
+    cost: '0',
+  };
+  window.SekepingWidget = {
+    setAccounts() {},
+    setSummary() {},
+    ready() {},
+    jevPost(id, url, body) {
+      const payload = JSON.parse(body);
+      const envelope = {
+        ok: true,
+        status: 200,
+        body: JSON.stringify({
+          ...answers,
+          model: payload.model === 'jev-1.13-free' ? 'jev-native' : payload.model,
+        }),
+      };
+      const send = () => {
+        if (window.SekepingJevResult) window.SekepingJevResult(id, JSON.stringify(envelope));
+        else setTimeout(send, 40);
+      };
+      setTimeout(send, 200);
+    },
+  };
+};
+
+const nativeState = {
+  ...STATE,
+  settings: {
+    ...STATE.settings,
+    ai: { enabled: true, baseUrl: '', model: 'jev-1.13-free' },
+  },
+};
+const nativePage = await newPage(nativeState, nativeBridge);
+const beforeNativeRequests = opencodeRequests.length;
+await openScanner(nativePage);
+await uploadAndWait(nativePage, file);
+await nativePage.waitForFunction(
+  () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]') !== null,
+  { timeout: 60000 },
+);
+const nativeBadge = await nativePage.evaluate(
+  () => document.querySelector('[data-testid="scan-review"] .sk-scan-badge[data-tone="ai"]')?.textContent ?? '',
+);
+check('native bridge JEV badge appears', /JEV/.test(nativeBadge) && /jev-native/.test(nativeBadge), nativeBadge);
+const nativeReason = await nativePage.evaluate(
+  () => document.querySelector('[data-testid="scan-review"] .sk-scan-ai[data-tone="ok"]')?.textContent?.trim() ?? '',
+);
+check('native bridge maps the destination', /BCA/.test(nativeReason) && /GoPay/.test(nativeReason), nativeReason);
+check(
+  'native bridge avoids the browser fetch',
+  opencodeRequests.length === beforeNativeRequests,
+  `${opencodeRequests.length - beforeNativeRequests} fetch request(s)`,
+);
+await nativePage.close();
 
 // ---------------------------------------------------------------------------
 // 2. JEV check through a proxy → AI badge and mapped answers

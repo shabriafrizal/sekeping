@@ -252,7 +252,7 @@ export default function Settings({
           <Button label={t("Uji JEV")} variant="secondary" size="sm" onClick={testJev} isLoading={aiTestBusy} />
         </div>
         <p className="sk-sub" style={{ fontSize: '0.74rem', marginTop: '0.55rem', lineHeight: 1.55 }}>
-          {t("JEV gratis dari OpenCode Zen tidak menjawab preflight CORS browser pada endpoint publiknya. Saat `npm run dev`, alamat /api/jev sudah diproksikan. Untuk situs statis, pasang contoh worker di `worker/jev-proxy.js` lalu isi URL-nya di atas. Tanpa koneksi, scan tetap memakai aturan lokal dan hasilnya bisa kamu koreksi.")}
+          {t("JEV gratis dari OpenCode Zen tidak menjawab preflight CORS browser dan membutuhkan alamat pemanggil di header X-Real-IP. Di APK Android, JEV dipanggil langsung oleh aplikasi sehingga tidak perlu proxy. Di web, `npm run dev` sudah memakai proxy /api/jev; untuk situs statis jalankan `scripts/jev-proxy.mjs` di host Node non-Cloudflare lalu isi URL-nya di atas. Tanpa koneksi, scan tetap memakai aturan lokal dan hasilnya bisa kamu koreksi.")}
         </p>
       </section>
 
@@ -467,7 +467,7 @@ export default function Settings({
         <p className="sk-sub" style={{ fontSize: '0.82rem', marginTop: 0 }}>
           {t("Sekeping adalah aplikasi pencatat keuangan pribadi untuk web. Semua perhitungan berjalan di browser dan datanya tetap di perangkatmu — tidak ada akun, tidak ada unggahan.")}
         </p>
-        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.2.1 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
+        <p className="sk-sub" style={{ fontSize: '0.72rem' }}>{t("Versi 1.2.2 · dibuat sebagai penerapan ulang mandiri dengan antarmuka dan kode sendiri.")}</p>
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
           <Button label={t("Tur antarmuka")} variant="ghost" size="sm" onClick={onTour} />
           <Button label={t("Pintasan keyboard (?)")} variant="ghost" size="sm" onClick={onShortcuts} />

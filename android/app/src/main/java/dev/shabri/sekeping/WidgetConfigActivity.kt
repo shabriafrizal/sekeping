@@ -165,6 +165,11 @@ class WidgetConfigActivity : AppCompatActivity() {
         fun setSummary(json: String) = Unit
 
         @JavascriptInterface
+        fun jevPost(id: String, url: String, body: String) {
+            JevBridge.postAsync(webView, id, url, body)
+        }
+
+        @JavascriptInterface
         fun ready() = Unit
     }
 }

@@ -3,11 +3,13 @@
  * Tiny JEV proxy for local development or a static build.
  *
  * OpenCode Zen answers POST /zen/v1/systemone, but it does not answer the
- * browser's CORS preflight. This server adds those headers and forwards the
- * request from Node, where CORS does not apply.
+ * browser's CORS preflight, and the free tier needs the caller's address in
+ * X-Real-IP. This server adds CORS headers, forwards the browser's address and
+ * sends the request from Node. Run it on a non-Cloudflare host: Cloudflare
+ * strips X-Real-IP on cross-zone Worker subrequests.
  *
  *   node scripts/jev-proxy.mjs
- *   JEV_PROXY_PORT=4178 node scripts/jev-proxy.mjs
+ *   PORT=4178 node scripts/jev-proxy.mjs
  *   JEV_MOCK='{"answers":{...}}' node scripts/jev-proxy.mjs   # tests
  *
  * Then set Settings → Pemindaian & AI → URL JEV / proxy to
@@ -15,7 +17,8 @@
  */
 import http from 'node:http';
 
-const PORT = Number(process.env.JEV_PROXY_PORT || 4178);
+const PORT = Number(process.env.PORT || process.env.JEV_PROXY_PORT || 4178);
+const HOST = process.env.HOST || '0.0.0.0';
 const UPSTREAM = process.env.JEV_UPSTREAM || 'https://opencode.ai/zen/v1/systemone';
 const MOCK = process.env.JEV_MOCK || '';
 const CORS = {
@@ -49,6 +52,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const clientIp =
+    forwarded ||
+    String(req.headers['x-real-ip'] || '') ||
+    String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+
   let body = '';
   for await (const chunk of req) body += chunk;
   if (!body) {
@@ -72,6 +81,9 @@ const server = http.createServer(async (req, res) => {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'sekeping-jev-proxy/1.0',
+        // OpenCode's free tier buckets by this address. On a non-Cloudflare
+        // host the header survives, unlike a Cloudflare Worker subrequest.
+        ...(clientIp ? { 'X-Real-IP': clientIp } : {}),
       },
       body,
       signal: AbortSignal.timeout(20000),
@@ -95,6 +107,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`JEV proxy on http://127.0.0.1:${PORT}${MOCK ? ' (mock)' : ` → ${UPSTREAM}`}`);
+server.listen(PORT, HOST, () => {
+  console.log(`JEV proxy on http://${HOST}:${PORT}${MOCK ? ' (mock)' : ` → ${UPSTREAM}`}`);
 });

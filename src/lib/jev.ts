@@ -1,6 +1,7 @@
 import type { Account, Category, TxType } from './types';
 import type { ReceiptDraft } from './receipt';
 import { t } from './i18n';
+import { nativeJevAvailable, nativeJevPost } from './native';
 
 interface JevAnswer {
   type: 'choice' | 'noul' | 'score' | string;
@@ -152,41 +153,92 @@ export async function checkWithJev(text: string, context: JevContext, signal?: A
     };
   }
 
+  // Android performs the request natively, so an empty setting must mean the
+  // real Zen endpoint, not the dev-server proxy used by desktop browsers.
+  const endpoint = nativeJevAvailable() && !context.baseUrl.trim()
+    ? 'https://opencode.ai/zen/v1/systemone'
+    : jevEndpoint(context.baseUrl);
+  const requestBody = JSON.stringify({
+    model: context.model || 'jev-1.13-free',
+    state,
+    questions,
+  });
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), 15000);
   const abort = () => controller.abort();
   signal?.addEventListener('abort', abort);
 
   try {
-    const response = await fetch(jevEndpoint(context.baseUrl), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: context.model || 'jev-1.13-free',
-        state,
-        questions,
-      }),
-      signal: controller.signal,
-    });
+    let data: JevResponse;
 
-    if (!response.ok) {
-      if (response.status === 429) {
+    if (nativeJevAvailable()) {
+      // Android's WebView cannot call OpenCode Zen because the endpoint has no
+      // CORS headers. The host app performs the POST on its own thread and
+      // returns the same JSON through a JavascriptInterface.
+      const raw = await nativeJevPost(endpoint, requestBody);
+      let envelope: { ok?: boolean; status?: number; body?: string; error?: string };
+      try {
+        envelope = JSON.parse(raw) as typeof envelope;
+      } catch {
+        envelope = { ok: false, status: 0 };
+      }
+      if (!envelope.ok) {
+        const status = envelope.status ?? 0;
+        if (status === 429) {
+          return {
+            failure: {
+              status: 'busy',
+              message: t('JEV sedang dibatasi (429). Coba lagi nanti; hasil lokal tetap dipakai.'),
+            },
+          };
+        }
         return {
           failure: {
-            status: 'busy',
-            message: t('JEV sedang dibatasi (429). Coba lagi nanti; hasil lokal tetap dipakai.'),
+            status: 'error',
+            message: status > 0
+              ? t('JEV membalas {status}. Hasil lokal tetap dipakai.', { status })
+              : t('JEV tidak bisa dihubungi dari perangkat ini. Periksa koneksi internet; hasil lokal tetap dipakai.'),
           },
         };
       }
-      return {
-        failure: {
-          status: 'error',
-          message: t('JEV membalas {status}. Hasil lokal tetap dipakai.', { status: response.status }),
-        },
-      };
+      try {
+        data = JSON.parse(envelope.body || '{}') as JevResponse;
+      } catch {
+        return {
+          failure: {
+            status: 'error',
+            message: t('Jawaban JEV tidak valid. Hasil lokal tetap dipakai.'),
+          },
+        };
+      }
+    } else {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return {
+            failure: {
+              status: 'busy',
+              message: t('JEV sedang dibatasi (429). Coba lagi nanti; hasil lokal tetap dipakai.'),
+            },
+          };
+        }
+        return {
+          failure: {
+            status: 'error',
+            message: t('JEV membalas {status}. Hasil lokal tetap dipakai.', { status: response.status }),
+          },
+        };
+      }
+
+      data = (await response.json()) as JevResponse;
     }
 
-    const data = (await response.json()) as JevResponse;
     const answers = data.answers ?? {};
     const allowedTypes = new Set(['expense', 'income', 'transfer', 'tidak_yakin']);
     const jenis = choice(answers.jenis, allowedTypes);
@@ -238,8 +290,8 @@ export async function checkWithJev(text: string, context: JevContext, signal?: A
       failure: {
         status: 'unreachable',
         message: aborted
-          ? t('JEV tidak menjawab dalam 15 detik. Hasil lokal tetap dipakai.')
-          : t('JEV tidak bisa dihubungi dari browser ini (CORS/jaringan). Hasil lokal tetap dipakai.'),
+          ? t('JEV tidak menjawab. Hasil lokal tetap dipakai.')
+          : t('JEV tidak bisa dihubungi dari browser ini (CORS). Di APK Android JEV berjalan otomatis; di web jalankan proxy non-Cloudflare. Hasil lokal tetap dipakai.'),
       },
     };
   } finally {

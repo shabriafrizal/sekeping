@@ -60,6 +60,8 @@ export interface NativeWidgetBridge {
   setAccounts: (json: string) => void;
   setSummary: (json: string) => void;
   ready: () => void;
+  /** Android performs the request natively so browser CORS does not apply. */
+  jevPost?: (id: string, url: string, body: string) => void;
   getWidgetConfig?: () => string;
   saveWidgetConfig?: (json: string) => void;
   closeSheet?: () => void;
@@ -71,6 +73,7 @@ declare global {
   interface Window {
     SekepingWidget?: NativeWidgetBridge;
     SekepingOpenAdd?: (type: string, accountId: string | null) => void;
+    SekepingJevResult?: (id: string, envelope: string) => void;
   }
 }
 
@@ -162,4 +165,56 @@ export function toast(message: string): void {
   } catch {
     /* no-op */
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* JEV over the native Android bridge                                  */
+/* ------------------------------------------------------------------ */
+
+let jevRequest = 0;
+const jevPending = new Map<string, (envelope: string) => void>();
+
+try {
+  window.SekepingJevResult = (id: string, envelope: string) => {
+    const resolve = jevPending.get(id);
+    jevPending.delete(id);
+    resolve?.(envelope);
+  };
+} catch {
+  /* no window outside the browser */
+}
+
+export function nativeJevAvailable(): boolean {
+  return typeof window.SekepingWidget?.jevPost === 'function';
+}
+
+/**
+ * The Java bridge runs on its own thread and calls SekepingJevResult with a
+ * JSON envelope: { ok, status, body, error }. This keeps the UI responsive and
+ * avoids the browser CORS preflight that OpenCode Zen does not answer.
+ */
+export function nativeJevPost(url: string, body: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const bridge = window.SekepingWidget;
+    if (!bridge?.jevPost) {
+      reject(new Error('native bridge unavailable'));
+      return;
+    }
+    const id = `jev_${Date.now().toString(36)}_${(jevRequest++).toString(36)}`;
+    const timer = window.setTimeout(() => {
+      jevPending.delete(id);
+      reject(new Error('native jev timeout'));
+    }, 25000);
+    jevPending.set(id, (envelope) => {
+      window.clearTimeout(timer);
+      resolve(envelope);
+    });
+    try {
+      bridge.jevPost(id, url, body);
+    } catch (error) {
+      window.clearTimeout(timer);
+      jevPending.delete(id);
+      reject(error);
+    }
+  });
 }
