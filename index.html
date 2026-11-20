@@ -14,6 +14,28 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./favicon.svg" />
     <title>Sekeping — Catatan Keuangan</title>
+    <style>
+      .sk-boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      .sk-boot::before {
+        content: '';
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 999px;
+        border: 3px solid color-mix(in srgb, currentColor 18%, transparent);
+        border-top-color: currentColor;
+        animation: sk-boot-spin 900ms linear infinite;
+      }
+      html[data-native] .sk-boot { display: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .sk-boot::before { animation: none; }
+      }
+      @keyframes sk-boot-spin { to { transform: rotate(1turn); } }
+    </style>
     <script>
       // Native modal surfaces paint on a transparent window; flag them before
       // first paint so the dashboard never flashes behind the sheet.
@@ -25,7 +47,7 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="sk-boot" role="status" aria-label="Memuat"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,0 +1,24 @@
+{
+  "name": "sekeping-wasm",
+  "type": "module",
+  "collaborators": [
+    "Sekeping contributors"
+  ],
+  "description": "WebAssembly boundary for the Sekeping Rust core.",
+  "version": "1.3.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shabriafrizal/sekeping"
+  },
+  "files": [
+    "sekeping_wasm_bg.wasm",
+    "sekeping_wasm.js",
+    "sekeping_wasm.d.ts"
+  ],
+  "main": "sekeping_wasm.js",
+  "types": "sekeping_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

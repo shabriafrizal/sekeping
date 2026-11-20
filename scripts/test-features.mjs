@@ -206,7 +206,10 @@ await wait(500);
 check('recurring page lists schedules', (await page.$$('.sk-rec-row')).length >= 2);
 check('subscription is labelled', (await page.evaluate(() => document.body.innerText)).includes('Langganan'));
 const beforePost = await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).txs.length);
-await page.evaluate(() => document.querySelector('.sk-rec-post')?.click());
+await page.evaluate(() => {
+  const row = [...document.querySelectorAll('.sk-rec-row')].find((el) => (el.textContent || '').includes('Netflix'));
+  row?.querySelector('.sk-rec-post')?.click();
+});
 await wait(500);
 const afterPost = await page.evaluate(() => JSON.parse(localStorage.getItem('sekeping.state.v1')).txs.length);
 check('manual "Catat" posts one occurrence', afterPost === beforePost + 1, `${beforePost} → ${afterPost}`);

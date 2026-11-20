@@ -12,3 +12,15 @@ android/app/src/main/assets/www/
 android/.idea/
 *.iml
 .gradle/
+
+# The Rust workspace is part of the app: keep its manifests and lockfile.
+!rust/Cargo.toml
+!rust/**/Cargo.toml
+!rust/Cargo.lock
+rust/cases/record.mjs
+
+# wasm-pack output is generated but committed so npm builds work without Rust.
+!src/wasm/
+
+# Rust build output
+/rust/target/

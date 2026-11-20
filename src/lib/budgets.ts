@@ -1,5 +1,6 @@
 import type { Budget, Category, Tx } from './types';
 import { monthRange, toISO } from './format';
+import { core, parseCoreJson } from './rust';
 
 /** All month keys (YYYY-MM) from `start` through `end`, inclusive. */
 export function monthsBetween(startMonth: string, endMonth: string): string[] {
@@ -54,41 +55,15 @@ export interface BudgetProgress {
  * Only positive leftovers roll over; overspending does not shrink next month.
  */
 export function budgetProgress(budget: Budget, txs: Tx[], month: string, category?: Category): BudgetProgress {
-  const empty: BudgetProgress = {
-    budget,
-    category,
-    carryIn: 0,
-    available: 0,
-    spent: 0,
-    remaining: 0,
-    ratio: 0,
-    over: 0,
-    monthsTracked: 0,
-  };
-  if (month < budget.startMonth) return empty;
-
-  let carry = 0;
-  let available = 0;
-  let spent = 0;
-  const months = monthsBetween(budget.startMonth, month);
-  for (const key of months) {
-    available = budget.amount + carry;
-    spent = spentInCategory(txs, budget.categoryId, key);
-    carry = budget.rollover ? Math.max(0, available - spent) : 0;
-  }
-
-  const remaining = available - spent;
-  return {
-    budget,
-    category,
-    carryIn: budget.rollover ? Math.max(0, available - budget.amount) : 0,
-    available,
-    spent,
-    remaining,
-    ratio: available > 0 ? Math.min(spent / available, 1) : spent > 0 ? 1 : 0,
-    over: Math.max(0, spent - available),
-    monthsTracked: months.length,
-  };
+  return parseCoreJson<BudgetProgress>(
+    core().budget_progress_one(
+      JSON.stringify(budget),
+      JSON.stringify(txs),
+      month,
+      JSON.stringify(category ?? null),
+    ),
+    'budget_progress_one',
+  );
 }
 
 export function toneFor(progress: BudgetProgress): 'ok' | 'warning' | 'over' {

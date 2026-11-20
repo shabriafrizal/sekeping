@@ -1,0 +1,18 @@
+[package]
+name = "sekeping-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Command line tools for Sekeping ledgers and encrypted backups."
+
+[[bin]]
+name = "sekeping"
+path = "src/main.rs"
+
+[dependencies]
+sekeping-core = { path = "../sekeping-core" }
+serde.workspace = true
+serde_json.workspace = true
+clap = { version = "4", features = ["derive", "env"] }
