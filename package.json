@@ -1,6 +1,6 @@
 {
   "name": "sekeping",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A calm, local-first personal finance web app: accounts, transactions, receipt OCR with confirmation, optional JEV checks, recurring bills, budgets, reports, CSV import, encrypted backups, debts and receivables in the browser.",
   "scripts": {
     "test": "node scripts/test.mjs",

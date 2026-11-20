@@ -11,6 +11,7 @@ Track accounts, spending, transfers, reports, debts and receivables — in the b
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2F6B57"></a>
   <img alt="React 19" src="https://img.shields.io/badge/React-19-2F6B57">
   <img alt="TypeScript 5" src="https://img.shields.io/badge/TypeScript-5-2F6B57">
+  <img alt="Core: Rust + WebAssembly" src="https://img.shields.io/badge/core-Rust%20%2B%20WASM-B7410E">
   <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-2F6B57"></a>
 </p>
 
@@ -64,6 +65,23 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
 | **Responsive** | Sidebar and top bar on desktop; drawer navigation and a top action bar on phones |
 | **Android app** | Offline APK plus 4×1 / 4×2 / 2×2 home-screen widgets chosen directly from the launcher's widget picker: the chosen provider and its balance, the total of all accounts, an eye that masks amounts with `***`, and three large icon-only quick actions (see [Android app](#android-app)) |
 | **Design** | One Astryx frame, one panel rhythm and one type scale on every screen (see [Design](#design)) |
+
+## What's new in 1.4
+
+- **Rust core.** Accounts, transactions, budgets, recurring schedules, CSV import,
+  receipt parsing and encrypted backups now run in a Rust crate compiled to WebAssembly.
+  The React UI, local storage and offline behaviour are unchanged; the same code also
+  powers a small `sekeping` command line for validating, exporting and unlocking backups.
+- **A new Android build.** `sekeping-1.4.0.apk` bundles the same WASM core, so the APK
+  gains the deterministic receipt and CSV engines without changing the scanner, widgets or
+  data location. Existing ledgers and `.sekeping` backups keep working.
+- **Receipt fixes.** Day-first dates above the 12th (`19/11/2026`) now parse correctly, and
+  `Transfer ke Dompet` detects the destination account instead of guessing the first one.
+- **Hardening.** Restoring a crafted backup can no longer request an absurd PBKDF2 cost,
+  and CSV exports neutralise spreadsheet formula prefixes.
+
+The port is locked by golden cases recorded from the previous TypeScript modules; see
+[`rust/README.md`](rust/README.md) for the crate layout and the command-line usage.
 
 ## What's new in 1.3
 
@@ -141,7 +159,7 @@ The same build ships as an APK with an offline WebView and a home-screen widget.
 
 ### Install
 
-1. Download **[sekeping-1.3.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.3.0/sekeping-1.3.0.apk)** (13 MB) or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
+1. Download **[sekeping-1.4.0.apk](https://github.com/shabriafrizal/sekeping/releases/download/v1.4.0/sekeping-1.4.0.apk)** or browse [Releases](https://github.com/shabriafrizal/sekeping/releases).
 2. Open it on the phone and allow installs from this source when prompted.
 3. Requires Android 7.0 (API 24) or newer. It works offline; no account needed.
 

@@ -5,7 +5,7 @@
     "Sekeping contributors"
   ],
   "description": "WebAssembly boundary for the Sekeping Rust core.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "license": "MIT",
   "repository": {
     "type": "git",
