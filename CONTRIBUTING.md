@@ -23,15 +23,27 @@ npm run dev
 Node.js 20+ and npm 10+ are required. The app needs no environment variables and no
 services.
 
+The domain core is Rust. The generated WASM is committed, so the UI runs without a
+Rust toolchain; install Rust and `wasm-pack` if you change a crate:
+
+```bash
+cargo install wasm-pack
+npm run build:wasm
+npm run test:rust
+```
+
 ## Checks
 
 Run these before opening a pull request:
 
 ```bash
 npm run typecheck   # tsc --noEmit
-npm run build       # production build
+npm run test:rust   # cargo tests + golden parity
+npm run build       # production build (uses the committed WASM)
 npm test            # browser smoke tests
 ```
+
+If you changed Rust, run `npm run build:wasm` before `npm run build`.
 
 The smoke tests need a preview server:
 
@@ -55,6 +67,11 @@ lives somewhere else.
 - New UI should use Astryx components and theme tokens; avoid raw hex values and one-off
   CSS when a token exists.
 - Comments explain *why*, not *what*.
+- Pure domain logic belongs in `rust/crates/sekeping-core`; keep JSON field names
+  `camelCase` so browser backups load unchanged.
+- `format.ts` keeps `Intl` formatting. Do not copy locale tables into Rust.
+- Re-record golden cases (`npm run cases`) when a ported rule changes, and explain
+  intentional behaviour fixes in the pull request.
 
 ## Android module
 

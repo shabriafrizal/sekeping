@@ -6,6 +6,7 @@
     "test": "node scripts/test.mjs",
     "dev": "vite",
     "build": "vite build",
+    "build:wasm": "wasm-pack build rust/crates/sekeping-wasm --target web --out-dir ../../../src/wasm --release",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "shots": "node scripts/shots.mjs",
@@ -15,7 +16,9 @@
     "test:widget": "node scripts/test-widget.mjs",
     "proxy": "node scripts/jev-proxy.mjs",
     "test:scan": "node scripts/test-scan.mjs",
-    "docs:scan": "node scripts/scan-shot.mjs"
+    "docs:scan": "node scripts/scan-shot.mjs",
+    "test:rust": "cargo test --manifest-path rust/Cargo.toml",
+    "cases": "npx esbuild rust/cases/record.ts --bundle --platform=node --format=esm --outfile=rust/cases/record.mjs && node rust/cases/record.mjs"
   },
   "keywords": [],
   "author": "",

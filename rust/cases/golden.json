@@ -1,0 +1,1837 @@
+{
+  "generatedAt": "2026-11-20T08:20:19.532Z",
+  "node": "v24.22.1",
+  "money": [
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 0,
+      "money": "Rp 0",
+      "compactMoney": "Rp 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 1,
+      "money": "Rp 1",
+      "compactMoney": "Rp 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 12.5,
+      "money": "Rp 13",
+      "compactMoney": "Rp 12,5",
+      "compactNumber": "12,5",
+      "plainNumber": "12,5"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 999,
+      "money": "Rp 999",
+      "compactMoney": "Rp 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 1000,
+      "money": "Rp 1.000",
+      "compactMoney": "Rp 1 Rb",
+      "compactNumber": "1 Rb",
+      "plainNumber": "1.000"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 1234.56,
+      "money": "Rp 1.235",
+      "compactMoney": "Rp 1,2 Rb",
+      "compactNumber": "1,2 Rb",
+      "plainNumber": "1.234,56"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 25000,
+      "money": "Rp 25.000",
+      "compactMoney": "Rp 25 Rb",
+      "compactNumber": "25 Rb",
+      "plainNumber": "25.000"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 1500000,
+      "money": "Rp 1.500.000",
+      "compactMoney": "Rp 1,5 Jt",
+      "compactNumber": "1,5 Jt",
+      "plainNumber": "1.500.000"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": 123456789.9,
+      "money": "Rp 123.456.790",
+      "compactMoney": "Rp 123,5 Jt",
+      "compactNumber": "123,5 Jt",
+      "plainNumber": "123.456.789,9"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "value": -2500,
+      "money": "−Rp 2.500",
+      "compactMoney": "−Rp 2,5 Rb",
+      "compactNumber": "−2,5 Rb",
+      "plainNumber": "2.500"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 0,
+      "money": "$ 0,00",
+      "compactMoney": "$ 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 1,
+      "money": "$ 1,00",
+      "compactMoney": "$ 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 12.5,
+      "money": "$ 12,50",
+      "compactMoney": "$ 12,5",
+      "compactNumber": "12,5",
+      "plainNumber": "12,5"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 999,
+      "money": "$ 999,00",
+      "compactMoney": "$ 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 1000,
+      "money": "$ 1.000,00",
+      "compactMoney": "$ 1 Rb",
+      "compactNumber": "1 Rb",
+      "plainNumber": "1.000"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 1234.56,
+      "money": "$ 1.234,56",
+      "compactMoney": "$ 1,2 Rb",
+      "compactNumber": "1,2 Rb",
+      "plainNumber": "1.234,56"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 25000,
+      "money": "$ 25.000,00",
+      "compactMoney": "$ 25 Rb",
+      "compactNumber": "25 Rb",
+      "plainNumber": "25.000"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 1500000,
+      "money": "$ 1.500.000,00",
+      "compactMoney": "$ 1,5 Jt",
+      "compactNumber": "1,5 Jt",
+      "plainNumber": "1.500.000"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": 123456789.9,
+      "money": "$ 123.456.789,90",
+      "compactMoney": "$ 123,5 Jt",
+      "compactNumber": "123,5 Jt",
+      "plainNumber": "123.456.789,9"
+    },
+    {
+      "language": "id",
+      "currency": "USD",
+      "value": -2500,
+      "money": "−$ 2.500,00",
+      "compactMoney": "−$ 2,5 Rb",
+      "compactNumber": "−2,5 Rb",
+      "plainNumber": "2.500"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 0,
+      "money": "€ 0,00",
+      "compactMoney": "€ 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 1,
+      "money": "€ 1,00",
+      "compactMoney": "€ 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 12.5,
+      "money": "€ 12,50",
+      "compactMoney": "€ 12,5",
+      "compactNumber": "12,5",
+      "plainNumber": "12,5"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 999,
+      "money": "€ 999,00",
+      "compactMoney": "€ 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 1000,
+      "money": "€ 1.000,00",
+      "compactMoney": "€ 1 Rb",
+      "compactNumber": "1 Rb",
+      "plainNumber": "1.000"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 1234.56,
+      "money": "€ 1.234,56",
+      "compactMoney": "€ 1,2 Rb",
+      "compactNumber": "1,2 Rb",
+      "plainNumber": "1.234,56"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 25000,
+      "money": "€ 25.000,00",
+      "compactMoney": "€ 25 Rb",
+      "compactNumber": "25 Rb",
+      "plainNumber": "25.000"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 1500000,
+      "money": "€ 1.500.000,00",
+      "compactMoney": "€ 1,5 Jt",
+      "compactNumber": "1,5 Jt",
+      "plainNumber": "1.500.000"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": 123456789.9,
+      "money": "€ 123.456.789,90",
+      "compactMoney": "€ 123,5 Jt",
+      "compactNumber": "123,5 Jt",
+      "plainNumber": "123.456.789,9"
+    },
+    {
+      "language": "id",
+      "currency": "EUR",
+      "value": -2500,
+      "money": "−€ 2.500,00",
+      "compactMoney": "−€ 2,5 Rb",
+      "compactNumber": "−2,5 Rb",
+      "plainNumber": "2.500"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 0,
+      "money": "Rp 0",
+      "compactMoney": "Rp 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 1,
+      "money": "Rp 1",
+      "compactMoney": "Rp 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 12.5,
+      "money": "Rp 13",
+      "compactMoney": "Rp 12.5",
+      "compactNumber": "12.5",
+      "plainNumber": "12.5"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 999,
+      "money": "Rp 999",
+      "compactMoney": "Rp 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 1000,
+      "money": "Rp 1,000",
+      "compactMoney": "Rp 1 K",
+      "compactNumber": "1 K",
+      "plainNumber": "1,000"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 1234.56,
+      "money": "Rp 1,235",
+      "compactMoney": "Rp 1.2 K",
+      "compactNumber": "1.2 K",
+      "plainNumber": "1,234.56"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 25000,
+      "money": "Rp 25,000",
+      "compactMoney": "Rp 25 K",
+      "compactNumber": "25 K",
+      "plainNumber": "25,000"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 1500000,
+      "money": "Rp 1,500,000",
+      "compactMoney": "Rp 1.5 M",
+      "compactNumber": "1.5 M",
+      "plainNumber": "1,500,000"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": 123456789.9,
+      "money": "Rp 123,456,790",
+      "compactMoney": "Rp 123.5 M",
+      "compactNumber": "123.5 M",
+      "plainNumber": "123,456,789.9"
+    },
+    {
+      "language": "en",
+      "currency": "IDR",
+      "value": -2500,
+      "money": "−Rp 2,500",
+      "compactMoney": "−Rp 2.5 K",
+      "compactNumber": "−2.5 K",
+      "plainNumber": "2,500"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 0,
+      "money": "$ 0.00",
+      "compactMoney": "$ 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 1,
+      "money": "$ 1.00",
+      "compactMoney": "$ 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 12.5,
+      "money": "$ 12.50",
+      "compactMoney": "$ 12.5",
+      "compactNumber": "12.5",
+      "plainNumber": "12.5"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 999,
+      "money": "$ 999.00",
+      "compactMoney": "$ 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 1000,
+      "money": "$ 1,000.00",
+      "compactMoney": "$ 1 K",
+      "compactNumber": "1 K",
+      "plainNumber": "1,000"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 1234.56,
+      "money": "$ 1,234.56",
+      "compactMoney": "$ 1.2 K",
+      "compactNumber": "1.2 K",
+      "plainNumber": "1,234.56"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 25000,
+      "money": "$ 25,000.00",
+      "compactMoney": "$ 25 K",
+      "compactNumber": "25 K",
+      "plainNumber": "25,000"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 1500000,
+      "money": "$ 1,500,000.00",
+      "compactMoney": "$ 1.5 M",
+      "compactNumber": "1.5 M",
+      "plainNumber": "1,500,000"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": 123456789.9,
+      "money": "$ 123,456,789.90",
+      "compactMoney": "$ 123.5 M",
+      "compactNumber": "123.5 M",
+      "plainNumber": "123,456,789.9"
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "value": -2500,
+      "money": "−$ 2,500.00",
+      "compactMoney": "−$ 2.5 K",
+      "compactNumber": "−2.5 K",
+      "plainNumber": "2,500"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 0,
+      "money": "€ 0.00",
+      "compactMoney": "€ 0",
+      "compactNumber": "0",
+      "plainNumber": "0"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 1,
+      "money": "€ 1.00",
+      "compactMoney": "€ 1",
+      "compactNumber": "1",
+      "plainNumber": "1"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 12.5,
+      "money": "€ 12.50",
+      "compactMoney": "€ 12.5",
+      "compactNumber": "12.5",
+      "plainNumber": "12.5"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 999,
+      "money": "€ 999.00",
+      "compactMoney": "€ 999",
+      "compactNumber": "999",
+      "plainNumber": "999"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 1000,
+      "money": "€ 1,000.00",
+      "compactMoney": "€ 1 K",
+      "compactNumber": "1 K",
+      "plainNumber": "1,000"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 1234.56,
+      "money": "€ 1,234.56",
+      "compactMoney": "€ 1.2 K",
+      "compactNumber": "1.2 K",
+      "plainNumber": "1,234.56"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 25000,
+      "money": "€ 25,000.00",
+      "compactMoney": "€ 25 K",
+      "compactNumber": "25 K",
+      "plainNumber": "25,000"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 1500000,
+      "money": "€ 1,500,000.00",
+      "compactMoney": "€ 1.5 M",
+      "compactNumber": "1.5 M",
+      "plainNumber": "1,500,000"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": 123456789.9,
+      "money": "€ 123,456,789.90",
+      "compactMoney": "€ 123.5 M",
+      "compactNumber": "123.5 M",
+      "plainNumber": "123,456,789.9"
+    },
+    {
+      "language": "en",
+      "currency": "EUR",
+      "value": -2500,
+      "money": "−€ 2,500.00",
+      "compactMoney": "−€ 2.5 K",
+      "compactNumber": "−2.5 K",
+      "plainNumber": "2,500"
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "Rp 25.000",
+      "parsed": 25000
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "25.000,50",
+      "parsed": 2500050
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "1,234.56",
+      "parsed": 123456
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "25000",
+      "parsed": 25000
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "-15.000",
+      "parsed": 15000
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "1.234.567",
+      "parsed": 1234567
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "",
+      "parsed": 0
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "abc",
+      "parsed": 0
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "12,5",
+      "parsed": 125
+    },
+    {
+      "language": "id",
+      "currency": "IDR",
+      "parse": "0,5",
+      "parsed": 5
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "Rp 25.000",
+      "parsed": 25
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "25.000,50",
+      "parsed": 25000.5
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "1,234.56",
+      "parsed": 1234.56
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "25000",
+      "parsed": 25000
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "-15.000",
+      "parsed": 15
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "1.234.567",
+      "parsed": 1.23
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "",
+      "parsed": 0
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "abc",
+      "parsed": 0
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "12,5",
+      "parsed": 12.5
+    },
+    {
+      "language": "en",
+      "currency": "USD",
+      "parse": "0,5",
+      "parsed": 0.5
+    },
+    {
+      "initials": "Cash",
+      "value": "C"
+    },
+    {
+      "initials": "Bank BCA",
+      "value": "BB"
+    },
+    {
+      "initials": "  ",
+      "value": ""
+    },
+    {
+      "initials": "dompet utama",
+      "value": "DU"
+    },
+    {
+      "initials": "A",
+      "value": "A"
+    }
+  ],
+  "dates": [
+    {
+      "addMonths": "2026-01-31",
+      "delta": 1,
+      "result": "2026-03-03"
+    },
+    {
+      "addMonths": "2024-02-29",
+      "delta": 12,
+      "result": "2025-03-01"
+    },
+    {
+      "addMonths": "2026-11-20",
+      "delta": -1,
+      "result": "2026-10-20"
+    },
+    {
+      "addMonths": "2025-12-01",
+      "delta": 2,
+      "result": "2026-02-01"
+    },
+    {
+      "addMonths": "2026-03-31",
+      "delta": -2,
+      "result": "2026-01-31"
+    },
+    {
+      "monthRange": "2026-02-10",
+      "result": {
+        "from": "2026-02-01",
+        "to": "2026-02-28"
+      }
+    },
+    {
+      "monthRange": "2024-02-10",
+      "result": {
+        "from": "2024-02-01",
+        "to": "2024-02-29"
+      }
+    },
+    {
+      "monthRange": "2026-12-31",
+      "result": {
+        "from": "2026-12-01",
+        "to": "2026-12-31"
+      }
+    },
+    {
+      "monthRange": "2026-01-01",
+      "result": {
+        "from": "2026-01-01",
+        "to": "2026-01-31"
+      }
+    },
+    {
+      "daysBetween": [
+        "2026-01-01",
+        "2026-01-31"
+      ],
+      "result": 30
+    },
+    {
+      "daysBetween": [
+        "2025-12-31",
+        "2026-01-01"
+      ],
+      "result": 1
+    },
+    {
+      "daysBetween": [
+        "2026-03-01",
+        "2026-02-01"
+      ],
+      "result": -28
+    },
+    {
+      "monthKey": "2026-11-20",
+      "result": "2026-11"
+    },
+    {
+      "monthKey": "2026-01-01T10:00:00",
+      "result": "2026-01"
+    },
+    {
+      "monthKey": "bad",
+      "result": "bad"
+    },
+    {
+      "txSortValue": {
+        "date": "2026-11-20",
+        "time": "09:30"
+      },
+      "result": 1795167000000
+    },
+    {
+      "txSortValue": {
+        "date": "2026-11-20"
+      },
+      "result": 1795132800000
+    },
+    {
+      "txSortValue": {
+        "date": "2026-11-19",
+        "time": "23:59"
+      },
+      "result": 1795132740000
+    }
+  ],
+  "budgets": [
+    {
+      "monthsBetween": [
+        "2025-11",
+        "2026-03"
+      ],
+      "result": [
+        "2025-11",
+        "2025-12",
+        "2026-01",
+        "2026-02",
+        "2026-03"
+      ]
+    },
+    {
+      "monthsBetween": [
+        "2026-01",
+        "2026-01"
+      ],
+      "result": [
+        "2026-01"
+      ]
+    },
+    {
+      "monthsBetween": [
+        "2026-03",
+        "2026-01"
+      ],
+      "result": []
+    },
+    {
+      "rollover": true,
+      "month": "2026-08",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": true,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": true,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 0,
+        "spent": 0,
+        "remaining": 0,
+        "ratio": 0,
+        "over": 0,
+        "monthsTracked": 0
+      },
+      "tone": "ok"
+    },
+    {
+      "rollover": true,
+      "month": "2026-09",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": true,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": true,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 200,
+        "spent": 100,
+        "remaining": 100,
+        "ratio": 0.5,
+        "over": 0,
+        "monthsTracked": 1
+      },
+      "tone": "ok"
+    },
+    {
+      "rollover": true,
+      "month": "2026-10",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": true,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": true,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 100,
+        "available": 300,
+        "spent": 300,
+        "remaining": 0,
+        "ratio": 1,
+        "over": 0,
+        "monthsTracked": 2
+      },
+      "tone": "warning"
+    },
+    {
+      "rollover": true,
+      "month": "2026-11",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": true,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": true,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 200,
+        "spent": 50,
+        "remaining": 150,
+        "ratio": 0.25,
+        "over": 0,
+        "monthsTracked": 3
+      },
+      "tone": "ok"
+    },
+    {
+      "rollover": false,
+      "month": "2026-08",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": false,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": false,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 0,
+        "spent": 0,
+        "remaining": 0,
+        "ratio": 0,
+        "over": 0,
+        "monthsTracked": 0
+      },
+      "tone": "ok"
+    },
+    {
+      "rollover": false,
+      "month": "2026-09",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": false,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": false,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 200,
+        "spent": 100,
+        "remaining": 100,
+        "ratio": 0.5,
+        "over": 0,
+        "monthsTracked": 1
+      },
+      "tone": "ok"
+    },
+    {
+      "rollover": false,
+      "month": "2026-10",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": false,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": false,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 200,
+        "spent": 300,
+        "remaining": -100,
+        "ratio": 1,
+        "over": 100,
+        "monthsTracked": 2
+      },
+      "tone": "over"
+    },
+    {
+      "rollover": false,
+      "month": "2026-11",
+      "budget": {
+        "id": "b1",
+        "categoryId": "food",
+        "amount": 200,
+        "rollover": false,
+        "startMonth": "2026-09",
+        "active": true
+      },
+      "category": {
+        "id": "food",
+        "name": "Food",
+        "icon": "bag",
+        "type": "expense",
+        "active": true
+      },
+      "progress": {
+        "budget": {
+          "id": "b1",
+          "categoryId": "food",
+          "amount": 200,
+          "rollover": false,
+          "startMonth": "2026-09",
+          "active": true
+        },
+        "category": {
+          "id": "food",
+          "name": "Food",
+          "icon": "bag",
+          "type": "expense",
+          "active": true
+        },
+        "carryIn": 0,
+        "available": 200,
+        "spent": 50,
+        "remaining": 150,
+        "ratio": 0.25,
+        "over": 0,
+        "monthsTracked": 3
+      },
+      "tone": "ok"
+    }
+  ],
+  "recurring": [
+    {
+      "id": "r1",
+      "item": {
+        "id": "r1",
+        "name": "Rent",
+        "type": "expense",
+        "amount": 1000,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-31",
+        "nextDate": "2026-01-31",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-11-20",
+      "due": [
+        "2026-01-31",
+        "2026-02-28",
+        "2026-03-28",
+        "2026-04-28",
+        "2026-05-28",
+        "2026-06-28",
+        "2026-07-28",
+        "2026-08-28",
+        "2026-09-28",
+        "2026-10-28"
+      ],
+      "isDue": true,
+      "monthly": 1000,
+      "days": -293
+    },
+    {
+      "id": "r1",
+      "item": {
+        "id": "r1",
+        "name": "Rent",
+        "type": "expense",
+        "amount": 1000,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-31",
+        "nextDate": "2026-01-31",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-03-15",
+      "due": [
+        "2026-01-31",
+        "2026-02-28"
+      ],
+      "isDue": true,
+      "monthly": 1000,
+      "days": -43
+    },
+    {
+      "id": "r1",
+      "item": {
+        "id": "r1",
+        "name": "Rent",
+        "type": "expense",
+        "amount": 1000,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-31",
+        "nextDate": "2026-01-31",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-01-15",
+      "due": [],
+      "isDue": false,
+      "monthly": 1000,
+      "days": 16
+    },
+    {
+      "id": "r2",
+      "item": {
+        "id": "r2",
+        "name": "Weekly",
+        "type": "expense",
+        "amount": 50,
+        "accountId": "a",
+        "interval": "weekly",
+        "startDate": "2026-11-01",
+        "nextDate": "2026-11-01",
+        "active": true,
+        "isSubscription": true,
+        "createdAt": 0
+      },
+      "today": "2026-11-20",
+      "due": [
+        "2026-11-01",
+        "2026-11-08",
+        "2026-11-15"
+      ],
+      "isDue": true,
+      "monthly": 217,
+      "days": -19
+    },
+    {
+      "id": "r2",
+      "item": {
+        "id": "r2",
+        "name": "Weekly",
+        "type": "expense",
+        "amount": 50,
+        "accountId": "a",
+        "interval": "weekly",
+        "startDate": "2026-11-01",
+        "nextDate": "2026-11-01",
+        "active": true,
+        "isSubscription": true,
+        "createdAt": 0
+      },
+      "today": "2026-03-15",
+      "due": [],
+      "isDue": false,
+      "monthly": 217,
+      "days": 231
+    },
+    {
+      "id": "r2",
+      "item": {
+        "id": "r2",
+        "name": "Weekly",
+        "type": "expense",
+        "amount": 50,
+        "accountId": "a",
+        "interval": "weekly",
+        "startDate": "2026-11-01",
+        "nextDate": "2026-11-01",
+        "active": true,
+        "isSubscription": true,
+        "createdAt": 0
+      },
+      "today": "2026-01-15",
+      "due": [],
+      "isDue": false,
+      "monthly": 217,
+      "days": 290
+    },
+    {
+      "id": "r3",
+      "item": {
+        "id": "r3",
+        "name": "Old",
+        "type": "expense",
+        "amount": 20,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-01",
+        "nextDate": "2026-01-01",
+        "endDate": "2026-03-01",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-11-20",
+      "due": [
+        "2026-01-01",
+        "2026-02-01",
+        "2026-03-01"
+      ],
+      "isDue": true,
+      "monthly": 20,
+      "days": -323
+    },
+    {
+      "id": "r3",
+      "item": {
+        "id": "r3",
+        "name": "Old",
+        "type": "expense",
+        "amount": 20,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-01",
+        "nextDate": "2026-01-01",
+        "endDate": "2026-03-01",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-03-15",
+      "due": [
+        "2026-01-01",
+        "2026-02-01",
+        "2026-03-01"
+      ],
+      "isDue": true,
+      "monthly": 20,
+      "days": -73
+    },
+    {
+      "id": "r3",
+      "item": {
+        "id": "r3",
+        "name": "Old",
+        "type": "expense",
+        "amount": 20,
+        "accountId": "a",
+        "interval": "monthly",
+        "startDate": "2026-01-01",
+        "nextDate": "2026-01-01",
+        "endDate": "2026-03-01",
+        "active": true,
+        "isSubscription": false,
+        "createdAt": 0
+      },
+      "today": "2026-01-15",
+      "due": [
+        "2026-01-01"
+      ],
+      "isDue": true,
+      "monthly": 20,
+      "days": -14
+    },
+    {
+      "initialNextDate": [
+        "2026-01-31",
+        "monthly",
+        "2026-11-20"
+      ],
+      "result": "2026-11-28"
+    },
+    {
+      "advanceDate": [
+        "2026-01-31",
+        "monthly"
+      ],
+      "result": "2026-02-28"
+    },
+    {
+      "advanceDate": [
+        "2024-02-29",
+        "monthly"
+      ],
+      "result": "2024-03-29"
+    },
+    {
+      "advanceDate": [
+        "2026-12-31",
+        "monthly"
+      ],
+      "result": "2027-01-31"
+    },
+    {
+      "initialNextDate": [
+        "2026-11-20",
+        "weekly",
+        "2026-11-20"
+      ],
+      "result": "2026-11-20"
+    },
+    {
+      "advanceDate": [
+        "2026-01-31",
+        "weekly"
+      ],
+      "result": "2026-02-07"
+    },
+    {
+      "advanceDate": [
+        "2024-02-29",
+        "weekly"
+      ],
+      "result": "2024-03-07"
+    },
+    {
+      "advanceDate": [
+        "2026-12-31",
+        "weekly"
+      ],
+      "result": "2027-01-07"
+    },
+    {
+      "initialNextDate": [
+        "2024-02-29",
+        "yearly",
+        "2026-11-20"
+      ],
+      "result": "2027-02-28"
+    },
+    {
+      "advanceDate": [
+        "2026-01-31",
+        "yearly"
+      ],
+      "result": "2027-01-31"
+    },
+    {
+      "advanceDate": [
+        "2024-02-29",
+        "yearly"
+      ],
+      "result": "2025-02-28"
+    },
+    {
+      "advanceDate": [
+        "2026-12-31",
+        "yearly"
+      ],
+      "result": "2027-12-31"
+    }
+  ],
+  "csv": [
+    {
+      "parseCsv": "date,amount,note\n2026-01-02,25000,Coffee\n2026-01-03,-15000,Refund\n",
+      "table": {
+        "headers": [
+          "date",
+          "amount",
+          "note"
+        ],
+        "rows": [
+          [
+            "2026-01-02",
+            "25000",
+            "Coffee"
+          ],
+          [
+            "2026-01-03",
+            "-15000",
+            "Refund"
+          ]
+        ],
+        "delimiter": ","
+      },
+      "mapping": {
+        "date": 0,
+        "amount": 1,
+        "note": 2
+      }
+    },
+    {
+      "parseCsv": "Tanggal;Jumlah;Keterangan\n02/01/2026;\"25.000\";\"Kopi, susu\"\n03/01/2026;\"1.500.000\";Gaji\n",
+      "table": {
+        "headers": [
+          "Tanggal",
+          "Jumlah",
+          "Keterangan"
+        ],
+        "rows": [
+          [
+            "02/01/2026",
+            "25.000",
+            "Kopi, susu"
+          ],
+          [
+            "03/01/2026",
+            "1.500.000",
+            "Gaji"
+          ]
+        ],
+        "delimiter": ";"
+      },
+      "mapping": {
+        "date": 0,
+        "amount": 1,
+        "note": 2
+      }
+    },
+    {
+      "parseCsv": "﻿\"date\",\"amount\",\"note\"\r\n\"2026-02-01\",\"1000\",\"multi\nline\"\r\n",
+      "table": {
+        "headers": [
+          "date",
+          "amount",
+          "note"
+        ],
+        "rows": [
+          [
+            "2026-02-01",
+            "1000",
+            "multi\nline"
+          ]
+        ],
+        "delimiter": ","
+      },
+      "mapping": {
+        "date": 0,
+        "amount": 1,
+        "note": 2
+      }
+    },
+    {
+      "parseCsv": "a,b\n1,2\n\n3,4\n",
+      "table": {
+        "headers": [
+          "a",
+          "b"
+        ],
+        "rows": [
+          [
+            "1",
+            "2"
+          ],
+          [
+            "3",
+            "4"
+          ]
+        ],
+        "delimiter": ","
+      },
+      "mapping": {}
+    },
+    {
+      "parseDateValue": [
+        "2026-01-02",
+        "auto"
+      ],
+      "result": "2026-01-02"
+    },
+    {
+      "parseDateValue": [
+        "02/01/2026",
+        "auto"
+      ],
+      "result": "2026-01-02"
+    },
+    {
+      "parseDateValue": [
+        "02/01/2026",
+        "dmy"
+      ],
+      "result": "2026-01-02"
+    },
+    {
+      "parseDateValue": [
+        "01/02/2026",
+        "mdy"
+      ],
+      "result": "2026-01-02"
+    },
+    {
+      "parseDateValue": [
+        "2026/1/2",
+        "auto"
+      ],
+      "result": "2026-01-02"
+    },
+    {
+      "parseDateValue": [
+        "2 Jan 2026",
+        "auto"
+      ],
+      "result": null
+    },
+    {
+      "parseDateValue": [
+        "nope",
+        "auto"
+      ],
+      "result": null
+    },
+    {
+      "parseAmountValue": "25.000",
+      "result": 25000
+    },
+    {
+      "parseAmountValue": "1,234.56",
+      "result": 1234.56
+    },
+    {
+      "parseAmountValue": "1.234.567",
+      "result": 1234567
+    },
+    {
+      "parseAmountValue": "-15.000",
+      "result": -15000
+    },
+    {
+      "parseAmountValue": "(12.500)",
+      "result": -12500
+    },
+    {
+      "parseAmountValue": "Rp 25.000",
+      "result": 25000
+    },
+    {
+      "parseAmountValue": "0,5",
+      "result": 0.5
+    },
+    {
+      "parseAmountValue": "12.5",
+      "result": 12.5
+    },
+    {
+      "buildImport": {
+        "type": "expense",
+        "dateFormat": "auto",
+        "inferSign": true,
+        "dedupe": true
+      },
+      "preview": {
+        "rows": [
+          {
+            "line": 2,
+            "date": "2026-01-02",
+            "type": "expense",
+            "amount": 25000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Coffee",
+            "duplicate": true
+          },
+          {
+            "line": 3,
+            "date": "2026-01-03",
+            "type": "expense",
+            "amount": 15000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Refund",
+            "duplicate": false
+          },
+          {
+            "line": 4,
+            "date": "",
+            "type": "expense",
+            "amount": null,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Broken",
+            "error": "Tanggal tidak dikenali: bad",
+            "duplicate": false
+          },
+          {
+            "line": 5,
+            "date": "2026-01-02",
+            "type": "expense",
+            "amount": 25000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Coffee",
+            "duplicate": true
+          }
+        ],
+        "valid": 1,
+        "errors": 1,
+        "duplicates": 2
+      }
+    },
+    {
+      "buildImport": {
+        "type": "expense",
+        "dateFormat": "auto",
+        "inferSign": false,
+        "dedupe": false
+      },
+      "preview": {
+        "rows": [
+          {
+            "line": 2,
+            "date": "2026-01-02",
+            "type": "expense",
+            "amount": 25000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Coffee",
+            "duplicate": false
+          },
+          {
+            "line": 3,
+            "date": "2026-01-03",
+            "type": "expense",
+            "amount": 15000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Refund",
+            "duplicate": false
+          },
+          {
+            "line": 4,
+            "date": "",
+            "type": "expense",
+            "amount": null,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Broken",
+            "error": "Tanggal tidak dikenali: bad",
+            "duplicate": false
+          },
+          {
+            "line": 5,
+            "date": "2026-01-02",
+            "type": "expense",
+            "amount": 25000,
+            "fee": 0,
+            "account": "Cash",
+            "toAccount": "",
+            "category": "Food",
+            "note": "Coffee",
+            "duplicate": false
+          }
+        ],
+        "valid": 3,
+        "errors": 1,
+        "duplicates": 0
+      }
+    }
+  ],
+  "crypto": [
+    {
+      "payload": "{\"version\":2,\"txs\":[{\"id\":\"t\",\"amount\":25000}]}",
+      "password": "correct horse battery",
+      "envelope": {
+        "format": "sekeping-encrypted",
+        "version": 1,
+        "createdAt": "2026-11-20T08:20:19.532Z",
+        "kdf": {
+          "name": "PBKDF2-SHA256",
+          "iterations": 310000,
+          "salt": "JmbJ3Jr/JRxdlgtbFnfJoQ=="
+        },
+        "cipher": {
+          "name": "AES-GCM",
+          "iv": "HhrfFGaFZXP26u3M"
+        },
+        "payload": "r25kdmNxB4IscCNJWfcl3pKNDsgOcHY9sYCxqPTF/wAnNKvus+89xa8xxrnKjh11GkDajnYaUCFjP30221Ol"
+      }
+    },
+    {
+      "envelope": {
+        "format": "sekeping-encrypted",
+        "version": 1,
+        "createdAt": "2026-11-20T08:20:19.532Z",
+        "kdf": {
+          "name": "PBKDF2-SHA256",
+          "iterations": 310000,
+          "salt": "JmbJ3Jr/JRxdlgtbFnfJoQ=="
+        },
+        "cipher": {
+          "name": "AES-GCM",
+          "iv": "HhrfFGaFZXP26u3M"
+        },
+        "payload": "r25kdmNxB4IscCNJWfcl3pKNDsgOcHY9sYCxqPTF/wAnNKvus+89xa8xxrnKjh11GkDajnYaUCFjP30221Ol"
+      },
+      "password": "wrong password",
+      "error": true
+    }
+  ]
+}

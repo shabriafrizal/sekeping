@@ -90,6 +90,29 @@ the occasional transfer, a monthly report, and a reminder of who owes whom.
   the scanner loads a 7 MB model pair and reuses it. The ONNX Runtime WASM is 13 MB,
   replacing Tesseract’s 19 MB of worker/cores/traineddata.
 
+## Rust core
+
+The ledger's domain logic — money parsing, budgets and rollover, recurring
+schedules, CSV import, receipt reading, reporting and encrypted backups — now
+lives in Rust and ships to the browser as WebAssembly. React is still the UI:
+there is no visual rewrite, no server, and no new network call. State stays in
+`localStorage` under the same key, and encrypted backups remain compatible with
+earlier versions.
+
+Why: the same code can run in the app, in the `sekeping` command line, and in
+tests against recorded behaviour. Receipt and CSV parsing are deterministic and
+easy to verify; date, budget and rollover rules no longer depend on JavaScript's
+`Date` quirks.
+
+```bash
+npm run build:wasm   # rebuild src/wasm after changing a Rust crate
+npm run test:rust    # cargo tests, including the golden cases
+npm run cases        # re-record goldens from the old TypeScript modules
+```
+
+See [`rust/README.md`](rust/README.md) for the crate layout, the intentional
+fixes in the port, and the command-line usage.
+
 ## Quick start
 
 ### Run it locally
@@ -402,6 +425,10 @@ A receipt scan is a draft, not a transaction: OCR and the optional JEV answer on
 confirmation form. `addTx` is called after **Gunakan data** and **Simpan**, so a cancelled
 scan, a bad OCR read or an unavailable AI check cannot change the ledger.
 
+The calculations above are implemented in Rust (`rust/crates/sekeping-core`) and
+called from the browser through WebAssembly. `format.ts` keeps the `Intl`-based
+currency and date presentation so the UI never depends on a copied locale table.
+
 There is no sync layer by design. Clearing site data clears the app — take a JSON
 backup first.
 
@@ -410,6 +437,7 @@ backup first.
 | Layer | Choice |
 | --- | --- |
 | UI | React 19 + TypeScript |
+| Domain core | Rust (2024 edition) → WebAssembly via `wasm-bindgen` |
 | Build | Vite 6 |
 | Design system | [Astryx](https://astryx.design) 0.7 — `AppShell`, `SideNav`, `Card`, `Section`, `Dialog`, `SegmentedControl` — on a Chocolate-based custom theme |
 | Charts | Recharts |
@@ -431,17 +459,24 @@ src/
     types.ts           domain types
     store.tsx          state, actions, selectors, persistence
     seed.ts            demo dataset
-    format.ts          currency, dates, helpers
-    recurring.ts       schedule math and catch-up posting
-    budgets.ts         monthly limits and rollover
-    csv.ts             CSV parser, column mapping and value detection
-    crypto.ts          password-encrypted backup envelope
+    format.ts          Intl currency, dates, helpers
+    rust.ts            loads the WASM core once, before the first render
+    recurring.ts       thin bridge to the Rust schedule engine
+    budgets.ts         thin bridge to Rust monthly limits and rollover
+    csv.ts             thin bridge to the Rust CSV parser and validator
+    crypto.ts          thin bridge to the Rust encrypted-backup envelope
     ocr.ts             lazy PaddleOCR engine, image prep and local OCR
     receipt.ts         amount/date/account/category parser and editable draft
     jev.ts             free JEV questions, merge rules and CORS-aware client
   components/          amount keypad, icon picker, transaction row, empty state, tour, widget preview
   pages/               Home, Transactions, Recurring, Budgets, Import, Reports, Debts, Settings
   sheets/              transaction, scan, account, category, debt, payment, recurring, budget and widget-setup dialogs
+  wasm/                committed wasm-pack output for the Rust core
+rust/
+  crates/sekeping-core   pure domain logic with unit and golden tests
+  crates/sekeping-wasm   JSON boundary used by the browser
+  crates/sekeping-cli    `sekeping` validate / summary / export / encrypt / decrypt
+  cases/                 TypeScript reference behaviour and its recorder
 public/paddle-ocr/     bundled PP-OCRv5 det/rec models and ONNX Runtime WASM
 worker/                one-file Cloudflare Worker CORS proxy for JEV
 scripts/
@@ -459,6 +494,9 @@ scripts/
 
 ```bash
 npm run dev            # development server with hot reload
+npm run build:wasm     # rebuild the Rust core into src/wasm
+npm run test:rust      # cargo tests + golden parity cases
+npm run cases          # re-record goldens from the TypeScript reference
 npm run build          # production build into dist/
 npm run preview        # serve the production build on :4173
 npm run typecheck      # tsc --noEmit

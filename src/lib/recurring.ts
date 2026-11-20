@@ -1,7 +1,7 @@
 import type { Interval, Recurring, Tx } from './types';
-import { parseISO, toISO, todayISO } from './format';
+import { todayISO } from './format';
+import { core, parseCoreJson } from './rust';
 import { uid } from './types';
-import { t } from './i18n';
 
 export const INTERVAL_LABEL: Record<Interval, string> = {
   weekly: "Mingguan",
@@ -9,52 +9,32 @@ export const INTERVAL_LABEL: Record<Interval, string> = {
   yearly: "Tahunan",
 };
 
-const MAX_CATCH_UP = 240;
 
 /** Move an ISO date forward by one interval, clamping month-end and Feb 29. */
 export function advanceDate(iso: string, interval: Interval): string {
-  const d = parseISO(iso);
-  if (interval === 'weekly') {
-    d.setDate(d.getDate() + 7);
-    return toISO(d);
-  }
-  const months = interval === 'yearly' ? 12 : 1;
-  const day = d.getDate();
-  const target = new Date(d.getFullYear(), d.getMonth() + months, 1);
-  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
-  target.setDate(Math.min(day, lastDay));
-  return toISO(target);
+  return core().advance_date(iso, interval) ?? iso;
 }
 
 /** Every unposted occurrence up to and including `today`. */
 export function dueDates(item: Recurring, today = todayISO()): string[] {
-  if (!item.active) return [];
-  const dates: string[] = [];
-  let cursor = item.nextDate < item.startDate ? item.startDate : item.nextDate;
-  let guard = 0;
-  while (cursor <= today && guard < MAX_CATCH_UP) {
-    if (item.endDate && cursor > item.endDate) break;
-    dates.push(cursor);
-    cursor = advanceDate(cursor, item.interval);
-    guard += 1;
-  }
-  return dates;
+  return parseCoreJson<string[]>(
+    core().recurring_due_dates(JSON.stringify(item), today),
+    'recurring_due_dates',
+  );
 }
 
 export function isDue(item: Recurring, today = todayISO()): boolean {
-  return item.active && item.nextDate <= today && (!item.endDate || item.nextDate <= item.endDate);
+  return core().recurring_is_due(JSON.stringify(item), today);
 }
 
 /** Rough monthly cost, used for the subscription summary. */
 export function monthlyEquivalent(item: Recurring): number {
-  if (item.interval === 'weekly') return Math.round((item.amount * 52) / 12);
-  if (item.interval === 'yearly') return Math.round(item.amount / 12);
-  return item.amount;
+  return core().recurring_monthly_equivalent(JSON.stringify(item));
 }
 
 /** Number of days until the next occurrence (negative when overdue). */
 export function daysUntilNext(item: Recurring, today = todayISO()): number {
-  return Math.round((parseISO(item.nextDate).getTime() - parseISO(today).getTime()) / 86_400_000);
+  return Number(core().recurring_days_until_next(JSON.stringify(item), today) ?? 0);
 }
 
 export interface RecurringRun {
@@ -115,12 +95,5 @@ export function occurrenceTx(item: Recurring, date = item.nextDate): Tx {
  * it is still ahead, otherwise the next one after today.
  */
 export function initialNextDate(startDate: string, interval: Interval, today = todayISO()): string {
-  if (startDate >= today) return startDate;
-  let cursor = startDate;
-  let guard = 0;
-  while (cursor <= today && guard < MAX_CATCH_UP) {
-    cursor = advanceDate(cursor, interval);
-    guard += 1;
-  }
-  return cursor;
+  return core().recurring_initial_next_date(startDate, interval, today) ?? startDate;
 }
