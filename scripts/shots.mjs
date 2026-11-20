@@ -1,7 +1,9 @@
+import fs from 'node:fs';
 import puppeteer from 'puppeteer-core';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:4180/';
-const OUT = '/data/tmp';
+const OUT = process.env.TMP_DIR || '/data/tmp/opencode/sekeping-shots';
+fs.mkdirSync(OUT, { recursive: true });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const browser = await puppeteer.launch({

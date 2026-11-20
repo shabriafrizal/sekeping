@@ -1,6 +1,9 @@
+import fs from 'node:fs';
 import puppeteer from 'puppeteer-core';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:4180/';
+const TMP = process.env.TMP_DIR || '/data/tmp/opencode/sekeping-widget';
+fs.mkdirSync(TMP, { recursive: true });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const browser = await puppeteer.launch({
   executablePath: process.env.CHROME_PATH || '/usr/bin/chromium',
@@ -46,7 +49,7 @@ for (const size of ['4x1', '4x2', '2x2']) {
   await wait(700);
   const stage = await shown.$('.skw-stage');
   if (!stage) throw new Error(`preview stage missing for ${size}`);
-  await stage.screenshot({ path: `/data/tmp/sk-${size}.png` });
+  await stage.screenshot({ path: `${TMP}/sk-${size}.png` });
 }
 await shown.goto(`${BASE}?widget_config=7&size=4x2`, { waitUntil: 'networkidle0' });
 await wait(700);
@@ -58,8 +61,8 @@ for (const size of ['4x1', '4x2', '2x2']) {
   await hidden.goto(`${BASE}?widget_config=7&size=${size}`, { waitUntil: 'networkidle0' });
   await wait(700);
   const stage = await hidden.$('.skw-stage');
-  await stage.screenshot({ path: `/data/tmp/sk-${size}-hidden.png` });
+  await stage.screenshot({ path: `${TMP}/sk-${size}-hidden.png` });
 }
 
 await browser.close();
-console.log('wrote /data/tmp/sk-*.png and docs/widget.png');
+console.log(`wrote ${TMP}/sk-*.png and docs/widget.png`);
